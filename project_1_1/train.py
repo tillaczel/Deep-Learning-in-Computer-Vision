@@ -22,7 +22,7 @@ def run_training(cfg : DictConfig):
     with open(cfg_file, 'w') as fh:
         fh.write(OmegaConf.to_yaml(cfg))
 
-    train_dataloader, test_dataloader = get_data(cfg) #TODO
+    train_dataloader, test_dataloader = get_data(cfg.data.size, cfg.data.batch_size)
     model = EngineModule(cfg)
 
     callbacks = []
