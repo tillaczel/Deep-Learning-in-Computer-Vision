@@ -53,6 +53,7 @@ class Hotdog_NotHotdog(Dataset):
 
 
 def get_data(size, batch_size, base_path: str='./'):
+    print(size)
     train_transform = transforms.Compose([transforms.Resize((size, size)),
                                           transforms.ToTensor()])
     valid_transform = transforms.Compose([transforms.Resize((size, size)),
