@@ -1,5 +1,6 @@
 import torch
 import pytorch_lightning as pl
+import wandb
 
 
 def get_trainer(cfg, engine):
