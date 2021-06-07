@@ -1,9 +1,9 @@
-def download_data():
-  if not os.path.exists('./hotdog_nothotdog'):
-    import gdown
-    url = 'https://drive.google.com/uc?id=1hwyBl4Fa0IHihun29ahszf1M2cxn9TFk'
-    gdown.download(url, './hotdog_nothotdog.zip', quiet=False)
-    !unzip ./hotdog_nothotdog.zip > /dev/null
+#def download_data():
+#  if not os.path.exists('./hotdog_nothotdog'):
+#    import gdown
+#    url = 'https://drive.google.com/uc?id=1hwyBl4Fa0IHihun29ahszf1M2cxn9TFk'
+#    gdown.download(url, './hotdog_nothotdog.zip', quiet=False)
+#    !unzip ./hotdog_nothotdog.zip > /dev/null
     
 class Hotdog_NotHotdog(torch.utils.data.Dataset):
     def __init__(self, train, transform, data_path='hotdog_nothotdog'):
@@ -29,7 +29,7 @@ class Hotdog_NotHotdog(torch.utils.data.Dataset):
         X = self.transform(image)
         return X, y
     
-def resize_data():
+def get_data():
   size = 128
   train_transform = transforms.Compose([transforms.Resize((size, size)), 
                                       transforms.ToTensor()])
