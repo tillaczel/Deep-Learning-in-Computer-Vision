@@ -2,16 +2,21 @@
 hydra:
   run:
     dir: ./
+
 model:
   pretrained: true
   out_dim: 1
   in_dim: 2048
-max_epochs: 100
-stopping_patience: 10
+
 training:
+  max_epochs: 100
+  batch_size: 128
   optimizer:
     name: adam
     lr: 0.0003
+  early_stopping:
+    monitor: 'val_loss'
+    stopping_patience: 10
   scheduler:
     monitor: val_loss
     mode: min
@@ -19,6 +24,8 @@ training:
     patience: 5
     min_lr: 0.00001
     factor: 0.5
+  model_checkpoint:
+    monitor: 'val_loss'
 data:
-  size: 32
-  batch_size: 64
+  size: 224
+  path: './data/'
