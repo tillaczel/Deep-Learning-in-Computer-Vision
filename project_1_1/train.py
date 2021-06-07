@@ -24,8 +24,8 @@ def run_training(cfg: DictConfig):
         fh.write(OmegaConf.to_yaml(cfg))
     wandb.save(cfg_file)  # this will force sync it
 
-    download_data(cfg_file.data.path)
-    train_dataloader, test_dataloader = get_data(cfg.data.size, cfg.data.batch_size, base_path=cfg_file.data.path)
+    download_data(cfg.data.path)
+    train_dataloader, test_dataloader = get_data(cfg.data.size, cfg.data.batch_size, base_path=cfg.data.path)
     engine = EngineModule(cfg)
 
     wandb.save('*.ckpt')  # should keep it up to date
