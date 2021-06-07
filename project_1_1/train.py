@@ -12,6 +12,8 @@ import pytorch_lightning as pl
 from project_1_1.src.data import get_data
 from project_1_1.src.engine import EngineModule
 
+from project_1_1.src.data import download_data
+
 wandb.init(project='p1', entity='dlcv')
 
 @hydra.main(config_path='config', config_name="default")
@@ -22,7 +24,8 @@ def run_training(cfg : DictConfig):
     with open(cfg_file, 'w') as fh:
         fh.write(OmegaConf.to_yaml(cfg))
 
-    train_dataloader, test_dataloader = get_data(cfg.data.size, cfg.data.batch_size)
+    download_data('./data/')
+    train_dataloader, test_dataloader = get_data(cfg.data.size, cfg.data.batch_size, base_path='./data/')
     model = EngineModule(cfg)
 
     callbacks = []
@@ -50,3 +53,6 @@ def run_training(cfg : DictConfig):
     # trainer.test(model, datamodule=data_module)
 
     # TODO: visualizations
+
+if __name__ == '__main__':
+    run_training()

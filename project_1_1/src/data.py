@@ -16,20 +16,22 @@ import zipfile
 import gdown
 
 
-def download_data():
-    if not os.path.exists('./hotdog_nothotdog'):
+def download_data(base_dir):
+    if not os.path.exists(base_dir + 'hotdog_nothotdog'):
+        if not os.path.exists(base_dir):
+            os.mkdir(base_dir)
         url = 'https://drive.google.com/uc?id=1hwyBl4Fa0IHihun29ahszf1M2cxn9TFk'
-        gdown.download(url, './hotdog_nothotdog.zip', quiet=False)
+        gdown.download(url, base_dir + 'hotdog_nothotdog.zip', quiet=False)
 
-        with zipfile.ZipFile('./hotdog_nothotdog.zip', 'r') as zip_ref:
-            zip_ref.extractall('/dev/null')
+        with zipfile.ZipFile(base_dir + 'hotdog_nothotdog.zip', 'r') as zip_ref:
+            zip_ref.extractall(base_dir + 'hotdog_nothotdog')
 
 
 class Hotdog_NotHotdog(Dataset):
-    def __init__(self, train, transform, data_path='hotdog_nothotdog'):
+    def __init__(self, train, transform, base_path="./", data_path='hotdog_nothotdog'):
         # 'Initialization'
         self.transform = transform
-        data_path = os.path.join(data_path, 'train' if train else 'test')
+        data_path = os.path.join(base_path, data_path, 'train' if train else 'test')
         image_classes = [os.path.split(d)[1] for d in glob.glob(data_path +'/*') if os.path.isdir(d)]
         image_classes.sort()
         self.name_to_label = {c: id for id, c in enumerate(image_classes)}
@@ -50,15 +52,15 @@ class Hotdog_NotHotdog(Dataset):
         return X, y
 
 
-def get_data(size, batch_size):
+def get_data(size, batch_size, base_path: str='./'):
     train_transform = transforms.Compose([transforms.Resize((size, size)),
                                           transforms.ToTensor()])
     valid_transform = transforms.Compose([transforms.Resize((size, size)),
                                           transforms.ToTensor()])
 
-    train_set = Hotdog_NotHotdog(train=True, transform=train_transform)
+    train_set = Hotdog_NotHotdog(train=True, transform=train_transform, base_path=base_path)
+    valid_set = Hotdog_NotHotdog(train=False, transform=valid_transform, base_path=base_path)
     train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=True, num_workers=2)
-    valid_set = Hotdog_NotHotdog(train=False, transform=valid_transform)
     valid_loader = DataLoader(valid_set, batch_size=batch_size, shuffle=False, num_workers=2)
     return train_loader, valid_loader
 
