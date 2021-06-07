@@ -24,7 +24,7 @@ def download_data(base_dir):
         gdown.download(url, base_dir + 'hotdog_nothotdog.zip', quiet=False)
 
         with zipfile.ZipFile(base_dir + 'hotdog_nothotdog.zip', 'r') as zip_ref:
-            zip_ref.extractall(base_dir + 'hotdog_nothotdog')
+            zip_ref.extractall(base_dir)
 
 
 class Hotdog_NotHotdog(Dataset):

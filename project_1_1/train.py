@@ -23,6 +23,7 @@ def run_training(cfg : DictConfig):
     cfg_file = os.path.join(wandb.run.dir, 'config.yaml')
     with open(cfg_file, 'w') as fh:
         fh.write(OmegaConf.to_yaml(cfg))
+    wandb.save(cfg_file) # this will force sync it
 
     download_data('./data/')
     train_dataloader, test_dataloader = get_data(cfg.data.size, cfg.data.batch_size, base_path='./data/')
