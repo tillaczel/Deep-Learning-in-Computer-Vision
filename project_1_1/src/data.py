@@ -67,7 +67,7 @@ def get_transforms(size, train_augmentation):
     train_transform = list()
     if 'random_crop' in train_augmentation:
         train_transform.append(transforms.Resize(int(1.1*size)))
-        train_transform.append(transforms.RandomCrop(size))
+        train_transform.append(transforms.RandomCrop(size, size))
     else:
         train_transform.append(transforms.Resize(size))
     train_transform.append(transforms.ToTensor())
