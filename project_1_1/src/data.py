@@ -52,16 +52,16 @@ class Hotdog_NotHotdog(Dataset):
         return X, y
 
 
-def get_data(config: DictConfig, base_path: str='./'):
-    train_transform = transforms.Compose([transforms.Resize((config.data.size, config.data.size)),
+def get_data(size, batch_size, base_path: str='./'):
+    train_transform = transforms.Compose([transforms.Resize((size, size)),
                                           transforms.ToTensor()])
-    valid_transform = transforms.Compose([transforms.Resize((config.data.size, config.data.size)),
+    valid_transform = transforms.Compose([transforms.Resize((size, size)),
                                           transforms.ToTensor()])
 
     train_set = Hotdog_NotHotdog(train=True, transform=train_transform, base_path=base_path)
-    train_loader = DataLoader(train_set, batch_size=config.data.batch_size, shuffle=True, num_workers=2)
     valid_set = Hotdog_NotHotdog(train=False, transform=valid_transform, base_path=base_path)
-    valid_loader = DataLoader(valid_set, batch_size=config.data.batch_size, shuffle=False, num_workers=2)
+    train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=True, num_workers=2)
+    valid_loader = DataLoader(valid_set, batch_size=batch_size, shuffle=False, num_workers=2)
     return train_loader, valid_loader
 
 

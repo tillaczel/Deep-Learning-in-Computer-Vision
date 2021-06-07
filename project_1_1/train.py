@@ -1,7 +1,7 @@
 import sys
 import os
 
-sys.path.append(os.path.split(os.getcwd())[0])
+sys.path.append('git_repo')
 
 import hydra
 import torch
@@ -25,7 +25,7 @@ def run_training(cfg : DictConfig):
         fh.write(OmegaConf.to_yaml(cfg))
 
     download_data('./data/')
-    train_dataloader, test_dataloader = get_data(cfg, base_path='./data/') #TODO
+    train_dataloader, test_dataloader = get_data(cfg.data.size, cfg.data.batch_size, base_path='./data/')
     model = EngineModule(cfg)
 
     callbacks = []
