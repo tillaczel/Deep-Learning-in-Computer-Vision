@@ -43,7 +43,7 @@ class Hotdog_NotHotdog(torch.utils.data.Dataset):
         X = self.transform(image)
         return X, y
     
-def resize_data():
+def get_data():
   size = 128
   train_transform = transforms.Compose([transforms.Resize((size, size)), 
                                       transforms.ToTensor()])
