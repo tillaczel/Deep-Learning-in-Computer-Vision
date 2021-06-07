@@ -1,9 +1,23 @@
-#def download_data():
-#  if not os.path.exists('./hotdog_nothotdog'):
-#    import gdown
-#    url = 'https://drive.google.com/uc?id=1hwyBl4Fa0IHihun29ahszf1M2cxn9TFk'
-#    gdown.download(url, './hotdog_nothotdog.zip', quiet=False)
-#    !unzip ./hotdog_nothotdog.zip > /dev/null
+import os
+import numpy as np
+import glob
+import PIL.Image as Image
+from tqdm.notebook import tqdm
+
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+import torchvision.datasets as datasets
+from torch.utils.data import DataLoader
+import torchvision.transforms as transforms
+import matplotlib.pyplot as plt
+
+def download_data():
+  if not os.path.exists('./hotdog_nothotdog'):
+    import gdown
+    url = 'https://drive.google.com/uc?id=1hwyBl4Fa0IHihun29ahszf1M2cxn9TFk'
+    gdown.download(url, './hotdog_nothotdog.zip', quiet=False)
+    !unzip ./hotdog_nothotdog.zip > /dev/null
     
 class Hotdog_NotHotdog(torch.utils.data.Dataset):
     def __init__(self, train, transform, data_path='hotdog_nothotdog'):
