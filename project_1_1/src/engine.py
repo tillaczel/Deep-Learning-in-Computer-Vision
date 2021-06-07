@@ -32,8 +32,9 @@ class EngineModule(pl.LightningModule):
 
     def validation_step(self, batch, batch_idx):
         images, labels = batch
-        embeddings = self.model(images)
-        return embeddings, labels
+        pred = self.model(images).squeeze() # [Bx1] -> [B]
+        loss = self.loss_func(pred, labels.type(torch.float32))
+        return {'val_loss': loss}
 
     def validation_epoch_end(self, outputs: list):
         pass
