@@ -1,4 +1,4 @@
-hydra
+hydra-core
 wandb
 omegaconf
 pytorch-lightning
