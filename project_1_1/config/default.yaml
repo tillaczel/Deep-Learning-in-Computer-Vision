@@ -31,3 +31,5 @@ data:
   path: './data/'
   train_augmentation:
     - 'random_crop'
+    - 'random_horizontal_flip'
+    - 'color_jitter'

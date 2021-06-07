@@ -70,6 +70,10 @@ def get_transforms(size, train_augmentation):
         train_transform.append(transforms.RandomCrop((size, size)))
     else:
         train_transform.append(transforms.Resize((size, size)))
+    if 'random_horizontal_flip' in train_augmentation:
+        train_transform.append(transforms.RandomHorizontalFlip())
+    if 'color_jitter' in train_augmentation:
+        train_transform.append(transforms.ColorJitter())
     train_transform.append(transforms.ToTensor())
     train_transform.append(transforms.Normalize(norm_mean, norm_std))
     train_transform = transforms.Compose(train_transform)
