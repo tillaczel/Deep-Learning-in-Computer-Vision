@@ -2,6 +2,7 @@ import os
 import numpy as np
 import glob
 import PIL.Image as Image
+from omegaconf import DictConfig
 from tqdm.notebook import tqdm
 
 import torch
@@ -49,21 +50,21 @@ class Hotdog_NotHotdog(Dataset):
         return X, y
 
 
-def get_data(size, batch_size):
-    train_transform = transforms.Compose([transforms.Resize((size, size)),
+def get_data(config: DictConfig):
+    train_transform = transforms.Compose([transforms.Resize((config.data.size, config.data.size)),
                                           transforms.ToTensor()])
-    valid_transform = transforms.Compose([transforms.Resize((size, size)),
+    valid_transform = transforms.Compose([transforms.Resize((config.data.size, config.data.size)),
                                           transforms.ToTensor()])
 
     train_set = Hotdog_NotHotdog(train=True, transform=train_transform)
-    train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=True, num_workers=3)
+    train_loader = DataLoader(train_set, batch_size=config.data.batch_size, shuffle=True, num_workers=2)
     valid_set = Hotdog_NotHotdog(train=False, transform=valid_transform)
-    valid_loader = DataLoader(valid_set, batch_size=batch_size, shuffle=False, num_workers=3)
+    valid_loader = DataLoader(valid_set, batch_size=config.data.batch_size, shuffle=False, num_workers=2)
     return train_loader, valid_loader
 
 
-def plot_data():
-    images, labels = next(iter(train_loader))
+def plot_data(loader):
+    images, labels = next(iter(loader))
     plt.figure(figsize=(20,10))
     
     for i in range(21):

@@ -6,6 +6,9 @@ import wandb
 from omegaconf import DictConfig, OmegaConf
 import pytorch_lightning as pl
 
+from project_1_1.src.data import get_data
+from project_1_1.src.engine import EngineModule
+
 wandb.init(project='p1', entity='dlcv')
 
 @hydra.main(config_path='config', config_name="default")
@@ -16,18 +19,17 @@ def run_training(cfg : DictConfig):
     with open(cfg_file, 'w') as fh:
         fh.write(OmegaConf.to_yaml(cfg))
 
-    train_dataloader, test_dataloader = get_data() #TODO
-    model = None # TODO...
+    train_dataloader, test_dataloader = get_data(cfg) #TODO
+    model = EngineModule(cfg)
 
     callbacks = []
-    callbacks.append(pl.callbacks.EarlyStopping(patience=10, monitor='val_loss'))
+    callbacks.append(pl.callbacks.EarlyStopping(patience=cfg.stopping_patience, monitor='val_loss'))
     callbacks.append(pl.callbacks.ModelCheckpoint(dirpath=wandb.run.dir,
                                                   monitor='val_loss',
                                                   filename='model',
                                                   verbose=True,
                                                   period=1))
     wandb.save('*.ckpt') # should keep it up to date
-    # callbacks.append(WandBFilesync(filename='model.ckpt', period=10)) # not sure if this one is necessary
 
     logger = pl.loggers.WandbLogger()
     logger.watch(model)

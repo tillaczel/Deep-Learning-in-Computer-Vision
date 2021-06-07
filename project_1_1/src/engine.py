@@ -11,7 +11,7 @@ class EngineModule(pl.LightningModule):
     def __init__(self, config: DictConfig):
         super().__init__()
         self.config = config
-        self.model = Model(pretrained=config.model.pretrained, out_dim=config.model.embedding_dim)
+        self.model = Model(pretrained=config.model.pretrained, out_dim=config.model.out_dim)
         self.loss_function = nn.BCELoss
 
     @property

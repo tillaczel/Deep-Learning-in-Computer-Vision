@@ -2,3 +2,18 @@
 hydra:
   run:
     dir: ./
+model:
+  pretrained: true
+  out_dim: 1
+max_epochs: 100
+stopping_patience: 10
+training:
+  optimizer:
+    name: adam
+    lr: 0.0003
+  lr_scheduler:
+    monitor: val_loss
+    name: plateau
+data:
+  size: 32
+  batch_size: 64
