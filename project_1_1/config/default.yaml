@@ -29,5 +29,3 @@ training:
 data:
   size: 224
   path: './data/'
-  train_augmentation:
-    -
