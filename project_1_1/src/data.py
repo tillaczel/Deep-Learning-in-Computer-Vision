@@ -67,15 +67,15 @@ def get_transforms(size, train_augmentation):
     norm_mean, norm_std = (0.485, 0.456, 0.406), (0.229, 0.224, 0.225)
     train_transform = list()
     if 'random_crop' in train_augmentation:
-        train_transform.append(transforms.Resize(int(1.1*size)))
-        train_transform.append(transforms.RandomCrop(size))
+        train_transform.append(transforms.Resize((int(1.1*size), int(1.1*size))))
+        train_transform.append(transforms.RandomCrop((size, size)))
     else:
-        train_transform.append(transforms.Resize(size))
+        train_transform.append(transforms.Resize((size, size)))
     train_transform.append(transforms.ToTensor())
     train_transform.append(transforms.Normalize(norm_mean, norm_std))
     train_transform = transforms.Compose(train_transform)
 
-    valid_transform = [transforms.Resize(size),
+    valid_transform = [transforms.Resize((size, size)),
                        transforms.ToTensor(),
                        transforms.Normalize(norm_mean, norm_std)]
     valid_transform = transforms.Compose(valid_transform)
