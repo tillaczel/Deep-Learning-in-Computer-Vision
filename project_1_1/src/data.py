@@ -57,8 +57,8 @@ def get_data(size, train_augmentation, batch_size, base_path: str = './'):
 
     train_set = Hotdog_NotHotdog(train=True, transform=train_transform, base_path=base_path)
     valid_set = Hotdog_NotHotdog(train=False, transform=valid_transform, base_path=base_path)
-    train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=True, num_workers=8)
-    valid_loader = DataLoader(valid_set, batch_size=batch_size, shuffle=False, num_workers=8)
+    train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=True, num_workers=2)
+    valid_loader = DataLoader(valid_set, batch_size=batch_size, shuffle=False, num_workers=2)
     return train_loader, valid_loader
 
 
@@ -67,7 +67,7 @@ def get_transforms(size, train_augmentation):
     train_transform = list()
     if 'random_crop' in train_augmentation:
         train_transform.append(transforms.Resize(int(1.1*size)))
-        train_transform.append(transforms.RandomCrop(size, size))
+        train_transform.append(transforms.RandomCrop(size))
     else:
         train_transform.append(transforms.Resize(size))
     train_transform.append(transforms.ToTensor())
