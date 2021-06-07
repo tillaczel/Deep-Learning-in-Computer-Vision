@@ -10,8 +10,9 @@ def get_trainer(cfg, engine):
     callbacks.append(pl.callbacks.ModelCheckpoint(dirpath=wandb.run.dir,
                                                   monitor=cfg.training.model_checkpoint.monitor,
                                                   filename='model',
-                                                  verbose=True,
+                                                  verbose=False,
                                                   period=1))
+    callbacks.append(pl.callbacks.progress.ProgressBar())
 
     gpus = 0
     if torch.cuda.is_available():
