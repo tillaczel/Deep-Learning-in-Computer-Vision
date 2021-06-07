@@ -1,7 +1,7 @@
 import sys
 import os
 
-sys.path.append(os.path.split(os.getcwd())[0])
+sys.path.append('git_repo')
 
 import hydra
 import torch
