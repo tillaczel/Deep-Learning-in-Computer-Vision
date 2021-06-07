@@ -49,7 +49,6 @@ class Hotdog_NotHotdog(Dataset):
         c = os.path.split(os.path.split(image_path)[0])[1]
         y = self.name_to_label[c]
         X = self.transform(image)
-        print(X.shape)
         return X, y
 
 
