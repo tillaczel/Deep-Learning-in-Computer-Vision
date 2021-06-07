@@ -1,4 +1,7 @@
+import sys
 import os
+
+sys.path.append(os.path.split(os.getcwd())[0])
 
 import hydra
 import torch
