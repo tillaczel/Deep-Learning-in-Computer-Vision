@@ -3,7 +3,6 @@ from typing import Optional
 import pytorch_lightning as pl
 from torch.utils.data import random_split, DataLoader
 
-# Note - you must have torchvision installed for this example
 from torchvision import datasets
 from torchvision import transforms
 
@@ -31,13 +30,13 @@ class HotDogDataModule(pl.LightningDataModule):
         if stage == 'fit' or stage is None:
             data_full = datasets.CIFAR10(self.data_dir, train=True, transform=self.transform_train)
             # TODO: change split sizes for hotdogs
-            self.data_train, self.data_val = random_split(data_full, [55000, 5000])
+            self.data_train, self.data_val = random_split(data_full, [40000, 10000])
 
         if stage == 'test' or stage is None:
             self.data_test = datasets.CIFAR10(self.data_dir, train=False, transform=self.transform_test)
 
 
-    def train_dataloader(self):
+    def (self):
         # TODO: batch size?
         return DataLoader(self.data_train, batch_size=32)
 
