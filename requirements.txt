@@ -1,0 +1,4 @@
+hydra
+wandb
+omegaconf
+pytorch-lightning
