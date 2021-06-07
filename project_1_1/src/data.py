@@ -36,7 +36,7 @@ class HotDogDataModule(pl.LightningDataModule):
             self.data_test = datasets.CIFAR10(self.data_dir, train=False, transform=self.transform_test)
 
 
-    def (self):
+    def train_dataloader(self):
         # TODO: batch size?
         return DataLoader(self.data_train, batch_size=32)
 
