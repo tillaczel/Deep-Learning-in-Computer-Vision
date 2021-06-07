@@ -52,8 +52,8 @@ class Hotdog_NotHotdog(Dataset):
         return X, y
 
 
-def get_data(size, train_transforms_list, batch_size, base_path: str = './'):
-    train_transform, valid_transform = get_transforms(size, train_transforms_list)
+def get_data(size, train_augmentation, batch_size, base_path: str = './'):
+    train_transform, valid_transform = get_transforms(size, train_augmentation)
 
     train_set = Hotdog_NotHotdog(train=True, transform=train_transform, base_path=base_path)
     valid_set = Hotdog_NotHotdog(train=False, transform=valid_transform, base_path=base_path)
@@ -62,21 +62,21 @@ def get_data(size, train_transforms_list, batch_size, base_path: str = './'):
     return train_loader, valid_loader
 
 
-def get_transforms(size, train_transforms_list):
+def get_transforms(size, train_augmentation):
     norm_mean, norm_std = (0.485, 0.456, 0.406), (0.229, 0.224, 0.225)
     train_transform = list()
-    if 'random_crop' in train_transforms_list:
+    if 'random_crop' in train_augmentation:
         train_transform.append(transforms.Resize(int(1.1*size)))
         train_transform.append(transforms.RandomCrop(size))
     else:
         train_transform.append(transforms.Resize(size))
-    train_transform.append(transforms.Normalize(norm_mean, norm_std))
     train_transform.append(transforms.ToTensor())
+    train_transform.append(transforms.Normalize(norm_mean, norm_std))
     train_transform = transforms.Compose(train_transform)
 
     valid_transform = [transforms.Resize(size),
-                       transforms.Normalize(norm_mean, norm_std),
-                       transforms.ToTensor()]
+                       transforms.ToTensor(),
+                       transforms.Normalize(norm_mean, norm_std)]
     valid_transform = transforms.Compose(valid_transform)
     return train_transform, valid_transform
 
