@@ -26,6 +26,7 @@ class EngineModule(pl.LightningModule):
         pred = self.model(images).squeeze()  # [Bx1] -> [B]
         loss = self.loss_func(pred, labels.type(torch.float32))
         self.log('loss', loss, on_step=False, on_epoch=True, prog_bar=False, logger=True)
+        self.log('lr', self.lr, on_step=False, on_epoch=True, prog_bar=False, logger=True)
         return {'loss': loss}
 
     def training_epoch_end(self, outputs: list):
