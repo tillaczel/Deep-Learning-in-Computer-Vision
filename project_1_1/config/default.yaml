@@ -24,7 +24,7 @@ training:
     patience: 5
     min_lr: 0.00001
     factor: 0.5
-  odel_checkpoint:
+  model_checkpoint:
     monitor: 'val_loss'
 data:
   size: 32
