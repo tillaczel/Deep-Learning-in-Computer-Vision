@@ -29,3 +29,5 @@ training:
 data:
   size: 224
   path: './data/'
+  train_transforms:
+    - 'random_crop'
