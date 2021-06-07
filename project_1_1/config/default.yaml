@@ -10,7 +10,7 @@ model:
 
 training:
   max_epochs: 100
-  batch_size: 256
+  batch_size: 64
   optimizer:
     name: adam
     lr: 0.0003
@@ -27,5 +27,5 @@ training:
   model_checkpoint:
     monitor: 'val_loss'
 data:
-  size: 32
+  size: 224
   path: './data/'
