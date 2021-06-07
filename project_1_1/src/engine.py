@@ -11,8 +11,8 @@ class EngineModule(pl.LightningModule):
     def __init__(self, config: DictConfig):
         super().__init__()
         self.config = config
-        self.model = Model(pretrained=config.model.pretrained, out_dim=config.model.out_dim)
-        self.loss_function = nn.BCELoss
+        self.model = Model(pretrained=config.model.pretrained, in_dim=config.model.in_dim, out_dim=config.model.out_dim)
+        self.loss_func = nn.BCEWithLogitsLoss()
 
     @property
     def lr(self):
@@ -23,8 +23,8 @@ class EngineModule(pl.LightningModule):
 
     def training_step(self, batch, batch_idx):
         images, labels = batch
-        pred = self.model(images)
-        loss = self.loss_func(pred, labels)
+        pred = self.model(images).squeeze() # [Bx1] -> [B]
+        loss = self.loss_func(pred, labels.type(torch.float32))
         return {'loss': loss}
 
     def training_epoch_end(self, outputs: list):
