@@ -8,20 +8,25 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torchvision.datasets as datasets
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, Dataset
 import torchvision.transforms as transforms
 import matplotlib.pyplot as plt
+import zipfile
+import gdown
+
 
 def download_data():
-  if not os.path.exists('./hotdog_nothotdog'):
-    import gdown
-    url = 'https://drive.google.com/uc?id=1hwyBl4Fa0IHihun29ahszf1M2cxn9TFk'
-    gdown.download(url, './hotdog_nothotdog.zip', quiet=False)
-    !unzip ./hotdog_nothotdog.zip > /dev/null
-    
-class Hotdog_NotHotdog(torch.utils.data.Dataset):
+    if not os.path.exists('./hotdog_nothotdog'):
+        url = 'https://drive.google.com/uc?id=1hwyBl4Fa0IHihun29ahszf1M2cxn9TFk'
+        gdown.download(url, './hotdog_nothotdog.zip', quiet=False)
+
+        with zipfile.ZipFile('./hotdog_nothotdog.zip', 'r') as zip_ref:
+            zip_ref.extractall('/dev/null')
+
+
+class Hotdog_NotHotdog(Dataset):
     def __init__(self, train, transform, data_path='hotdog_nothotdog'):
-        'Initialization'
+        # 'Initialization'
         self.transform = transform
         data_path = os.path.join(data_path, 'train' if train else 'test')
         image_classes = [os.path.split(d)[1] for d in glob.glob(data_path +'/*') if os.path.isdir(d)]
@@ -30,11 +35,11 @@ class Hotdog_NotHotdog(torch.utils.data.Dataset):
         self.image_paths = glob.glob(data_path + '/*/*.jpg')
         
     def __len__(self):
-        'Returns the total number of samples'
+        # 'Returns the total number of samples'
         return len(self.image_paths)
 
     def __getitem__(self, idx):
-        'Generates one sample of data'
+        # 'Generates one sample of data'
         image_path = self.image_paths[idx]
         
         image = Image.open(image_path)
@@ -42,20 +47,21 @@ class Hotdog_NotHotdog(torch.utils.data.Dataset):
         y = self.name_to_label[c]
         X = self.transform(image)
         return X, y
-    
-def get_data():
-  size = 128
-  train_transform = transforms.Compose([transforms.Resize((size, size)), 
-                                      transforms.ToTensor()])
-  test_transform = transforms.Compose([transforms.Resize((size, size)), 
-                                      transforms.ToTensor()])
 
-  batch_size = 64
-  trainset = Hotdog_NotHotdog(train=True, transform=train_transform)
-  train_loader = DataLoader(trainset, batch_size=batch_size, shuffle=True, num_workers=3)
-  testset = Hotdog_NotHotdog(train=False, transform=test_transform)
-  test_loader = DataLoader(testset, batch_size=batch_size, shuffle=False, num_workers=3)
-  
+
+def get_data(size, batch_size):
+    train_transform = transforms.Compose([transforms.Resize((size, size)),
+                                          transforms.ToTensor()])
+    valid_transform = transforms.Compose([transforms.Resize((size, size)),
+                                          transforms.ToTensor()])
+
+    train_set = Hotdog_NotHotdog(train=True, transform=train_transform)
+    train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=True, num_workers=3)
+    valid_set = Hotdog_NotHotdog(train=False, transform=valid_transform)
+    valid_loader = DataLoader(valid_set, batch_size=batch_size, shuffle=False, num_workers=3)
+    return train_loader, valid_loader
+
+
 def plot_data():
     images, labels = next(iter(train_loader))
     plt.figure(figsize=(20,10))
