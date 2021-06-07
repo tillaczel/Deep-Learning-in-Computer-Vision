@@ -29,3 +29,7 @@ training:
 data:
   size: 224
   path: './data/'
+  train_augmentation:
+    - 'random_crop'
+    - 'random_horizontal_flip'
+    - 'color_jitter'

@@ -52,18 +52,37 @@ class Hotdog_NotHotdog(Dataset):
         return X, y
 
 
-def get_data(size, batch_size, base_path: str='./'):
-    train_transform = transforms.Compose([transforms.Resize((size, size)),
-                                          transforms.ToTensor()])
-    valid_transform = transforms.Compose([transforms.Resize((size, size)),
-                                          transforms.ToTensor()])
+def get_data(size, train_augmentation, batch_size, base_path: str = './'):
+    train_transform, valid_transform = get_transforms(size, train_augmentation)
 
     train_set = Hotdog_NotHotdog(train=True, transform=train_transform, base_path=base_path)
     valid_set = Hotdog_NotHotdog(train=False, transform=valid_transform, base_path=base_path)
-    train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=True, num_workers=8)
-    valid_loader = DataLoader(valid_set, batch_size=batch_size, shuffle=False, num_workers=8)
+    train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=True, num_workers=2)
+    valid_loader = DataLoader(valid_set, batch_size=batch_size, shuffle=False, num_workers=2)
     return train_loader, valid_loader
 
+
+def get_transforms(size, train_augmentation):
+    norm_mean, norm_std = (0.485, 0.456, 0.406), (0.229, 0.224, 0.225)
+    train_transform = list()
+    if 'random_crop' in train_augmentation:
+        train_transform.append(transforms.Resize((int(1.1*size), int(1.1*size))))
+        train_transform.append(transforms.RandomCrop((size, size)))
+    else:
+        train_transform.append(transforms.Resize((size, size)))
+    if 'random_horizontal_flip' in train_augmentation:
+        train_transform.append(transforms.RandomHorizontalFlip())
+    if 'color_jitter' in train_augmentation:
+        train_transform.append(transforms.ColorJitter())
+    train_transform.append(transforms.ToTensor())
+    train_transform.append(transforms.Normalize(norm_mean, norm_std))
+    train_transform = transforms.Compose(train_transform)
+
+    valid_transform = [transforms.Resize((size, size)),
+                       transforms.ToTensor(),
+                       transforms.Normalize(norm_mean, norm_std)]
+    valid_transform = transforms.Compose(valid_transform)
+    return train_transform, valid_transform
 
 def plot_data(loader):
     images, labels = next(iter(loader))
