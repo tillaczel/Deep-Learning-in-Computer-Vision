@@ -10,7 +10,7 @@ model:
 
 training:
   max_epochs: 100
-  batch_size: 64
+  batch_size: 128
   optimizer:
     name: adam
     lr: 0.0003
