@@ -44,7 +44,7 @@ class EngineModule(pl.LightningModule):
         metric = getattr(self, f"{mode}_{metric_name}")
         metric(probs, labels)
         self.log(f"{mode}_{metric_name}", metric,
-                 on_step=(metric_name==self.main_metric),
+                 on_step=(metric_name == self.main_metric) and mode=='train',
                  prog_bar=(metric_name == self.main_metric),
                  on_epoch=True, logger=True)
 
