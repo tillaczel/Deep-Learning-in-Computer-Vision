@@ -9,7 +9,7 @@ from .model import Model
 
 class EngineModule(pl.LightningModule):
 
-    def __init__(self, config: DictConfig):
+    def __init__(self, config: DictConfig, main_metric: str="f1"):
         super().__init__()
         self.config = config
         self.model = Model(pretrained=config.model.pretrained, in_dim=config.model.in_dim, out_dim=config.model.out_dim)
@@ -28,7 +28,7 @@ class EngineModule(pl.LightningModule):
         self.val_precision = torchmetrics.Precision()
 
         self.metrics = ["acc", "f1", "recall", "precision"]
-
+        self.main_metric = main_metric
         # not released yet :(
         # self.train_specificity = torchmetrics.Specificity()
         # self.val_specificity = torchmetrics.Specificity()
