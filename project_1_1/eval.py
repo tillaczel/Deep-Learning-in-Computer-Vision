@@ -37,10 +37,10 @@ def eval(cfg : DictConfig):
                                                  base_path=cfg.data.path)
 
     download_file(cfg.run_id, "model.ckpt")
-    engine = EngineModule.load_from_checkpoint("model.ckpt", config=cfg)
+    engine = EngineModule.load_from_checkpoint("model.ckpt", config=train_cfg)
 
-    trainer = get_test_trainer(engine)
-    trainer.test(engine, test_dataloaders=test_dataloader, ckpt_path=None)
+    trainer = get_test_trainer(cfg, engine)
+    trainer.validate(engine, val_dataloaders=test_dataloader, ckpt_path=None)
 
 
 if __name__ == '__main__':

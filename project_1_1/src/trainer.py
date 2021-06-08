@@ -22,16 +22,17 @@ def get_trainer(cfg, engine):
     logger.watch(engine)
 
     # TODO: we can use this to put configuration into nice table in wandb
-    # logger.log_hyperparams(hyperparams)
+    logger.log_hyperparams(cfg)
 
     trainer = pl.Trainer(callbacks=callbacks, logger=logger, default_root_dir="training/logs",
                          max_epochs=cfg.training.max_epochs, gpus=gpus)
     return trainer
 
-def get_test_trainer(engine):
+def get_test_trainer(cfg, engine):
     logger = pl.loggers.WandbLogger()
     logger.watch(engine)
     gpus = 0
     if torch.cuda.is_available():
         gpus = -1
+    logger.log_hyperparams({"run_id": cfg.run_id})
     return pl.Trainer(logger=logger, default_root_dir="eval/logs", gpus=gpus)
