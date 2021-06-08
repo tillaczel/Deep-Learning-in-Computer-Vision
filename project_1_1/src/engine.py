@@ -6,20 +6,32 @@ import torchmetrics
 
 from .model import Model
 
+
 class EngineModule(pl.LightningModule):
 
-    def __init__(self, config: DictConfig):
+    def __init__(self, config: DictConfig, main_metric: str="f1"):
         super().__init__()
         self.config = config
         self.model = Model(pretrained=config.model.pretrained, in_dim=config.model.in_dim, out_dim=config.model.out_dim)
         self.loss_func = nn.BCEWithLogitsLoss()
-        
+
         self.train_acc = torchmetrics.Accuracy()
-        self.valid_acc = torchmetrics.Accuracy()
-        
-        self.train_F1 = torchmetrics.F1(num_classes=2, multiclass=True) # Not sure if arguments are right
-        self.valid_F1 = torchmetrics.F1(num_classes=2, multiclass=True)
-        
+        self.val_acc = torchmetrics.Accuracy()
+
+        self.train_f1 = torchmetrics.F1()
+        self.val_f1 = torchmetrics.F1()
+
+        self.train_recall = torchmetrics.Recall()
+        self.val_recall = torchmetrics.Recall()
+
+        self.train_precision = torchmetrics.Precision()
+        self.val_precision = torchmetrics.Precision()
+
+        self.metrics = ["acc", "f1", "recall", "precision"]
+        self.main_metric = main_metric
+        # not released yet :(
+        # self.train_specificity = torchmetrics.Specificity()
+        # self.val_specificity = torchmetrics.Specificity()
 
     @property
     def lr(self):
@@ -28,19 +40,30 @@ class EngineModule(pl.LightningModule):
     def forward(self, x):
         return self.model(x)
 
+    def update_and_log_metric(self, metric_name, probs, labels, mode='train'):
+        metric = getattr(self, f"{mode}_{metric_name}")
+        metric(probs, labels)
+        self.log(f"{mode}_{metric_name}", metric,
+                 on_step=False,
+                 prog_bar=(metric_name == self.main_metric),
+                 on_epoch=True, logger=True)
+
+
     def training_step(self, batch, batch_idx):
         images, labels = batch
         pred = self.model(images).squeeze()  # [Bx1] -> [B]
         loss = self.loss_func(pred, labels.type(torch.float32))
-        self.log('loss', loss, on_step=False, on_epoch=True, prog_bar=False, logger=True)
-        self.log('lr', self.lr, on_step=False, on_epoch=True, prog_bar=False, logger=True)
-     
-        train_acc = self.train_acc((pred>0.5).float().to(device='cuda:0'), labels.type(torch.IntTensor).to(device='cuda:0'))
-        train_F1 = self.train_F1((pred>0.5).float().to(device='cuda:0'), labels.type(torch.IntTensor).to(device='cuda:0'))
-        self.log('train_acc', train_acc, on_step=True, on_epoch=False)
-        self.log('train_F1', train_F1, on_step=True, on_epoch=False)
-        
-        return {'loss': loss, 'train_acc': train_acc, 'train_F1': train_F1}
+        self.log('loss', loss, on_step=False, on_epoch=True,
+                 prog_bar=False, logger=True)
+        self.log('lr', self.lr, on_step=False, on_epoch=True,
+                 prog_bar=False, logger=True)
+
+        probs = nn.functional.sigmoid(pred)
+
+        for metric_name in self.metrics:
+            self.update_and_log_metric(metric_name, probs, labels, mode='train')
+
+        return {'loss': loss}
 
     def training_epoch_end(self, outputs: list):
         pass
@@ -49,14 +72,16 @@ class EngineModule(pl.LightningModule):
         images, labels = batch
         pred = self.model(images).squeeze()  # [Bx1] -> [B]
         loss = self.loss_func(pred, labels.type(torch.float32))
-        
-        valid_acc = self.valid_acc((pred>0.5).float().to(device='cuda:0'), labels.type(torch.IntTensor).to(device='cuda:0'))
-        valid_F1 = self.valid_F1((pred>0.5).float().to(device='cuda:0'), labels.type(torch.IntTensor).to(device='cuda:0'))
-        
-        self.log('valid_acc', valid_acc, on_step=True, on_epoch=True)
-        self.log('valid_F1', valid_F1, on_step=True, on_epoch=True)
-        
-        return {'val_loss': loss, 'valid_acc': valid_acc, 'valid_F1': valid_F1}
+
+        probs = nn.functional.sigmoid(pred)
+        self.log('val_loss', loss, on_step=False, on_epoch=True,
+                 prog_bar=False, logger=True)
+
+        for metric_name in self.metrics:
+            self.update_and_log_metric(metric_name, probs, labels, mode='val')
+
+
+        return {'val_loss': loss}
 
     def validation_epoch_end(self, outputs: list):
         pass
