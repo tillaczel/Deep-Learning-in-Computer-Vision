@@ -27,3 +27,11 @@ def get_trainer(cfg, engine):
     trainer = pl.Trainer(callbacks=callbacks, logger=logger, default_root_dir="training/logs",
                          max_epochs=cfg.training.max_epochs, gpus=gpus)
     return trainer
+
+def get_test_trainer(engine):
+    logger = pl.loggers.WandbLogger()
+    logger.watch(engine)
+    gpus = 0
+    if torch.cuda.is_available():
+        gpus = -1
+    return pl.Trainer(logger=logger, default_root_dir="eval/logs", gpus=gpus)
