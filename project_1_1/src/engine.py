@@ -44,7 +44,7 @@ class EngineModule(pl.LightningModule):
         metric = getattr(self, f"{mode}_{metric_name}")
         metric(probs, labels)
         self.log(f"{mode}_{metric_name}", metric,
-                 on_step=(metric_name == self.main_metric) and mode=='train',
+                 on_step=False,
                  prog_bar=(metric_name == self.main_metric),
                  on_epoch=True, logger=True)
 
@@ -74,9 +74,12 @@ class EngineModule(pl.LightningModule):
         loss = self.loss_func(pred, labels.type(torch.float32))
 
         probs = nn.functional.sigmoid(pred)
+        self.log('val_loss', loss, on_step=False, on_epoch=True,
+                 prog_bar=False, logger=True)
 
         for metric_name in self.metrics:
             self.update_and_log_metric(metric_name, probs, labels, mode='val')
+
 
         return {'val_loss': loss}
 
