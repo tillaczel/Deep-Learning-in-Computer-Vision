@@ -36,6 +36,8 @@ class Hotdog_NotHotdog(Dataset):
         image_classes.sort()
         self.name_to_label = {c: id for id, c in enumerate(image_classes)}
         self.image_paths = glob.glob(data_path + '/*/*.jpg')
+        self.targets = np.array([self.name_to_label[os.path.split(os.path.split(image_path)[0])[1]]
+                                 for image_path in  self.image_paths])
         
     def __len__(self):
         # 'Returns the total number of samples'

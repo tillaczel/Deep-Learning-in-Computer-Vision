@@ -5,7 +5,7 @@ sys.path.append('git_repo')
 sys.path.append(os.path.split(os.getcwd())[0])
 
 from project_1_1.src.trainer import get_test_trainer
-from project_1_1.src.utils import download_file
+from project_1_1.src.utils import download_file, plot_heatmaps
 import hydra
 import torch
 import wandb
@@ -41,7 +41,7 @@ def eval(cfg : DictConfig):
 
     trainer = get_test_trainer(cfg, engine)
     trainer.validate(engine, val_dataloaders=test_dataloader, ckpt_path=None)
-
+    plot_heatmaps(test_dataloader, engine)
 
 if __name__ == '__main__':
     eval()
