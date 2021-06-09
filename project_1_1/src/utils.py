@@ -38,7 +38,7 @@ def get_heatmap(x, model, normalize=True):
 
     pred.sum().backward()
     predicted_hotdog = (pred.sum() > 0).cpu().numpy()
-    grad = x.grad[0].numpy()
+    grad = x.grad.numpy()
     grad = np.abs(grad).sum(axis=0)
     if normalize:
       grad -= grad.min()
