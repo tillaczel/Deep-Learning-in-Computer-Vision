@@ -61,7 +61,7 @@ def plot_heatmaps(test_dataloader, engine, n_rows=10):
                 not_hotdog.append(x)
             if y == 1 and len(hotdog) < n_rows:
                 hotdog.append(x)
-                engine.model(x.unsqueeze(0))
+                print(engine.model(x.unsqueeze(0)))
             if len(not_hotdog) == n_rows and len(hotdog) == n_rows:
                 break
         if len(not_hotdog) == n_rows and len(hotdog) == n_rows:
