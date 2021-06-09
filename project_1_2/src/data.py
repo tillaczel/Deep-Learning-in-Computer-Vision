@@ -101,7 +101,7 @@ def random_square(img, meta, rng):
 def random_square_from_boundaries(l, r, t, b, rng):
     w = r - l
     h = b - t
-    size = rng.integers(32, min(w, h))
+    size = rng.integers(MIN_SIZE, min(w, h))
     left = l + rng.integers(0, w - size)
     right = left + size
     top = t + rng.integers(0, h - size)

@@ -11,6 +11,7 @@ from omegaconf import DictConfig, OmegaConf
 from project_1_1.src.data import get_data, download_data
 from project_1_1.src.engine import EngineModule
 from project_1_1.src.trainer import get_trainer
+from project_1_1.src.utils import print_class_dist
 
 wandb.init(project='p1', entity='dlcv')
 
@@ -25,6 +26,7 @@ def run_training(cfg: DictConfig):
     download_data(cfg.data.path)
     train_dataloader, test_dataloader = get_data(cfg.data.size, cfg.data.train_augmentation, cfg.training.batch_size,
                                                  base_path=cfg.data.path)
+    print_class_dist(train_dataloader, title='Train set'), print_class_dist(test_dataloader, title='Test set')
     engine = EngineModule(cfg)
 
     wandb.save('*.ckpt')  # should keep it up to date
