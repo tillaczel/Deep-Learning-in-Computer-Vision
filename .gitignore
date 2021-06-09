@@ -145,3 +145,4 @@ cython_debug/
 *model.ckpt
 
 *.DS_store
+*.tar.gz
