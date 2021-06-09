@@ -61,7 +61,7 @@ def get_heatmap(x, model, normalize=True):
 
 
 def plot_heatmaps(test_dataloader, engine):
-    plt.figure(figsize=(10, n_rows * 5))
+    #plt.figure(figsize=(10, n_rows * 5))
     for x_batch, y_batch in test_dataloader:
         for idx in x_batch.shape[0]:
             x = x_batch[idx]
