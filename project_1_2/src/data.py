@@ -3,7 +3,7 @@ import numpy as np
 import glob
 import PIL.Image as Image
 from omegaconf import DictConfig
-from tqdm.notebook import tqdm
+from tqdm import tqdm
 
 import torch
 import torch.nn as nn
@@ -18,6 +18,7 @@ import os
 import PIL.Image as Image
 import h5py
 import pandas as pd
+
 
 def get_box_data(index, hdf5_data):
     """
@@ -46,9 +47,11 @@ def get_box_data(index, hdf5_data):
     hdf5_data[box[0]].visititems(print_attrs)
     return meta_data
 
+
 def get_name(index, hdf5_data):
     name = hdf5_data['/digitStruct/name']
     return ''.join([chr(v[0]) for v in np.array(hdf5_data[name[index][0]])])
+
 
 def get_metadata(folder='train'):
     mat_data = h5py.File(os.path.join(folder, 'digitStruct.mat'))
@@ -61,6 +64,7 @@ def get_metadata(folder='train'):
         box["file"] = pic
         data.append(box)
     return pd.DataFrame(data)
+
 
 def random_square(img, meta, rng):
     h, w, _ = img.shape
@@ -110,12 +114,19 @@ class NoDigitDataset(Dataset):
         self.rng = np.random.default_rng(12345)
         self.transform = transform
         self.folder = folder
-        self.df = get_metadata(folder=folder)
-        # TODO: seed
+        meta_csv = os.path.join(folder, 'meta.csv')
+        if os.path.isfile(meta_csv):
+            print('loading metadata from cache')
+            self.df = pd.read_csv(meta_csv)
+        else:
+            print('parsing metadata')
+            self.df = get_metadata(folder=folder)
+            print('caching')
+            self.df.to_csv(meta_csv, index=None)
 
     def __len__(self):
         # 'Returns the total number of samples'
-        return len(self.df) # this could be arbitrarily larger
+        return len(self.df)  # this could be arbitrarily larger
 
     def __getitem__(self, idx):
         # 'Generates one sample of data'
@@ -131,6 +142,7 @@ class NoDigitDataset(Dataset):
         X = self.transform(X)
         return X, 10
 
+
 def get_data_no_digit(size, train_augmentation, batch_size, base_path: str = './'):
     train_transform, valid_transform = get_transforms(size, train_augmentation)
     train_set = NoDigitDataset(folder='./data/train', transform=train_transform)
@@ -138,6 +150,7 @@ def get_data_no_digit(size, train_augmentation, batch_size, base_path: str = './
     train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=False, num_workers=2)
     valid_loader = DataLoader(valid_set, batch_size=batch_size, shuffle=False, num_workers=2)
     return train_loader, valid_loader
+
 
 def get_data_svhn(size, train_augmentation, batch_size, base_path: str = './'):
     train_transform, valid_transform = get_transforms(size, train_augmentation)
@@ -147,11 +160,12 @@ def get_data_svhn(size, train_augmentation, batch_size, base_path: str = './'):
     valid_loader = DataLoader(valid_set, batch_size=batch_size, shuffle=False, num_workers=2)
     return train_loader, valid_loader
 
+
 def get_transforms(size, train_augmentation):
     norm_mean, norm_std = (0.485, 0.456, 0.406), (0.229, 0.224, 0.225)
     train_transform = list()
     if 'random_crop' in train_augmentation:
-        train_transform.append(transforms.Resize((int(1.1*size), int(1.1*size))))
+        train_transform.append(transforms.Resize((int(1.1 * size), int(1.1 * size))))
         train_transform.append(transforms.RandomCrop((size, size)))
     else:
         train_transform.append(transforms.Resize((size, size)))
@@ -169,12 +183,13 @@ def get_transforms(size, train_augmentation):
     valid_transform = transforms.Compose(valid_transform)
     return train_transform, valid_transform
 
+
 def plot_data(loader):
     images, labels = next(iter(loader))
-    plt.figure(figsize=(20,10))
-    
+    plt.figure(figsize=(20, 10))
+
     for i in range(21):
-        plt.subplot(5,7,i+1)
+        plt.subplot(5, 7, i + 1)
         plt.imshow(np.swapaxes(np.swapaxes(images[i].numpy(), 0, 2), 0, 1))
-        #plt.title(['hotdog', 'not hotdog'][labels[i].item()])
+        # plt.title(['hotdog', 'not hotdog'][labels[i].item()])
         plt.axis('off')
