@@ -99,17 +99,15 @@ def random_square(img, meta, rng):
     print(l, r, t, b)
     return img[t:b, l:r]
 
-
 def random_square_from_boundaries(l, r, t, b, rng):
     w = r - l
     h = b - t
-    size = rng.integers(MIN_SIZE, min(w, h))
+    size = rng.integers(32, min(w, h))
     left = l + rng.integers(0, w - size)
     right = left + size
     top = t + rng.integers(0, h - size)
     bottom = top + size
-    return left, right, top, bottom
-
+    return int(left), int(right), int(top), int(bottom)
 
 def load_meta(meta_csv):
     df = pd.read_csv(meta_csv)
@@ -125,6 +123,7 @@ def filter_images(df):
     ok_ind = []
     rejected = []
     rng = np.random.default_rng(12345)
+    print('filtering images for no-digit')
     for i in tqdm(range(len(df))):
         try:
             meta = df.iloc[i]
