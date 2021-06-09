@@ -46,7 +46,7 @@ def get_heatmap(x, model, normalize=True):
 
     if torch.cuda.is_available():
         x = x.cuda()
-    predicted_hotdog = (model(x.unsqueeze(0)) > 0).cpu().numpy()[0, 0]
+    predicted_hotdog = ~(model(x.unsqueeze(0)) > 0).cpu().numpy()[0, 0]
 
     return grad, predicted_hotdog
 
@@ -57,9 +57,9 @@ def plot_heatmaps(test_dataloader, engine, n_rows=10):
         for idx in range(x_batch.shape[0]):
             x = x_batch[idx]
             y = y_batch[idx]
-            if y == 0 and len(not_hotdog) < n_rows:
+            if y == 1 and len(not_hotdog) < n_rows:
                 not_hotdog.append(x)
-            if y == 1 and len(hotdog) < n_rows:
+            if y == 0 and len(hotdog) < n_rows:
                 hotdog.append(x)
             if len(not_hotdog) == n_rows and len(hotdog) == n_rows:
                 break
@@ -75,7 +75,7 @@ def plot_heatmaps(test_dataloader, engine, n_rows=10):
             axs[i_row, i_class * 2].axis('off')
 
             axs[i_row, i_class * 2 + 1].imshow(np.swapaxes(np.swapaxes(x.detach().numpy() / 4 + 0.5, 0, 2), 0, 1))
-            axs[i_row, i_class * 2 + 1].set_title("Label: " + ['not hotdog', 'hotdog'][i_class])
+            axs[i_row, i_class * 2 + 1].set_title("Label: " + ['hotdog', 'not hotdog'][i_class])
             axs[i_row, i_class * 2 + 1].axis('off')
 
     fname = os.path.join(wandb.run.dir, 'heatmaps.png')
