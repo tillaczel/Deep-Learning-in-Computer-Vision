@@ -47,7 +47,6 @@ def get_heatmap(x, model, normalize=True):
     if torch.cuda.is_available():
         x = x.cuda()
     predicted_hotdog = (model(x.unsqueeze(0)) > 0).cpu().numpy()[0, 0]
-    print(model(x.unsqueeze(0)))
 
     return grad, predicted_hotdog
 
@@ -62,6 +61,7 @@ def plot_heatmaps(test_dataloader, engine, n_rows=10):
                 not_hotdog.append(x)
             if y == 1 and len(hotdog) < n_rows:
                 hotdog.append(x)
+                engine.model(x.unsqueeze(0))
             if len(not_hotdog) == n_rows and len(hotdog) == n_rows:
                 break
         if len(not_hotdog) == n_rows and len(hotdog) == n_rows:
