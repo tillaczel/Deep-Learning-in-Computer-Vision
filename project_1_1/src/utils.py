@@ -51,7 +51,6 @@ def get_heatmap(x, model, normalize=True):
 def plot_heatmaps(test_dataloader, engine, n_rows=10):
     hotdog, not_hotdog = list(), list()
     for x_batch, y_batch in test_dataloader:
-        print(x_batch.shape)
         for idx in range(x_batch.shape[0]):
             x = x_batch[idx]
             y = y_batch[idx]
@@ -67,6 +66,7 @@ def plot_heatmaps(test_dataloader, engine, n_rows=10):
     fig, axs = plt.subplots(n_rows, 4, figsize=(20, n_rows * 5))
     for i_row, (x_0, x_1) in enumerate(zip(hotdog, not_hotdog)):
         for i_class, x in enumerate([x_0, x_1]):
+            print(x.shape)
             grad, predicted_hotdog = get_heatmap(x, engine.model, normalize=True)
             axs[i_row, i_class * 2].imshow(grad, cmap="Greys_r")
             axs[i_row, i_class * 2].set_title(f"Predicted hotdog: {predicted_hotdog}")
