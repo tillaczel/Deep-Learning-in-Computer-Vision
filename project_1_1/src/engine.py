@@ -73,13 +73,12 @@ class EngineModule(pl.LightningModule):
         pred = self.model(images).squeeze()  # [Bx1] -> [B]
         loss = self.loss_func(pred, labels.type(torch.float32))
 
-        probs = nn.functional.sigmoid(pred)
+        probs = torch.sigmoid(pred)
         self.log('val_loss', loss, on_step=False, on_epoch=True,
                  prog_bar=False, logger=True)
 
         for metric_name in self.metrics:
             self.update_and_log_metric(metric_name, probs, labels, mode='val')
-
 
         return {'val_loss': loss}
 
