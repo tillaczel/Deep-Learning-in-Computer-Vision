@@ -151,7 +151,15 @@ class NoDigitDataset(Dataset):
             print('caching')
             self.df.to_csv(meta_csv, index=None)
 
-        self.filtered_indices = filter_images(self.df)
+        ind_csv = os.path.join(folder, 'ind.csv')
+        if os.path.isfile(ind_csv):
+          print('indices from cashe')
+          self.filtered_indices = pd.read_csv(ind_csv).ind
+        else:
+          self.filtered_indices = filter_images(self.df)
+          pd.DataFrame({'ind': self.filtered_indices}).to_csv(ind_csv, index=False)
+          print('got: ', len(self.filtered_indices))
+
 
     def __len__(self):
         # 'Returns the total number of samples'
