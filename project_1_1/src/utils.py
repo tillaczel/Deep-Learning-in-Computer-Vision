@@ -54,7 +54,7 @@ def get_heatmap(x, model, normalize=True):
 def plot_heatmaps(test_dataloader, engine, n_rows=10):
     hotdog, not_hotdog = list(), list()
     for x_batch, y_batch in test_dataloader:
-        print(x_batch.shape)
+        print(x_batch.mean())
         for idx in range(x_batch.shape[0]):
             x = x_batch[idx]
             y = y_batch[idx]
