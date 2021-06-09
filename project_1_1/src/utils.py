@@ -37,6 +37,7 @@ def get_heatmap(x, model, normalize=True):
     pred = model(x_noise)
 
     pred.sum().backward()
+    print(pred)
     predicted_hotdog = (pred.sum() > 0).cpu().numpy()
     print(predicted_hotdog)
     grad = x.grad.numpy()
