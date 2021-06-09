@@ -81,3 +81,12 @@ def plot_heatmaps(test_dataloader, engine, n_rows=10):
     fname = os.path.join(wandb.run.dir, 'heatmaps.png')
     plt.savefig(fname)
     wandb.save(fname)
+
+
+def print_class_dist(dataloader, title=None):
+    labels = list()
+    for _, ys in dataloader:
+        labels.extend(ys.numpy().tolist())
+    if title is not None:
+        print(f'{title}:')
+    print({element: labels.count(element) for element in set(labels)})
