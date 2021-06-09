@@ -46,7 +46,7 @@ def get_heatmap(x, model, normalize=True):
 
     if torch.cuda.is_available():
         x = x.cuda()
-    predicted_hotdog = (model(x.unsqueeze(0)) > 0).cpu().numpy()
+    predicted_hotdog = (model(x.unsqueeze(0)) > 0).cpu().numpy()[0, 0]
 
     return grad, predicted_hotdog
 
