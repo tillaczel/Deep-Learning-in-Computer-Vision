@@ -96,7 +96,6 @@ def random_square(img, meta, rng):
     mode = rng.integers(0, len(available_modes))
 
     l, r, t, b = random_square_from_boundaries(*mode_boundaries[available_modes[mode]], rng)
-    print(l, r, t, b)
     return img[t:b, l:r]
 
 def random_square_from_boundaries(l, r, t, b, rng):
