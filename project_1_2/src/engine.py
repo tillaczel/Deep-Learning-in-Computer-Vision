@@ -42,9 +42,16 @@ class EngineModule(pl.LightningModule):
 
 
     def training_step(self, batch, batch_idx):
-        images, labels = batch
+        images_d, labels_d = batch["svhn"]
+        images_n, labels_n = batch["no_digit"]
+
+        images = torch.cat([images_d, images_n], dim=0)
+        labels = torch.cat([labels_d, labels_n], dim=0)
+
         pred = self.model(images).squeeze()  # [Bx1] -> [B]
         loss = self.loss_func(pred, labels.type(torch.long))
+
+
         self.log('loss', loss, on_step=False, on_epoch=True,
                  prog_bar=False, logger=True)
         self.log('lr', self.lr, on_step=False, on_epoch=True,
@@ -61,7 +68,12 @@ class EngineModule(pl.LightningModule):
         pass
 
     def validation_step(self, batch, batch_idx):
-        images, labels = batch
+        images_d, labels_d = batch["svhn"]
+        images_n, labels_n = batch["no_digit"]
+
+        images = torch.cat([images_d, images_n], dim=0)
+        labels = torch.cat([labels_d, labels_n], dim=0)
+
         pred = self.model(images).squeeze()  # [Bx1] -> [B]
         loss = self.loss_func(pred, labels.type(torch.long))
 
@@ -71,7 +83,6 @@ class EngineModule(pl.LightningModule):
 
         for metric_name in self.metrics:
             self.update_and_log_metric(metric_name, probs, labels, mode='val')
-
 
         return {'val_loss': loss}
 

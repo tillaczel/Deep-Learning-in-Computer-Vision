@@ -8,7 +8,7 @@ import hydra
 import wandb
 from omegaconf import DictConfig, OmegaConf
 
-from project_1_2.src.data import get_data
+from project_1_2.src.data import get_data_no_digit, get_data_svhn
 from project_1_2.src.engine import EngineModule
 from project_1_2.src.trainer import get_trainer
 
@@ -23,15 +23,28 @@ def run_training(cfg: DictConfig):
     wandb.save(cfg_file)  # this will force sync it
 
     # download_data(cfg.data.path)
-    train_dataloader, test_dataloader = get_data(cfg.data.size, cfg.data.train_augmentation, cfg.training.batch_size,
+    train_dataloader_svhn, test_dataloader_svhn = get_data_svhn(cfg.data.size, cfg.data.train_augmentation, cfg.training.batch_size,
                                                  base_path=cfg.data.path)
+    train_dataloader_no_dig, test_dataloader_no_dig =  get_data_no_digit(cfg.data.size, cfg.data.train_augmentation, cfg.training.batch_size,
+                                                 base_path=cfg.data.path)
+
+    train_dataloaders = {
+        'svhn': train_dataloader_svhn,
+        'no_digit': train_dataloader_no_dig
+    }
+
+    val_dataloaders = {
+        'svhn': test_dataloader_svhn,
+        'no_digit': test_dataloader_no_dig
+    }
+
     engine = EngineModule(cfg)
 
     wandb.save('*.ckpt')  # should keep it up to date
 
     trainer = get_trainer(cfg, engine)
 
-    trainer.fit(engine, train_dataloader=train_dataloader, val_dataloaders=test_dataloader)
+    trainer.fit(engine, train_dataloader=train_dataloaders, val_dataloaders=val_dataloaders)
 
     # TODO: visualizations
 

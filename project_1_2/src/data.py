@@ -62,7 +62,7 @@ def get_metadata(folder='train'):
         data.append(box)
     return pd.DataFrame(data)
 
-def random_square(img, meta):
+def random_square(img, meta, rng):
     h, w, _ = img.shape
     available_modes = []
     leftest = np.min(np.array(meta['left']))
@@ -87,25 +87,27 @@ def random_square(img, meta):
     if len(available_modes) < 0:
         print(meta.file)
         raise ValueError('no possible part')
-    mode = np.random.randint(0, len(available_modes))
+    mode = rng.integers(0, len(available_modes))
 
-    l, r, t, b = random_square_from_boundaries(*mode_boundaries[available_modes[mode]])
+    l, r, t, b = random_square_from_boundaries(*mode_boundaries[available_modes[mode]], rng)
     return img[t:b, l:r]
 
 
-def random_square_from_boundaries(l, r, t, b):
+def random_square_from_boundaries(l, r, t, b, rng):
     w = r - l
     h = b - t
-    size = np.random.randint(32, min(w, h))
-    left = l + np.random.randint(0, w - size)
+    size = rng.integers(32, min(w, h))
+    left = l + rng.integers(0, w - size)
     right = left + size
-    top = t + np.random.randint(0, h - size)
+    top = t + rng.integers(0, h - size)
     bottom = top + size
     return left, right, top, bottom
 
 
 class NoDigitDataset(Dataset):
-    def __init__(self, transform, folder="./"):
+    def __init__(self, transform, folder="./", is_val=False):
+        self.is_val = is_val
+        self.rng = np.random.default_rng(12345)
         self.transform = transform
         self.folder = folder
         self.df = get_metadata(folder=folder)
@@ -117,24 +119,32 @@ class NoDigitDataset(Dataset):
 
     def __getitem__(self, idx):
         # 'Generates one sample of data'
+        if self.is_val:
+            rng = np.random.default_rng(idx)
+        else:
+            rng = self.rng
         meta = self.df.iloc[idx]
         image = Image.open(os.path.join(self.folder, meta.file))
         img = np.array(image)
 
-        X = random_square(img, meta)
+        X = random_square(img, meta, rng)
         X = self.transform(X)
         return X, 10
 
-def get_data_no_digit():
-    # TODO:
-    pass
+def get_data_no_digit(size, train_augmentation, batch_size, base_path: str = './'):
+    train_transform, valid_transform = get_transforms(size, train_augmentation)
+    train_set = NoDigitDataset(folder='./data/train', transform=train_transform)
+    valid_set = NoDigitDataset(folder='./data/train', transform=valid_transform, is_val=True)
+    train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=False, num_workers=2)
+    valid_loader = DataLoader(valid_set, batch_size=batch_size, shuffle=False, num_workers=2)
+    return train_loader, valid_loader
 
-def get_data(size, train_augmentation, batch_size, base_path: str = './'):
-    train_set = datasets.SVHN('./data', split='train', download=True, transform=transforms.ToTensor())
-    valid_set = datasets.SVHN('./data', split='test', download=True, transform=transforms.ToTensor())
+def get_data_svhn(size, train_augmentation, batch_size, base_path: str = './'):
+    train_transform, valid_transform = get_transforms(size, train_augmentation)
+    train_set = datasets.SVHN('./data', split='train', download=True, transform=train_transform)
+    valid_set = datasets.SVHN('./data', split='test', download=True, transform=valid_transform)
     train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=True, num_workers=2)
     valid_loader = DataLoader(valid_set, batch_size=batch_size, shuffle=False, num_workers=2)
-    train_transform, valid_transform = get_transforms(size, train_augmentation)
     return train_loader, valid_loader
 
 def get_transforms(size, train_augmentation):
