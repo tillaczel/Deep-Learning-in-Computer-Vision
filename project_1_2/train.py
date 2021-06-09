@@ -39,7 +39,8 @@ def run_training(cfg: DictConfig):
         'no_digit': test_dataloader_no_dig
     }
 
-    print_class_dist(train_dataloader, title='Train set'), print_class_dist(test_dataloader, title='Valid set')
+    print_class_dist(train_dataloader_svhn, title='Train svhn set'), print_class_dist(train_dataloader_no_dig, title='Train no_digit set')
+    print_class_dist(test_dataloader_svhn, title='Test svhn set'), print_class_dist(test_dataloader_no_dig, title='Test no_digit set')
 
     engine = EngineModule(cfg)
 
