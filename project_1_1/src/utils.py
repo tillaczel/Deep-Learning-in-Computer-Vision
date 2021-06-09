@@ -16,6 +16,7 @@ def download_file(run_id, filename):
             return
     raise RuntimeError(f"File {filename} not found in dlcv/p1/{run_id}")
 
+
 def get_state_from_checkpoint(run_id, filename="model.ckpt", replace=True):
   if not os.path.isfile(filename) or replace:
     download_file(run_id, filename)
@@ -33,6 +34,7 @@ def plot_row(x, grad, y, predicted_hotdog, row, n_rows):
     plt.imshow(np.swapaxes(np.swapaxes(x[0].detach().numpy()/4 + 0.5, 0, 2), 0, 1))
     plt.title("Label: " + ['hotdog', 'not hotdog'][y.item()])
     plt.axis('off')
+
 
 def get_heatmap(x, model, normalize=True):
     model.train()
@@ -57,6 +59,7 @@ def get_heatmap(x, model, normalize=True):
 
     return grad, predicted_hotdog
 
+
 def plot_heatmaps(test_dataloader, engine):
     # TODO: find some actual hotdogs in there
     itr = iter(test_dataloader)
@@ -68,6 +71,7 @@ def plot_heatmaps(test_dataloader, engine):
     for i in range(n_rows):
         x = x_batch[i:i + 1]
         y = y_batch[i]
+        print(y)
         grad, predicted_hotdog = get_heatmap(x, engine.model, normalize=True)
         plot_row(x, grad, y, predicted_hotdog, i, n_rows)
     fname = os.path.join(wandb.run.dir, 'heatmaps.png')
