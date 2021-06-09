@@ -66,15 +66,14 @@ def plot_heatmaps(test_dataloader, engine, n_rows=10):
     fig, axs = plt.subplots(n_rows, 4, figsize=(20, n_rows * 5))
     for i_row, (x_0, x_1) in enumerate(zip(hotdog, not_hotdog)):
         for i_class, x in enumerate([x_0, x_1]):
-            print(x.shape)
             grad, predicted_hotdog = get_heatmap(x, engine.model, normalize=True)
             axs[i_row, i_class * 2].imshow(grad, cmap="Greys_r")
             axs[i_row, i_class * 2].set_title(f"Predicted hotdog: {predicted_hotdog}")
-            axs[i_row, i_class * 2].set_axis('off')
+            axs[i_row, i_class * 2].axis('off')
 
             axs[i_row, i_class * 2 + 1].imshow(np.swapaxes(np.swapaxes(x[0].detach().numpy() / 4 + 0.5, 0, 2), 0, 1))
             axs[i_row, i_class * 2 + 1].set_title("Label: " + ['hotdog', 'not hotdog'][i_class])
-            axs[i_row, i_class * 2 + 1].set_axis('off')
+            axs[i_row, i_class * 2 + 1].axis('off')
 
     fname = os.path.join(wandb.run.dir, 'heatmaps.png')
     plt.savefig(fname)
