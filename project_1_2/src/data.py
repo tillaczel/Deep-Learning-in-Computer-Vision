@@ -1,3 +1,4 @@
+import json
 import os
 import numpy as np
 import glob
@@ -18,6 +19,8 @@ import os
 import PIL.Image as Image
 import h5py
 import pandas as pd
+
+MIN_SIZE = 20
 
 
 def get_box_data(index, hdf5_data):
@@ -70,16 +73,16 @@ def random_square(img, meta, rng):
     h, w, _ = img.shape
     available_modes = []
     leftest = np.min(np.array(meta['left']))
-    if leftest > 32:
+    if leftest > MIN_SIZE:
         available_modes.append(0)
     rightest = np.max(np.array(meta['left']) + np.array(meta['width']))
-    if w - rightest > 32:
+    if w - rightest > MIN_SIZE:
         available_modes.append(1)
     topest = np.min(np.array(meta['top']))
-    if topest > 32:
+    if topest > MIN_SIZE:
         available_modes.append(2)
     lowest = np.max(np.array(meta['top']) + np.array(meta['height']))
-    if h - lowest > 32:
+    if h - lowest > MIN_SIZE:
         available_modes.append(3)
 
     mode_boundaries = [
@@ -88,24 +91,50 @@ def random_square(img, meta, rng):
         [0, w, 0, topest],
         [0, w, lowest, h]
     ]
-    if len(available_modes) < 0:
-        print(meta.file)
+    if len(available_modes) == 0:
         raise ValueError('no possible part')
     mode = rng.integers(0, len(available_modes))
 
     l, r, t, b = random_square_from_boundaries(*mode_boundaries[available_modes[mode]], rng)
+    print(l, r, t, b)
     return img[t:b, l:r]
 
 
 def random_square_from_boundaries(l, r, t, b, rng):
     w = r - l
     h = b - t
-    size = rng.integers(32, min(w, h))
+    size = rng.integers(MIN_SIZE, min(w, h))
     left = l + rng.integers(0, w - size)
     right = left + size
     top = t + rng.integers(0, h - size)
     bottom = top + size
     return left, right, top, bottom
+
+
+def load_meta(meta_csv):
+    df = pd.read_csv(meta_csv)
+    df['height'] = df.height.apply(json.loads)
+    df['label'] = df.label.apply(json.loads)
+    df['left'] = df.left.apply(json.loads)
+    df['top'] = df.top.apply(json.loads)
+    df['width'] = df.width.apply(json.loads)
+    return df
+
+
+def filter_images(df):
+    ok_ind = []
+    rejected = []
+    rng = np.random.default_rng(12345)
+    for i in tqdm(range(len(df))):
+        try:
+            meta = df.iloc[i]
+            image = Image.open(os.path.join('./data/train/', meta.file))
+            img = np.array(image)
+            random_square(img, meta, rng)
+            ok_ind.append(i)
+        except ValueError as e:
+            rejected.append((i, meta.file))
+    return ok_ind
 
 
 class NoDigitDataset(Dataset):
@@ -117,28 +146,31 @@ class NoDigitDataset(Dataset):
         meta_csv = os.path.join(folder, 'meta.csv')
         if os.path.isfile(meta_csv):
             print('loading metadata from cache')
-            self.df = pd.read_csv(meta_csv)
+            self.df = load_meta(meta_csv)
         else:
             print('parsing metadata')
             self.df = get_metadata(folder=folder)
             print('caching')
             self.df.to_csv(meta_csv, index=None)
 
+        self.filtered_indices = filter_images(self.df)
+
     def __len__(self):
         # 'Returns the total number of samples'
-        return len(self.df)  # this could be arbitrarily larger
+        return len(self.filtered_indices)  # this could be arbitrarily larger
 
     def __getitem__(self, idx):
         # 'Generates one sample of data'
+        ind = self.filtered_indices[idx]
         if self.is_val:
-            rng = np.random.default_rng(idx)
+            rng = np.random.default_rng(ind)
         else:
             rng = self.rng
-        meta = self.df.iloc[idx]
+        meta = self.df.iloc[ind]
         image = Image.open(os.path.join(self.folder, meta.file))
         img = np.array(image)
 
-        X = random_square(img, meta, rng)
+        X = Image.fromarray(random_square(img, meta, rng))
         X = self.transform(X)
         return X, 10
 
