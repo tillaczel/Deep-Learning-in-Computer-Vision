@@ -12,6 +12,7 @@ from omegaconf import DictConfig, OmegaConf
 from project_1_2.src.data import get_data_no_digit, get_data_svhn
 from project_1_2.src.engine import EngineModule
 from project_1_2.src.trainer import get_trainer
+from project_1_2.src.utils import print_class_dist
 
 wandb.init(project='p2', entity='dlcv')
 
@@ -34,13 +35,17 @@ def run_training(cfg: DictConfig):
         'no_digit': train_dataloader_no_dig
     }
 
-    val_dataloaders = [test_dataloader_svhn, test_dataloader_no_dig]
     val_dataloaders = {
         'svhn': test_dataloader_svhn,
         'no_digit': test_dataloader_no_dig
     }
 
-    val_dataloaders = CombinedLoader(val_dataloaders, "max_size_cycle")
+    # val_dataloaders = CombinedLoader(val_dataloaders, "max_size_cycle")
+
+    print_class_dist(train_dataloader_svhn, title='Train svhn set'), print_class_dist(train_dataloader_no_dig,
+                                                                                      title='Train no_digit set')
+    print_class_dist(test_dataloader_svhn, title='Test svhn set'), print_class_dist(test_dataloader_no_dig,
+                                                                                    title='Test no_digit set')
 
     engine = EngineModule(cfg)
 
