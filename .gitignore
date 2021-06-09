@@ -141,5 +141,7 @@ cython_debug/
 *data/
 *.hydra
 *wandb/
-train_config.yaml
-model.ckpt
+*train_config.yaml
+*model.ckpt
+
+*.DS_store

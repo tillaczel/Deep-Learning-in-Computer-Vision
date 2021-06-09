@@ -1,0 +1,10 @@
+#defaults:
+hydra:
+  run:
+    dir: ./
+run_id: vmmyfvv4
+data:
+  size: 32
+  path: './data/'
+  train_augmentation: []
+batch_size: 64
