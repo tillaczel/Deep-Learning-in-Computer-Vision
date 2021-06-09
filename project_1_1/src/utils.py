@@ -25,7 +25,7 @@ def get_state_from_checkpoint(run_id, filename="model.ckpt", replace=True):
 
 
 def get_heatmap(x, model, normalize=True):
-    model.train()
+    model.eval()
     if torch.cuda.is_available():
         model.cuda()
     x.requires_grad = True
@@ -54,7 +54,6 @@ def get_heatmap(x, model, normalize=True):
 def plot_heatmaps(test_dataloader, engine, n_rows=10):
     hotdog, not_hotdog = list(), list()
     for x_batch, y_batch in test_dataloader:
-        print(x_batch.mean())
         for idx in range(x_batch.shape[0]):
             x = x_batch[idx]
             y = y_batch[idx]
@@ -62,7 +61,6 @@ def plot_heatmaps(test_dataloader, engine, n_rows=10):
                 not_hotdog.append(x)
             if y == 1 and len(hotdog) < n_rows:
                 hotdog.append(x)
-                print(engine.model(x.unsqueeze(0)))
             if len(not_hotdog) == n_rows and len(hotdog) == n_rows:
                 break
         if len(not_hotdog) == n_rows and len(hotdog) == n_rows:
