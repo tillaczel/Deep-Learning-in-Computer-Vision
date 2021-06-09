@@ -27,19 +27,18 @@ def get_state_from_checkpoint(run_id, filename="model.ckpt", replace=True):
 def get_heatmap(x, model, normalize=True):
     model.train()
     if torch.cuda.is_available():
-      model.cuda()
+        model.cuda()
     x.requires_grad = True
     x_noise = x.repeat((128, 1, 1, 1)) + torch.randn([128, 3, 224, 224]) * 0.1
     model.zero_grad()
 
     if torch.cuda.is_available():
-      x_noise = x_noise.cuda()
+        x_noise = x_noise.cuda()
+        x = x.cuda()
     pred = model(x_noise)
 
     pred.sum().backward()
-    print(pred)
-    predicted_hotdog = (pred.sum() > 0).cpu().numpy()
-    print(predicted_hotdog)
+    predicted_hotdog = (model(x) > 0).cpu().numpy()
     grad = x.grad.numpy()
     grad = np.abs(grad).sum(axis=0)
     if normalize:
