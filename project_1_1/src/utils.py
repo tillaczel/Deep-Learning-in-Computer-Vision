@@ -61,19 +61,14 @@ def get_heatmap(x, model, normalize=True):
 
 
 def plot_heatmaps(test_dataloader, engine):
-    # TODO: find some actual hotdogs in there
-    itr = iter(test_dataloader)
-    x_batch, y_batch = next(itr)
-
-    n_rows = 10
     plt.figure(figsize=(10, n_rows * 5))
-
-    for i in range(n_rows):
-        x = x_batch[i:i + 1]
-        y = y_batch[i]
-        print(y)
-        grad, predicted_hotdog = get_heatmap(x, engine.model, normalize=True)
-        plot_row(x, grad, y, predicted_hotdog, i, n_rows)
-    fname = os.path.join(wandb.run.dir, 'heatmaps.png')
-    plt.savefig(fname)
-    wandb.save(fname)
+    for x_batch, y_batch in test_dataloader:
+        for idx in x_batch.shape[0]:
+            x = x_batch[idx]
+            y = y_batch[idx]
+            print(y)
+            # grad, predicted_hotdog = get_heatmap(x, engine.model, normalize=True)
+            # plot_row(x, grad, y, predicted_hotdog, i, n_rows)
+    # fname = os.path.join(wandb.run.dir, 'heatmaps.png')
+    # plt.savefig(fname)
+    # wandb.save(fname)
