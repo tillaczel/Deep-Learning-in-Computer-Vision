@@ -41,10 +41,10 @@ def get_data_no_digit():
     pass
 
 def get_data(size, train_augmentation, batch_size, base_path: str = './'):
-    trainset = datasets.SVHN('./data', split='train', download=True, transform=transforms.ToTensor())
-    validset = datasets.SVHN('./data', split='test', download=True, transform=transforms.ToTensor())
-    train_loader = DataLoader(trainset, batch_size=batch_size, shuffle=True, num_workers=2)
-    valid_loader = DataLoader(testset, batch_size=batch_size, shuffle=False, num_workers=2)
+    train_set = datasets.SVHN('./data', split='train', download=True, transform=transforms.ToTensor())
+    valid_set = datasets.SVHN('./data', split='test', download=True, transform=transforms.ToTensor())
+    train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=True, num_workers=2)
+    valid_loader = DataLoader(valid_set, batch_size=batch_size, shuffle=False, num_workers=2)
     train_transform, valid_transform = get_transforms(size, train_augmentation)
     return train_loader, valid_loader
 
