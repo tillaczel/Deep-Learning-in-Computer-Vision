@@ -78,7 +78,7 @@ def plot_heatmaps(test_dataloader, engine):
 
 def print_class_dist(dataloader, title=None):
     labels = list()
-    for _, ys in dataloader():
+    for _, ys in dataloader:
         labels.extend(ys.numpy().to_list())
     if title is not None:
         print(f'{title}:')
