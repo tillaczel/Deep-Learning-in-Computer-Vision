@@ -44,13 +44,13 @@ class EngineModule(pl.LightningModule):
     def training_step(self, batch, batch_idx):
         images, labels = batch
         pred = self.model(images).squeeze()  # [Bx1] -> [B]
-        loss = self.loss_func(pred, labels.type(torch.float32))
+        loss = self.loss_func(pred, labels.type(torch.long))
         self.log('loss', loss, on_step=False, on_epoch=True,
                  prog_bar=False, logger=True)
         self.log('lr', self.lr, on_step=False, on_epoch=True,
                  prog_bar=False, logger=True)
 
-        probs = nn.functional.sigmoid(pred)
+        probs = pred # Softmaxed in model
 
         for metric_name in self.metrics:
             self.update_and_log_metric(metric_name, probs, labels, mode='train')
@@ -63,7 +63,7 @@ class EngineModule(pl.LightningModule):
     def validation_step(self, batch, batch_idx):
         images, labels = batch
         pred = self.model(images).squeeze()  # [Bx1] -> [B]
-        loss = self.loss_func(pred, labels.type(torch.float32))
+        loss = self.loss_func(pred, labels.type(torch.long))
 
         probs = nn.functional.softmax(pred, dim=-1)
         self.log('val_loss', loss, on_step=False, on_epoch=True,
