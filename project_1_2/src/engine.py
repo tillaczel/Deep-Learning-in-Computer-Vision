@@ -50,7 +50,7 @@ class EngineModule(pl.LightningModule):
         self.log('lr', self.lr, on_step=False, on_epoch=True,
                  prog_bar=False, logger=True)
 
-        probs = nn.functional.softmax(pred)
+        probs = nn.functional.softmax(pred, dim=1)
 
         for metric_name in self.metrics:
             self.update_and_log_metric(metric_name, probs, labels, mode='train')
