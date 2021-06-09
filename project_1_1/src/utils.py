@@ -71,7 +71,7 @@ def plot_heatmaps(test_dataloader, engine, n_rows=10):
             axs[i_row, i_class * 2].set_title(f"Predicted hotdog: {predicted_hotdog}")
             axs[i_row, i_class * 2].axis('off')
 
-            axs[i_row, i_class * 2 + 1].imshow(np.swapaxes(np.swapaxes(x[0].detach().numpy() / 4 + 0.5, 0, 2), 0, 1))
+            axs[i_row, i_class * 2 + 1].imshow(np.swapaxes(np.swapaxes(x.detach().numpy() / 4 + 0.5, 0, 2), 0, 1))
             axs[i_row, i_class * 2 + 1].set_title("Label: " + ['hotdog', 'not hotdog'][i_class])
             axs[i_row, i_class * 2 + 1].axis('off')
 
