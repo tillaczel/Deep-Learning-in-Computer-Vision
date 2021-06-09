@@ -40,17 +40,13 @@ def get_data_no_digit():
     # TODO:
     pass
 
-def get_data_svhn(size, train_augmentation, batch_size, base_path: str = './'):
-    train_transform, valid_transform = get_transforms(size, train_augmentation)
-
-    # train_set = Hotdog_NotHotdog(train=True, transform=train_transform, base_path=base_path)
-    # valid_set = Hotdog_NotHotdog(train=False, transform=valid_transform, base_path=base_path)
-
-    # TODO: get regular SVHN
+def get_data(size, train_augmentation, batch_size, base_path: str = './'):
+    train_set = datasets.SVHN('./data', split='train', download=True, transform=transforms.ToTensor())
+    valid_set = datasets.SVHN('./data', split='test', download=True, transform=transforms.ToTensor())
     train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=True, num_workers=2)
     valid_loader = DataLoader(valid_set, batch_size=batch_size, shuffle=False, num_workers=2)
+    train_transform, valid_transform = get_transforms(size, train_augmentation)
     return train_loader, valid_loader
-
 
 def get_transforms(size, train_augmentation):
     norm_mean, norm_std = (0.485, 0.456, 0.406), (0.229, 0.224, 0.225)
@@ -74,12 +70,12 @@ def get_transforms(size, train_augmentation):
     valid_transform = transforms.Compose(valid_transform)
     return train_transform, valid_transform
 
-# def plot_data(loader):
-#     images, labels = next(iter(loader))
-#     plt.figure(figsize=(20,10))
-#
-#     for i in range(21):
-#         plt.subplot(5,7,i+1)
-#         plt.imshow(np.swapaxes(np.swapaxes(images[i].numpy(), 0, 2), 0, 1))
-#         plt.title(['hotdog', 'not hotdog'][labels[i].item()])
-#         plt.axis('off')
+def plot_data(loader):
+    images, labels = next(iter(loader))
+    plt.figure(figsize=(20,10))
+    
+    for i in range(21):
+        plt.subplot(5,7,i+1)
+        plt.imshow(np.swapaxes(np.swapaxes(images[i].numpy(), 0, 2), 0, 1))
+        #plt.title(['hotdog', 'not hotdog'][labels[i].item()])
+        plt.axis('off')
