@@ -24,18 +24,6 @@ def get_state_from_checkpoint(run_id, filename="model.ckpt", replace=True):
   return chpt['state_dict']
 
 
-def plot_row(x, grad, y, predicted_hotdog, row, n_rows):
-    plt.subplot(n_rows, 2, row * 2 + 1)
-    plt.imshow(grad, cmap="Greys_r")
-    plt.title(f"Predicted hotdog: {predicted_hotdog}")
-    plt.axis('off')
-
-    plt.subplot(n_rows, 2, row * 2 + 2)
-    plt.imshow(np.swapaxes(np.swapaxes(x[0].detach().numpy()/4 + 0.5, 0, 2), 0, 1))
-    plt.title("Label: " + ['hotdog', 'not hotdog'][y.item()])
-    plt.axis('off')
-
-
 def get_heatmap(x, model, normalize=True):
     model.train()
     if torch.cuda.is_available():
@@ -60,15 +48,33 @@ def get_heatmap(x, model, normalize=True):
     return grad, predicted_hotdog
 
 
-def plot_heatmaps(test_dataloader, engine):
-    #plt.figure(figsize=(10, n_rows * 5))
+def plot_heatmaps(test_dataloader, engine, n_rows=10):
+    hotdog, not_hotdog = list(), list()
     for x_batch, y_batch in test_dataloader:
         for idx in range(x_batch.shape[0]):
             x = x_batch[idx]
             y = y_batch[idx]
-            print(y)
-            # grad, predicted_hotdog = get_heatmap(x, engine.model, normalize=True)
-            # plot_row(x, grad, y, predicted_hotdog, i, n_rows)
-    # fname = os.path.join(wandb.run.dir, 'heatmaps.png')
-    # plt.savefig(fname)
-    # wandb.save(fname)
+            if y == 0 and len(not_hotdog) < n_rows:
+                not_hotdog.append(x)
+            if y == 1 and len(hotdog) < n_rows:
+                hotdog.append(x)
+            if len(not_hotdog) == n_rows and len(hotdog) == n_rows:
+                break
+        if len(not_hotdog) == n_rows and len(hotdog) == n_rows:
+            break
+
+    fig, axs = plt.subplots(n_rows, 4, figsize=(20, n_rows * 5))
+    for i_row, (x_0, x_1) in enumerate(zip(hotdog, not_hotdog)):
+        for i_class, x in enumerate([x_0, x_1]):
+            grad, predicted_hotdog = get_heatmap(x, engine.model, normalize=True)
+            axs[i_row, i_class * 2].imshow(grad, cmap="Greys_r")
+            axs[i_row, i_class * 2].set_title(f"Predicted hotdog: {predicted_hotdog}")
+            axs[i_row, i_class * 2].set_axis('off')
+
+            axs[i_row, i_class * 2 + 1].imshow(np.swapaxes(np.swapaxes(x[0].detach().numpy() / 4 + 0.5, 0, 2), 0, 1))
+            axs[i_row, i_class * 2 + 1].set_title("Label: " + ['hotdog', 'not hotdog'][i_class])
+            axs[i_row, i_class * 2 + 1].set_axis('off')
+
+    fname = os.path.join(wandb.run.dir, 'heatmaps.png')
+    plt.savefig(fname)
+    wandb.save(fname)
