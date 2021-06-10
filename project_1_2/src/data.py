@@ -85,6 +85,9 @@ def random_square(img, meta, rng, overlap=0.2):
         available_modes.append(3)
         probs.append(h - lowest)
 
+    if len(available_modes) == 0:
+        raise ValueError('no possible part')
+
     probs = np.array(probs)
     probs /= probs.sum() # normalize
 
@@ -94,8 +97,6 @@ def random_square(img, meta, rng, overlap=0.2):
         [0, w, 0, topest],
         [0, w, lowest, h]
     ]
-    if len(available_modes) == 0:
-        raise ValueError('no possible part')
     mode = rng.choice(available_modes, p=probs) # get bigger
 
     l, r, t, b = random_square_from_boundaries(*mode_boundaries[mode], rng)
