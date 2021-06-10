@@ -1,12 +1,12 @@
 import sys
 import os
 
-from project_1_2.src.bbox import plt_bboxes
 
 sys.path.append('git_repo')
 sys.path.append(os.path.split(os.getcwd())[0])
 
 from project_1_2.src.trainer import get_test_trainer
+from project_1_2.src.bbox import plt_bboxes
 from project_1_2.src.utils import download_file, plot_heatmaps
 import hydra
 import torch
