@@ -82,14 +82,14 @@ def eval(cfg : DictConfig):
                         coord,
                         p[:10]
                     ))
-            for  i, th in enumerate(thresholds):
+            for th in thresholds:
                 th_dir = os.path.join(wandb.run.dir, f'thresh_{th[0]:.2f}_{th[1]:.2f}')
                 if not os.path.isdir(th_dir):
                     os.mkdir(th_dir)
                 p_threshold, iou_threshold = th
                 filename = os.path.join(th_dir, f'bbox_{i}_{ratio:.2f}.png')
                 filter_bboxes(result, original_image, filename=filename, p_threshold=p_threshold, iou_threshold=iou_threshold)
-        for  i, th in enumerate(thresholds):
+        for  th in thresholds:
             th_dir = os.path.join(wandb.run.dir, f'thresh_{th[0]:.2f}_{th[1]:.2f}')
             if not os.path.isdir(th_dir):
                 os.mkdir(th_dir)
