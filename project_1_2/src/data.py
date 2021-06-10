@@ -89,7 +89,7 @@ def random_square(img, meta, rng, overlap=0.2):
         raise ValueError('no possible part')
 
     probs = np.array(probs)
-    probs /= probs.sum() # normalize
+    probs = probs / probs.sum() # normalize
 
     mode_boundaries = [
         [0, leftest, 0, h],
