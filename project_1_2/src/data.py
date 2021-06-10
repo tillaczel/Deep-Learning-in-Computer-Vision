@@ -207,6 +207,7 @@ def get_data_no_digit(size, train_augmentation, batch_size, base_path: str = './
     dir_path = 'data/train'
     try:
         os.rmdir(dir_path)
+        os.mkdir(dir_path)
     except OSError as e:
         print("Error: %s : %s" % (dir_path, e.strerror))
     move_all_files_in_dir('train', dir_path)
