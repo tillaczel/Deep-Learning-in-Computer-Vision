@@ -1,6 +1,8 @@
 import sys
 import os
 
+from project_1_2.src.bbox import run_detection
+
 sys.path.append('git_repo')
 sys.path.append(os.path.split(os.getcwd())[0])
 from pytorch_lightning.trainer.supporters import CombinedLoader
@@ -35,6 +37,8 @@ def run_training(cfg: DictConfig):
     trainer = get_trainer(cfg, engine)
 
     trainer.fit(engine, train_dataloader=train_loader, val_dataloaders=valid_loader)
+
+    run_detection(engine)
 
     # TODO: visualizations
 
