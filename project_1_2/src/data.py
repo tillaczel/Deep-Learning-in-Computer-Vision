@@ -195,7 +195,7 @@ def move_all_files_in_dir(src_dir, dst_dir):
         print("srcDir & dstDir should be Directories")
 
 
-def get_data_no_digit(size, train_augmentation, batch_size, base_path: str = './'):
+def get_data_no_digit(size, train_augmentation):
     train_transform, valid_transform = get_transforms(size, train_augmentation)
 
     if not os.path.isfile('train.tar.gz'):
@@ -221,15 +221,20 @@ def get_data_no_digit(size, train_augmentation, batch_size, base_path: str = './
 
     train_set = NoDigitDataset(folder='./data/train', transform=train_transform)
     valid_set = NoDigitDataset(folder='./data/train', transform=valid_transform, is_val=True)
-    train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=False, num_workers=2)
-    valid_loader = DataLoader(valid_set, batch_size=batch_size, shuffle=False, num_workers=2)
-    return train_loader, valid_loader
+    return train_set, valid_set
 
 
-def get_data_svhn(size, train_augmentation, batch_size, base_path: str = './'):
+def get_data_svhn(size, train_augmentation):
     train_transform, valid_transform = get_transforms(size, train_augmentation)
     train_set = datasets.SVHN('./data/svhn', split='train', download=True, transform=train_transform)
     valid_set = datasets.SVHN('./data/svhn', split='test', download=True, transform=valid_transform)
+    return train_set, valid_set
+
+
+def get_dataloaders(size, train_augmentation, batch_size):
+    train_set_no_digit, valid_set_no_digit = get_data_no_digit(size, train_augmentation)
+    train_set_svhn, valid_set_svhn = get_data_svhn(size, train_augmentation)
+    train_set, valid_set = ConcatDataset(train_set_no_digit, train_set_svhn), ConcatDataset(valid_set_no_digit, valid_set_svhn)
     train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=True, num_workers=2)
     valid_loader = DataLoader(valid_set, batch_size=batch_size, shuffle=False, num_workers=2)
     return train_loader, valid_loader
