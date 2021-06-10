@@ -32,3 +32,4 @@ data:
   train_augmentation:
     - 'random_crop'
     - 'color_jitter'
+overlap: 0.2

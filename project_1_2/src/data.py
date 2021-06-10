@@ -15,7 +15,7 @@ import PIL.Image as Image
 import h5py
 import pandas as pd
 
-MIN_SIZE = 20
+MIN_SIZE = 32
 
 
 def get_box_data(index, hdf5_data):
@@ -64,21 +64,29 @@ def get_metadata(folder='train'):
     return pd.DataFrame(data)
 
 
-def random_square(img, meta, rng):
+def random_square(img, meta, rng, overlap=0.2):
     h, w, _ = img.shape
     available_modes = []
-    leftest = np.min(np.array(meta['left']))
+    probs = []
+    leftest = int(np.min(np.array(meta['left']) + overlap * np.array(meta['width'])))
     if leftest > MIN_SIZE:
         available_modes.append(0)
-    rightest = np.max(np.array(meta['left']) + np.array(meta['width']))
+        probs.append(leftest)
+    rightest = int(np.max(np.array(meta['left']) + (1- overlap) * np.array(meta['width'])))
     if w - rightest > MIN_SIZE:
         available_modes.append(1)
-    topest = np.min(np.array(meta['top']))
+        probs.append(w - rightest)
+    topest = int(np.max(np.array(meta['top']) + overlap * np.array(meta['height'])))
     if topest > MIN_SIZE:
         available_modes.append(2)
-    lowest = np.max(np.array(meta['top']) + np.array(meta['height']))
+        probs.append(topest)
+    lowest = int(np.max(np.array(meta['top']) + (1 - overlap) * np.array(meta['height'])))
     if h - lowest > MIN_SIZE:
         available_modes.append(3)
+        probs.append(h - lowest)
+
+    probs = np.array(probs)
+    probs /= probs.sum() # normalize
 
     mode_boundaries = [
         [0, leftest, 0, h],
@@ -88,9 +96,9 @@ def random_square(img, meta, rng):
     ]
     if len(available_modes) == 0:
         raise ValueError('no possible part')
-    mode = rng.integers(0, len(available_modes))
+    mode = rng.choice(available_modes, p=probs) # get bigger
 
-    l, r, t, b = random_square_from_boundaries(*mode_boundaries[available_modes[mode]], rng)
+    l, r, t, b = random_square_from_boundaries(*mode_boundaries[mode], rng)
     return img[t:b, l:r]
 
 def random_square_from_boundaries(l, r, t, b, rng):
@@ -113,7 +121,7 @@ def load_meta(meta_csv):
     return df
 
 
-def filter_images(df):
+def filter_images(df, overlap=0.2):
     ok_ind = []
     rejected = []
     rng = np.random.default_rng(12345)
@@ -123,7 +131,7 @@ def filter_images(df):
             meta = df.iloc[i]
             image = Image.open(os.path.join('./data/train/', meta.file))
             img = np.array(image)
-            random_square(img, meta, rng)
+            random_square(img, meta, rng, overlap=overlap)
             ok_ind.append(i)
         except ValueError as e:
             rejected.append((i, meta.file))
@@ -131,8 +139,9 @@ def filter_images(df):
 
 
 class NoDigitDataset(Dataset):
-    def __init__(self, transform, folder="./", is_val=False):
+    def __init__(self, transform, folder="./", is_val=False, overlap=0.2):
         self.is_val = is_val
+        self.overlap = overlap
         self.rng = np.random.default_rng(12345)
         self.transform = transform
         self.folder = folder
@@ -146,12 +155,12 @@ class NoDigitDataset(Dataset):
             print('caching')
             self.df.to_csv(meta_csv, index=None)
 
-        ind_csv = os.path.join(folder, 'ind.csv')
+        ind_csv = os.path.join(folder, f'ind_{self.overlap:.3f}.csv')
         if os.path.isfile(ind_csv):
           print('indices from cashe')
           self.filtered_indices = pd.read_csv(ind_csv).ind
         else:
-          self.filtered_indices = filter_images(self.df)
+          self.filtered_indices = filter_images(self.df, overlap=self.overlap)
           pd.DataFrame({'ind': self.filtered_indices}).to_csv(ind_csv, index=False)
           print('got: ', len(self.filtered_indices))
 
@@ -171,7 +180,7 @@ class NoDigitDataset(Dataset):
         image = Image.open(os.path.join(self.folder, meta.file))
         img = np.array(image)
 
-        X = Image.fromarray(random_square(img, meta, rng))
+        X = Image.fromarray(random_square(img, meta, rng, overlap=self.overlap))
         X = self.transform(X)
         return X, 10
 
@@ -258,11 +267,11 @@ def get_data_raw(split='test', resize_ratios=(0.5, 0.7, 0.9)):
     ])
     return RawDataset(transform, resize_ratios=resize_ratios, folder=f"./data/{split}")
 
-def get_data_no_digit(size, train_augmentation):
+def get_data_no_digit(size, train_augmentation, overlap):
     train_transform, valid_transform = get_transforms(size, train_augmentation)
     download_if_necessary('train')
-    train_set = NoDigitDataset(folder='./data/train', transform=train_transform)
-    valid_set = NoDigitDataset(folder='./data/train', transform=valid_transform, is_val=True)
+    train_set = NoDigitDataset(folder='./data/train', transform=train_transform, overlap=overlap)
+    valid_set = NoDigitDataset(folder='./data/train', transform=valid_transform, is_val=True, overlap=overlap)
     return train_set, valid_set
 
 
@@ -273,8 +282,8 @@ def get_data_svhn(size, train_augmentation):
     return train_set, valid_set
 
 
-def get_dataloaders(size, train_augmentation, batch_size):
-    train_set_no_digit, valid_set_no_digit = get_data_no_digit(size, train_augmentation)
+def get_dataloaders(size, train_augmentation, batch_size, overlap=0.2):
+    train_set_no_digit, valid_set_no_digit = get_data_no_digit(size, train_augmentation, overlap=overlap)
     train_set_svhn, valid_set_svhn = get_data_svhn(size, train_augmentation)
     train_set, valid_set = ConcatDataset([train_set_no_digit, train_set_svhn]), ConcatDataset([valid_set_no_digit, valid_set_svhn])
     train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=True, num_workers=2)
