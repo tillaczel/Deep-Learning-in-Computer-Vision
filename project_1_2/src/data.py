@@ -198,11 +198,15 @@ def move_all_files_in_dir(src_dir, dst_dir):
 def get_data_no_digit(size, train_augmentation, batch_size, base_path: str = './'):
     train_transform, valid_transform = get_transforms(size, train_augmentation)
 
-    if not os.path.isfile('train.tar.gz') or not os.path.isdir('data/train'):
+    if not os.path.isfile('train.tar.gz'):
         url = 'http://ufldl.stanford.edu/housenumbers/train.tar.gz'
         print('Downloading data')
         filename = wget.download(url)
+    else:
+        filename = 'train.tar.gz'
+        print('Using cached data')
 
+    if not os.path.isdir('data/train'):
         with tarfile.open(filename, "r:gz") as tar:
             tar.extractall()
 
@@ -212,6 +216,7 @@ def get_data_no_digit(size, train_augmentation, batch_size, base_path: str = './
             os.mkdir(dir_path)
         except OSError as e:
             print("Error: %s : %s" % (dir_path, e.strerror))
+            os.mkdir(dir_path)
         move_all_files_in_dir('train', dir_path)
 
     train_set = NoDigitDataset(folder='./data/train', transform=train_transform)
