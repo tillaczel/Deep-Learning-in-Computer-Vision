@@ -189,6 +189,7 @@ def move_all_files_in_dir(src_dir, dst_dir):
     if os.path.isdir(src_dir) and os.path.isdir(dst_dir) :
         # Iterate over all the files in source directory
         for filePath in glob.glob(src_dir + '\*'):
+            print(filePath)
             # Move each file to destination Directory
             shutil.move(filePath, dst_dir);
     else:
@@ -204,7 +205,7 @@ def get_data_no_digit(size, train_augmentation, batch_size, base_path: str = './
         filename = wget.download(url)
     else:
         filename = 'train.tar.gz'
-        print('Using cached data')
+        print('Using cached train.tar.gz')
 
     if not os.path.isdir('data/train'):
         with tarfile.open(filename, "r:gz") as tar:
@@ -212,12 +213,12 @@ def get_data_no_digit(size, train_augmentation, batch_size, base_path: str = './
 
         dir_path = 'data/train'
         try:
-            os.rmdir(dir_path)
             os.mkdir(dir_path)
         except OSError as e:
             print("Error: %s : %s" % (dir_path, e.strerror))
-            os.mkdir(dir_path)
         move_all_files_in_dir('train', dir_path)
+    else:
+        print('Using cached data/train')
 
     train_set = NoDigitDataset(folder='./data/train', transform=train_transform)
     valid_set = NoDigitDataset(folder='./data/train', transform=valid_transform, is_val=True)
