@@ -13,7 +13,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torchvision.datasets as datasets
-from torch.utils.data import DataLoader, Dataset
+from torch.utils.data import DataLoader, Dataset, ConcatDataset
 import torchvision.transforms as transforms
 import matplotlib.pyplot as plt
 import zipfile
