@@ -200,7 +200,8 @@ def get_data_no_digit(size, train_augmentation, batch_size, base_path: str = './
 
     if not os.path.isfile('train.tar.gz') or not os.path.isdir('data/train'):
         url = 'http://ufldl.stanford.edu/housenumbers/train.tar.gz'
-        filename = wget.bar_adaptive(url)
+        print('Downloading data')
+        filename = wget.download(url)
 
         with tarfile.open(filename, "r:gz") as tar:
             tar.extractall()
