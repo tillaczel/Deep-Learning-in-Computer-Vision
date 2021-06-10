@@ -14,6 +14,7 @@ import wandb
 from omegaconf import DictConfig, OmegaConf
 import pytorch_lightning as pl
 
+from tqdm import tqdm
 from project_1_2.src.data import get_data_raw
 from project_1_2.src.engine import EngineModule
 from torch import nn
@@ -56,11 +57,14 @@ def eval(cfg : DictConfig):
 
     # this will go to separate func
     engine.model.resnet[-1] = nn.AvgPool2d(kernel_size=(7, 7), stride=(1, 1))
-    n_images_to_process = 5
+    n_images_to_process = 10
 
     thresholds = [(0.1, 0.5), (0.2, 0.5), (0.1, 0.3), (0.25, 0.25)]
 
-    for i in range(n_images_to_process):
+    for i in tqdm(range(n_images_to_process)):
+        im_dir = os.path.join(wandb.run.dir, f'img_{i}')
+        if not os.path.isdir(im_dir):
+            os.mkdir(im_dir)
         result2 = []
         resized, original_image, ratios, meta = dataset[i]
         # this is ugly but should work
@@ -83,18 +87,18 @@ def eval(cfg : DictConfig):
                         p[:10]
                     ))
             for th in thresholds:
-                th_dir = os.path.join(wandb.run.dir, f'thresh_{th[0]:.2f}_{th[1]:.2f}')
+                th_dir = os.path.join(im_dir, f'thresh_{th[0]:.2f}_{th[1]:.2f}')
                 if not os.path.isdir(th_dir):
                     os.mkdir(th_dir)
                 p_threshold, iou_threshold = th
-                filename = os.path.join(th_dir, f'bbox_{i}_{ratio:.2f}.png')
+                filename = os.path.join(th_dir, f'bbox_{ratio:.2f}.png')
                 filter_bboxes(result, original_image, filename=filename, p_threshold=p_threshold, iou_threshold=iou_threshold)
         for  th in thresholds:
-            th_dir = os.path.join(wandb.run.dir, f'thresh_{th[0]:.2f}_{th[1]:.2f}')
+            th_dir = os.path.join(im_dir, f'thresh_{th[0]:.2f}_{th[1]:.2f}')
             if not os.path.isdir(th_dir):
                 os.mkdir(th_dir)
             p_threshold, iou_threshold = th
-            filename = os.path.join(th_dir, f'bbox_{i}.png')
+            filename = os.path.join(th_dir, f'bbox_.png')
             filter_bboxes(result2, original_image, filename=filename, p_threshold=p_threshold, iou_threshold=iou_threshold)
 
 
