@@ -4,11 +4,13 @@ import matplotlib.patches as patches
 import os
 
 
-def plt_bboxes(img, bboxes, filename=None):
+def plt_bboxes(img, bboxes, labels, filename=None):
     fig, axs = plt.subplots(1, 1, figsize=(10, 10))
     axs.imshow(img)
-    for bbox in bboxes:
+    for bbox, label in zip(bboxes, labels):
+        # TODO: add colors
         l, t, w, h = bbox[0], bbox[2], bbox[1] - bbox[0], bbox[3] - bbox[2]
+        plt.text(l,t, str(label), fontsize=30)
         rect = patches.Rectangle((l, t), w, h, linewidth=1, edgecolor='r', facecolor='none')
         axs.add_patch(rect)
     if filename is not None:
@@ -49,5 +51,5 @@ def non_maximum_suppression(bboxes, p_classes, p_threshold=0.6, iou_threshold=0.
 def filter_bboxes(result, img, filename=None):
     bboxes, p_classes = map(np.array, zip(*result))
     bboxes, probs, class_idx = non_maximum_suppression(bboxes, p_classes, p_threshold=0.1)
-    plt_bboxes(img, bboxes, filename=filename)
+    plt_bboxes(img, bboxes, class_idx, filename=filename)
     return bboxes, probs, class_idx
