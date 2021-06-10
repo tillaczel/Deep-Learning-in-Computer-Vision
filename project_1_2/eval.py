@@ -60,9 +60,9 @@ def eval(cfg : DictConfig):
             y = engine(img.unsqueeze(dim=0))
             input_max, input_indexes = torch.max(torch.softmax(y, 1), 1)
             mask = (input_max > threshold) & (input_indexes != 10)
-            coordinates = np.argwhere(mask.cpu().numpy())[:, 1]
-            probs = input_max[mask].cpu().numpy()
-            pred_digits  = input_indexes[mask].cpu().numpy()
+            coordinates = np.argwhere(mask.detach().cpu().numpy())[:, 1]
+            probs = input_max[mask].detach().cpu().numpy()
+            pred_digits  = input_indexes[mask].detach().cpu().numpy()
 
             # TODO: coordinates to frames (this is probably wrong)
             size = int(ratio * 224)
@@ -73,7 +73,7 @@ def eval(cfg : DictConfig):
                     int(center[1] - size / 2),
                     int(center[1] + size / 2),
                     int(center[0] - size / 2),
-                    int(center[1] + size / 2),
+                    int(center[0] + size / 2),
                 ))
 
             # this will have the output coordinates, probabilities and the predicted labels
