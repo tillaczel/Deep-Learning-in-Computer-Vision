@@ -1,11 +1,11 @@
 import sys
 import os
 
-from project_1_2.src.bbox import run_detection
 
 sys.path.append('git_repo')
 sys.path.append(os.path.split(os.getcwd())[0])
-from pytorch_lightning.trainer.supporters import CombinedLoader
+
+from project_1_2.src.bbox import run_detection
 
 import hydra
 import wandb
