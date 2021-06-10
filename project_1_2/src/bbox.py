@@ -48,8 +48,8 @@ def non_maximum_suppression(bboxes, p_classes, p_threshold=0.6, iou_threshold=0.
     return final_bboxes, final_probs, final_class_idx
 
 
-def filter_bboxes(result, img, filename=None):
+def filter_bboxes(result, img, filename=None, p_threshold=0.1, iou_threshold=0.5):
     bboxes, p_classes = map(np.array, zip(*result))
-    bboxes, probs, class_idx = non_maximum_suppression(bboxes, p_classes, p_threshold=0.1)
+    bboxes, probs, class_idx = non_maximum_suppression(bboxes, p_classes, p_threshold=p_threshold, iou_threshold=iou_threshold)
     plt_bboxes(img, bboxes, class_idx, filename=filename)
     return bboxes, probs, class_idx

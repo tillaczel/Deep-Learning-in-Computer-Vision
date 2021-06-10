@@ -47,7 +47,7 @@ def eval(cfg : DictConfig):
         fh.write(OmegaConf.to_yaml(cfg))
     wandb.save(cfg_file) # this will force sync it
 
-    resize_ratios = (0.5, 0.7, 0.9) # todo: config
+    resize_ratios = (0.55, 0.7, 0.8) # todo: config
     # dataset = get_data_raw(split='test', resize_ratios=resize_ratios)
     dataset = get_data_raw(split='train', resize_ratios=resize_ratios)
 
@@ -57,6 +57,8 @@ def eval(cfg : DictConfig):
     # this will go to separate func
     engine.model.resnet[-1] = nn.AvgPool2d(kernel_size=(7, 7), stride=(1, 1))
     n_images_to_process = 5
+
+    thresholds = [(0.1, 0.5), (0.2, 0.5), (0.1, 0.3), (0.25, 0.25)]
 
     for i in range(n_images_to_process):
         result2 = []
@@ -80,10 +82,20 @@ def eval(cfg : DictConfig):
                         coord,
                         p[:10]
                     ))
-            filename = os.path.join(wandb.run.dir, f'bbox_{i}_{ratio:.2f}.png')
-            filter_bboxes(result, original_image, filename=filename)
-        filename = os.path.join(wandb.run.dir, f'bbox_{i}.png')
-        filter_bboxes(result2, original_image, filename=filename)
+            for  i, th in enumerate(thresholds):
+                th_dir = os.path.join(wandb.run.dir, f'thresh_{th[0]:.2f}_{th[1]:.2f}')
+                if not os.path.isdir(th_dir):
+                    os.mkdir(th_dir)
+                p_threshold, iou_threshold = th
+                filename = os.path.join(th_dir, f'bbox_{i}_{ratio:.2f}.png')
+                filter_bboxes(result, original_image, filename=filename, p_threshold=p_threshold, iou_threshold=iou_threshold)
+        for  i, th in enumerate(thresholds):
+            th_dir = os.path.join(wandb.run.dir, f'thresh_{th[0]:.2f}_{th[1]:.2f}')
+            if not os.path.isdir(th_dir):
+                os.mkdir(th_dir)
+            p_threshold, iou_threshold = th
+            filename = os.path.join(th_dir, f'bbox_{i}.png')
+            filter_bboxes(result2, original_image, filename=filename, p_threshold=p_threshold, iou_threshold=iou_threshold)
 
 
 
