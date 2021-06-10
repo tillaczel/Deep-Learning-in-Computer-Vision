@@ -1,10 +1,12 @@
 import sys
 import os
 
+
 sys.path.append('git_repo')
 sys.path.append(os.path.split(os.getcwd())[0])
 
 from project_1_2.src.trainer import get_test_trainer
+from project_1_2.src.bbox import plt_bboxes, filter_bboxes, run_detection
 from project_1_2.src.utils import download_file, plot_heatmaps
 import hydra
 import torch
@@ -12,12 +14,17 @@ import wandb
 from omegaconf import DictConfig, OmegaConf
 import pytorch_lightning as pl
 
-from project_1_2.src.data import get_data
+from tqdm import tqdm
+from project_1_2.src.data import get_data_raw
 from project_1_2.src.engine import EngineModule
+from torch import nn
+import numpy as np
 
-from project_1_2.src.data import download_data
 
 wandb.init(project='p2', entity='dlcv')
+
+
+
 
 @hydra.main(config_path='config', config_name="default_eval")
 def eval(cfg : DictConfig):
@@ -32,15 +39,12 @@ def eval(cfg : DictConfig):
         fh.write(OmegaConf.to_yaml(cfg))
     wandb.save(cfg_file) # this will force sync it
 
-    download_data(cfg.data.path)
-    _, test_dataloader = get_data(cfg.data.size, cfg.data.train_augmentation, cfg.batch_size,
-                                                 base_path=cfg.data.path)
 
     download_file(cfg.run_id, "model.ckpt")
     engine = EngineModule.load_from_checkpoint("model.ckpt", config=train_cfg)
+    run_detection(engine)
+    # this will go to separate func
 
-    trainer = get_test_trainer(cfg, engine)
-    trainer.validate(engine, val_dataloaders=test_dataloader, ckpt_path=None)
 
 if __name__ == '__main__':
     eval()

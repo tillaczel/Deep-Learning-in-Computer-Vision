@@ -18,8 +18,8 @@ class EngineModule(pl.LightningModule):
         self.train_acc = torchmetrics.Accuracy(multiclass=True, num_classes=n_classes)
         self.val_acc = torchmetrics.Accuracy(multiclass=True, num_classes=n_classes)
 
-        self.train_f1 = torchmetrics.F1(multiclass=True, num_classes=n_classes)
-        self.val_f1 = torchmetrics.F1(multiclass=True, num_classes=n_classes)
+        self.train_f1 = torchmetrics.F1(multiclass=True, num_classes=n_classes, average="macro")
+        self.val_f1 = torchmetrics.F1(multiclass=True, num_classes=n_classes, average="macro")
 
 
         self.metrics = ["acc", "f1"]

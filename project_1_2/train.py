@@ -1,9 +1,11 @@
 import sys
 import os
 
+
 sys.path.append('git_repo')
 sys.path.append(os.path.split(os.getcwd())[0])
-from pytorch_lightning.trainer.supporters import CombinedLoader
+
+from project_1_2.src.bbox import run_detection
 
 import hydra
 import wandb
@@ -24,7 +26,7 @@ def run_training(cfg: DictConfig):
         fh.write(OmegaConf.to_yaml(cfg))
     wandb.save(cfg_file)  # this will force sync it
 
-    train_loader, valid_loader = get_dataloaders(cfg.data.size, cfg.data.train_augmentation, cfg.training.batch_size)
+    train_loader, valid_loader = get_dataloaders(cfg.data.size, cfg.data.train_augmentation, cfg.training.batch_size, overlap=cfg.overlap)
 
     # print_class_dist(train_loader, title='Train set'), print_class_dist(valid_loader, title='Valid no_digit set')
 
@@ -35,6 +37,8 @@ def run_training(cfg: DictConfig):
     trainer = get_trainer(cfg, engine)
 
     trainer.fit(engine, train_dataloader=train_loader, val_dataloaders=valid_loader)
+
+    run_detection(engine)
 
     # TODO: visualizations
 
