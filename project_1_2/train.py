@@ -24,24 +24,6 @@ def run_training(cfg: DictConfig):
         fh.write(OmegaConf.to_yaml(cfg))
     wandb.save(cfg_file)  # this will force sync it
 
-    # # download_data(cfg.data.path)
-    # train_dataloader_svhn, test_dataloader_svhn = get_data_svhn(cfg.data.size, cfg.data.train_augmentation, cfg.training.batch_size,
-    #                                              base_path=cfg.data.path)
-    # train_dataloader_no_dig, test_dataloader_no_dig =  get_data_no_digit(cfg.data.size, cfg.data.train_augmentation, cfg.training.batch_size,
-    #                                              base_path=cfg.data.path)
-    #
-    # train_dataloaders = {
-    #     'svhn': train_dataloader_svhn,
-    #     'no_digit': train_dataloader_no_dig
-    # }
-    #
-    # val_dataloaders = {
-    #     'svhn': test_dataloader_svhn,
-    #     'no_digit': test_dataloader_no_dig
-    # }
-    #
-    # val_dataloaders = CombinedLoader(val_dataloaders, "max_size_cycle")
-
     train_loader, valid_loader = get_dataloaders(cfg.data.size, cfg.data.train_augmentation, cfg.training.batch_size)
 
     # print_class_dist(train_loader, title='Train set'), print_class_dist(valid_loader, title='Valid no_digit set')
