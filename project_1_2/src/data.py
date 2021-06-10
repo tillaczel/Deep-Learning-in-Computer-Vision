@@ -5,6 +5,9 @@ import glob
 import PIL.Image as Image
 from omegaconf import DictConfig
 from tqdm import tqdm
+import wget
+import tarfile
+import shutil
 
 import torch
 import torch.nn as nn
@@ -181,8 +184,33 @@ class NoDigitDataset(Dataset):
         return X, 10
 
 
+def move_all_files_in_dir(src_dir, dst_dir):
+    # Check if both the are directories
+    if os.path.isdir(src_dir) and os.path.isdir(dst_dir) :
+        # Iterate over all the files in source directory
+        for filePath in glob.glob(src_dir + '\*'):
+            # Move each file to destination Directory
+            shutil.move(filePath, dst_dir);
+    else:
+        print("srcDir & dstDir should be Directories")
+
+
 def get_data_no_digit(size, train_augmentation, batch_size, base_path: str = './'):
     train_transform, valid_transform = get_transforms(size, train_augmentation)
+
+    url = 'http://ufldl.stanford.edu/housenumbers/train.tar.gz'
+    filename = wget.download(url)
+
+    with tarfile.open(filename, "r:gz") as tar:
+        tar.extractall()
+
+    dir_path = 'data/train'
+    try:
+        os.rmdir(dir_path)
+    except OSError as e:
+        print("Error: %s : %s" % (dir_path, e.strerror))
+    move_all_files_in_dir('train', dir_path)
+
     train_set = NoDigitDataset(folder='./data/train', transform=train_transform)
     valid_set = NoDigitDataset(folder='./data/train', transform=valid_transform, is_val=True)
     train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=False, num_workers=2)
