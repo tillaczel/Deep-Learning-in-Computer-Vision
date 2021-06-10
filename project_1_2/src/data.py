@@ -228,8 +228,8 @@ def get_data_no_digit(size, train_augmentation, batch_size, base_path: str = './
 
 def get_data_svhn(size, train_augmentation, batch_size, base_path: str = './'):
     train_transform, valid_transform = get_transforms(size, train_augmentation)
-    train_set = datasets.SVHN('./data', split='train', download=True, transform=train_transform)
-    valid_set = datasets.SVHN('./data', split='test', download=True, transform=valid_transform)
+    train_set = datasets.SVHN('./data/svhn', split='train', download=True, transform=train_transform)
+    valid_set = datasets.SVHN('./data/svhn', split='test', download=True, transform=valid_transform)
     train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=True, num_workers=2)
     valid_loader = DataLoader(valid_set, batch_size=batch_size, shuffle=False, num_workers=2)
     return train_loader, valid_loader
