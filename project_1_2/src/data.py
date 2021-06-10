@@ -5,12 +5,15 @@ import glob
 import PIL.Image as Image
 from omegaconf import DictConfig
 from tqdm import tqdm
+import wget
+import tarfile
+import shutil
 
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torchvision.datasets as datasets
-from torch.utils.data import DataLoader, Dataset
+from torch.utils.data import DataLoader, Dataset, ConcatDataset
 import torchvision.transforms as transforms
 import matplotlib.pyplot as plt
 import zipfile
@@ -181,19 +184,57 @@ class NoDigitDataset(Dataset):
         return X, 10
 
 
-def get_data_no_digit(size, train_augmentation, batch_size, base_path: str = './'):
+def move_all_files_in_dir(src_dir, dst_dir):
+    # Check if both the are directories
+    if os.path.isdir(src_dir) and os.path.isdir(dst_dir) :
+        # Iterate over all the files in source directory
+        for filePath in glob.glob(src_dir + '/*'):
+            # Move each file to destination Directory
+            shutil.move(filePath, dst_dir);
+    else:
+        print("srcDir & dstDir should be Directories")
+
+
+def get_data_no_digit(size, train_augmentation):
     train_transform, valid_transform = get_transforms(size, train_augmentation)
+
+    if not os.path.isfile('train.tar.gz'):
+        url = 'http://ufldl.stanford.edu/housenumbers/train.tar.gz'
+        print('Downloading data')
+        filename = wget.download(url)
+    else:
+        filename = 'train.tar.gz'
+        print('Using cached train.tar.gz')
+
+    if not os.path.isdir('data/train'):
+        with tarfile.open(filename, "r:gz") as tar:
+            tar.extractall()
+
+        dir_path = 'data/train'
+        try:
+            os.mkdir(dir_path)
+        except OSError as e:
+            print("Error: %s : %s" % (dir_path, e.strerror))
+        move_all_files_in_dir('train', dir_path)
+    else:
+        print('Using cached data/train')
+
     train_set = NoDigitDataset(folder='./data/train', transform=train_transform)
     valid_set = NoDigitDataset(folder='./data/train', transform=valid_transform, is_val=True)
-    train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=False, num_workers=2)
-    valid_loader = DataLoader(valid_set, batch_size=batch_size, shuffle=False, num_workers=2)
-    return train_loader, valid_loader
+    return train_set, valid_set
 
 
-def get_data_svhn(size, train_augmentation, batch_size, base_path: str = './'):
+def get_data_svhn(size, train_augmentation):
     train_transform, valid_transform = get_transforms(size, train_augmentation)
-    train_set = datasets.SVHN('./data', split='train', download=True, transform=train_transform)
-    valid_set = datasets.SVHN('./data', split='test', download=True, transform=valid_transform)
+    train_set = datasets.SVHN('./data/svhn', split='train', download=True, transform=train_transform)
+    valid_set = datasets.SVHN('./data/svhn', split='test', download=True, transform=valid_transform)
+    return train_set, valid_set
+
+
+def get_dataloaders(size, train_augmentation, batch_size):
+    train_set_no_digit, valid_set_no_digit = get_data_no_digit(size, train_augmentation)
+    train_set_svhn, valid_set_svhn = get_data_svhn(size, train_augmentation)
+    train_set, valid_set = ConcatDataset([train_set_no_digit, train_set_svhn]), ConcatDataset([valid_set_no_digit, valid_set_svhn])
     train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=True, num_workers=2)
     valid_loader = DataLoader(valid_set, batch_size=batch_size, shuffle=False, num_workers=2)
     return train_loader, valid_loader

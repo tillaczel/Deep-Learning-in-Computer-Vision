@@ -42,22 +42,17 @@ class EngineModule(pl.LightningModule):
 
 
     def training_step(self, batch, batch_idx):
-        images_d, labels_d = batch["svhn"]
-        images_n, labels_n = batch["no_digit"]
-
-        images = torch.cat([images_d, images_n], dim=0)
-        labels = torch.cat([labels_d, labels_n], dim=0)
+        images, labels = batch
 
         pred = self.model(images).squeeze()  # [Bx1] -> [B]
         loss = self.loss_func(pred, labels.type(torch.long))
-
 
         self.log('loss', loss, on_step=False, on_epoch=True,
                  prog_bar=False, logger=True)
         self.log('lr', self.lr, on_step=False, on_epoch=True,
                  prog_bar=False, logger=True)
 
-        probs = nn.functional.softmax(pred, dim=-1)
+        probs = torch.softmax(pred, dim=-1)
 
         for metric_name in self.metrics:
             self.update_and_log_metric(metric_name, probs, labels, mode='train')
@@ -68,16 +63,12 @@ class EngineModule(pl.LightningModule):
         pass
 
     def validation_step(self, batch, batch_idx):
-        images_d, labels_d = batch["svhn"]
-        images_n, labels_n = batch["no_digit"]
-
-        images = torch.cat([images_d, images_n], dim=0)
-        labels = torch.cat([labels_d, labels_n], dim=0)
+        images, labels = batch
 
         pred = self.model(images).squeeze()  # [Bx1] -> [B]
         loss = self.loss_func(pred, labels.type(torch.long))
 
-        probs = nn.functional.softmax(pred, dim=-1)
+        probs = torch.softmax(pred, dim=-1)
         self.log('val_loss', loss, on_step=False, on_epoch=True,
                  prog_bar=False, logger=True)
 
