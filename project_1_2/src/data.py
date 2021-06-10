@@ -234,8 +234,7 @@ def get_data_svhn(size, train_augmentation):
 def get_dataloaders(size, train_augmentation, batch_size):
     train_set_no_digit, valid_set_no_digit = get_data_no_digit(size, train_augmentation)
     train_set_svhn, valid_set_svhn = get_data_svhn(size, train_augmentation)
-    print(train_set_no_digit, train_set_svhn)
-    train_set, valid_set = ConcatDataset(train_set_no_digit, train_set_svhn), ConcatDataset(valid_set_no_digit, valid_set_svhn)
+    train_set, valid_set = ConcatDataset([train_set_no_digit, train_set_svhn]), ConcatDataset([valid_set_no_digit, valid_set_svhn])
     train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=True, num_workers=2)
     valid_loader = DataLoader(valid_set, batch_size=batch_size, shuffle=False, num_workers=2)
     return train_loader, valid_loader
