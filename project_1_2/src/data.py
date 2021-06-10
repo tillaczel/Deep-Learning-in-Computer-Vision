@@ -1,23 +1,15 @@
 import json
-import os
 import numpy as np
 import glob
-import PIL.Image as Image
-from omegaconf import DictConfig
 from tqdm import tqdm
 import wget
 import tarfile
 import shutil
 
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
 import torchvision.datasets as datasets
 from torch.utils.data import DataLoader, Dataset, ConcatDataset
 import torchvision.transforms as transforms
 import matplotlib.pyplot as plt
-import zipfile
-import gdown
 import os
 import PIL.Image as Image
 import h5py
@@ -183,6 +175,44 @@ class NoDigitDataset(Dataset):
         X = self.transform(X)
         return X, 10
 
+class RawDataset(Dataset):
+    def __init__(self, transform, resize_ratios=(0.5, 0.7, 0.9), folder="./"):
+        self.size = 224 # hardcoded
+        self.resize_heights = (self.size / np.array(list(resize_ratios))).astype(int)
+        self.transform = transform
+        self.folder = folder
+        meta_csv = os.path.join(folder, 'meta.csv')
+        if os.path.isfile(meta_csv):
+            print('loading metadata from cache')
+            self.df = load_meta(meta_csv)
+        else:
+            print('parsing metadata')
+            self.df = get_metadata(folder=folder)
+            print('caching')
+            self.df.to_csv(meta_csv, index=None)
+
+    def __len__(self):
+        # 'Returns the total number of samples'
+        return len(self.df)  # this could be arbitrarily larger
+
+    def __getitem__(self, idx):
+        # 'Generates one sample of data'
+        meta = self.df.iloc[idx]
+        original_image = Image.open(os.path.join(self.folder, meta.file))
+        w, h = original_image.size
+        resized = [] # list
+        ratios = []
+        for height in self.resize_heights:
+            ratio = height/h
+            width = int(w * ratio)
+            X = original_image.resize((width, height))
+            X = self.transform(X)
+            ratios.append(ratio)
+            resized.append(X)
+        # list of resized images, original,
+        # ratios used for resizing and original metadata
+        return resized, original_image, ratios, meta
+
 
 def move_all_files_in_dir(src_dir, dst_dir):
     # Check if both the are directories
@@ -194,31 +224,43 @@ def move_all_files_in_dir(src_dir, dst_dir):
     else:
         print("srcDir & dstDir should be Directories")
 
+def download_if_necessary(split):
+    assert split in ['train', 'test', 'extra']
+    if not os.path.isdir(f'data/{split}'):
+        if not os.path.isfile('f{split}.tar.gz'):
+            url = f'http://ufldl.stanford.edu/housenumbers/{split}.tar.gz'
+            print('Downloading data')
+            filename = wget.download(url)
+        else:
+            filename = f'{split}.tar.gz'
+            print(f'Using cached {split}.tar.gz')
 
-def get_data_no_digit(size, train_augmentation):
-    train_transform, valid_transform = get_transforms(size, train_augmentation)
-
-    if not os.path.isfile('train.tar.gz'):
-        url = 'http://ufldl.stanford.edu/housenumbers/train.tar.gz'
-        print('Downloading data')
-        filename = wget.download(url)
-    else:
-        filename = 'train.tar.gz'
-        print('Using cached train.tar.gz')
-
-    if not os.path.isdir('data/train'):
         with tarfile.open(filename, "r:gz") as tar:
             tar.extractall()
 
-        dir_path = 'data/train'
+        if not os.path.isdir('data'):
+            os.mkdir('data')
+        dir_path = f'data/{split}'
         try:
             os.mkdir(dir_path)
         except OSError as e:
             print("Error: %s : %s" % (dir_path, e.strerror))
-        move_all_files_in_dir('train', dir_path)
+        move_all_files_in_dir(f'{split}', dir_path)
     else:
-        print('Using cached data/train')
+        print(f'Using cached data/{split}')
 
+def get_data_raw(split='test', resize_ratios=(0.5, 0.7, 0.9)):
+    download_if_necessary(split)
+    norm_mean, norm_std = (0.485, 0.456, 0.406), (0.229, 0.224, 0.225)
+    transform = transforms.Compose([
+        transforms.ToTensor(),
+        transforms.Normalize(norm_mean, norm_std)
+    ])
+    return RawDataset(transform, resize_ratios=resize_ratios, folder=f"./data/{split}")
+
+def get_data_no_digit(size, train_augmentation):
+    train_transform, valid_transform = get_transforms(size, train_augmentation)
+    download_if_necessary('train')
     train_set = NoDigitDataset(folder='./data/train', transform=train_transform)
     valid_set = NoDigitDataset(folder='./data/train', transform=valid_transform, is_val=True)
     return train_set, valid_set
