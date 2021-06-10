@@ -56,13 +56,15 @@ def eval(cfg : DictConfig):
 
     # this will go to separate func
     engine.model.resnet[-1] = nn.AvgPool2d(kernel_size=(7, 7), stride=(1, 1))
-    n_images_to_process = 1
+    n_images_to_process = 5
 
     for i in range(n_images_to_process):
-        result = []
+        result2 = []
         resized, original_image, ratios, meta = dataset[i]
         # this is ugly but should work
         for img, ratio in zip(resized, ratios):
+            result = []
+
             y = engine(img.unsqueeze(dim=0))
             probs = torch.softmax(y, 1).detach().cpu().numpy()
             for i in range(probs.shape[-1]):  # x-axis
@@ -74,8 +76,14 @@ def eval(cfg : DictConfig):
                         coord,
                         p[:10]
                     ))
+                    result2.append((
+                        coord,
+                        p[:10]
+                    ))
+            filename = os.path.join(wandb.run.dir, f'bbox_{i}_{ratio:.2f}.png')
+            filter_bboxes(result, original_image, filename=filename)
         filename = os.path.join(wandb.run.dir, f'bbox_{i}.png')
-        filter_bboxes(result, original_image, filename=filename)
+        filter_bboxes(result2, original_image, filename=filename)
 
 
 
