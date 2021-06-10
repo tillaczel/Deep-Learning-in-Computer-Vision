@@ -199,7 +199,7 @@ def get_data_no_digit(size, train_augmentation, batch_size, base_path: str = './
     train_transform, valid_transform = get_transforms(size, train_augmentation)
 
     url = 'http://ufldl.stanford.edu/housenumbers/train.tar.gz'
-    filename = wget.download(url)
+    filename = wget.bar_adaptive(url)
 
     with tarfile.open(filename, "r:gz") as tar:
         tar.extractall()
