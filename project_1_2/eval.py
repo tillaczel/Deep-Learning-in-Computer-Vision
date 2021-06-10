@@ -25,11 +25,11 @@ wandb.init(project='p2', entity='dlcv')
 
 def coord_to_boxes(coord, ratio):  # TODO: this is probably wrong...
     center = (coord * 32 + 112)
-    coord = (
-        int((center[1] - 112) / ratio),
-        int((center[1] + 112) / ratio),
+    coord = ( # who knows where is up or left
         int((center[0] - 112) / ratio),
         int((center[0] + 112) / ratio),
+        int((center[1] - 112) / ratio),
+        int((center[1] + 112) / ratio),
     )
     return coord
 
@@ -72,7 +72,7 @@ def eval(cfg : DictConfig):
 
                     result.append((
                         coord,
-                        p
+                        p[:10]
                     ))
         filename = os.path.join(wandb.run.dir, f'bbox_{i}.png')
         filter_bboxes(result, original_image, filename=filename)
