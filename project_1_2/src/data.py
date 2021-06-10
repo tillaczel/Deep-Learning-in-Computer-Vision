@@ -188,8 +188,7 @@ def move_all_files_in_dir(src_dir, dst_dir):
     # Check if both the are directories
     if os.path.isdir(src_dir) and os.path.isdir(dst_dir) :
         # Iterate over all the files in source directory
-        for filePath in glob.glob(src_dir + '\*'):
-            print(filePath)
+        for filePath in glob.glob(src_dir + '/*'):
             # Move each file to destination Directory
             shutil.move(filePath, dst_dir);
     else:
