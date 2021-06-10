@@ -1,6 +1,8 @@
 import sys
 import os
 
+from project_1_2.src.bbox import plt_bboxes
+
 sys.path.append('git_repo')
 sys.path.append(os.path.split(os.getcwd())[0])
 
@@ -67,13 +69,18 @@ def eval(cfg : DictConfig):
             centers = coord_to_boxes(coordinates, ratio)
             # TODO: this is shit
             for center in centers:
-                all_frames.append((center, size))
-
+                all_frames.append((
+                    int(center[1] - size / 2),
+                    int(center[1] + size / 2),
+                    int(center[0] - size / 2),
+                    int(center[1] + size / 2),
+                ))
 
             # this will have the output coordinates, probabilities and the predicted labels
             # as a list of tuples
             frames = list(zip(coordinates, probs, pred_digits))
             print(frames)
+        plt_bboxes(original_image, all_frames, path=None)
 
             # TODO: reject boxes
             # TODO: print image
