@@ -6,7 +6,7 @@ sys.path.append('git_repo')
 sys.path.append(os.path.split(os.getcwd())[0])
 
 from project_1_2.src.trainer import get_test_trainer
-from project_1_2.src.bbox import plt_bboxes
+from project_1_2.src.bbox import plt_bboxes, filter_bboxes
 from project_1_2.src.utils import download_file, plot_heatmaps
 import hydra
 import torch
@@ -23,9 +23,15 @@ import numpy as np
 wandb.init(project='p2', entity='dlcv')
 
 
-def coord_to_boxes(coord, ratio): # TODO: this is probably wrong...
-    centers = ((coord * 32 + 112) * ratio).astype(int)
-    return centers
+def coord_to_boxes(coord, ratio):  # TODO: this is probably wrong...
+    center = (coord * 32 + 112)
+    coord = (
+        int((center[1] - 112) / ratio),
+        int((center[1] + 112) / ratio),
+        int((center[0] - 112) / ratio),
+        int((center[0] + 112) / ratio),
+    )
+    return coord
 
 
 @hydra.main(config_path='config', config_name="default_eval")
@@ -51,39 +57,24 @@ def eval(cfg : DictConfig):
     # this will go to separate func
     engine.model.resnet[-1] = nn.AvgPool2d(kernel_size=(7, 7), stride=(1, 1))
     n_images_to_process = 1
-    threshold = 0.2
 
     for i in range(n_images_to_process):
-        all_frames = []
-        resized, original_image, ratios, meta = dataset[0]
+        result = []
+        resized, original_image, ratios, meta = dataset[i]
+        # this is ugly but should work
         for img, ratio in zip(resized, ratios):
             y = engine(img.unsqueeze(dim=0))
-            input_max, input_indexes = torch.max(torch.softmax(y, 1), 1)
-            mask = (input_max > threshold) & (input_indexes != 10)
-            coordinates = np.argwhere(mask.detach().cpu().numpy())[:, 1]
-            probs = input_max[mask].detach().cpu().numpy()
-            pred_digits  = input_indexes[mask].detach().cpu().numpy()
+            probs = torch.softmax(y, 1).detach().cpu().numpy()
+            for i in range(probs.shape[-1]):  # x-axis
+                for j in range(probs.shape[-2]):  # y-axis
+                    p = probs[0, :, j, i]
+                    coord = coord_to_boxes(np.array([i, j]), ratio)
 
-            # TODO: coordinates to frames (this is probably wrong)
-            size = int(ratio * 224)
-            centers = coord_to_boxes(coordinates, ratio)
-            # TODO: this is shit
-            for center in centers:
-                all_frames.append((
-                    int(center[1] - size / 2),
-                    int(center[1] + size / 2),
-                    int(center[0] - size / 2),
-                    int(center[0] + size / 2),
-                ))
-
-            # this will have the output coordinates, probabilities and the predicted labels
-            # as a list of tuples
-            frames = list(zip(coordinates, probs, pred_digits))
-            print(frames)
-        plt_bboxes(original_image, all_frames, path=None)
-
-            # TODO: reject boxes
-            # TODO: print image
+                    result.append((
+                        coord,
+                        p
+                    ))
+        filter_bboxes(result, original_image, path=None)
 
 
 
