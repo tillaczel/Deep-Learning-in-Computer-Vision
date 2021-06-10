@@ -40,7 +40,6 @@ def run_training(cfg: DictConfig):
         'no_digit': test_dataloader_no_dig
     }
 
-    train_dataloaders = CombinedLoader(train_dataloaders, "max_size_cycle")
     val_dataloaders = CombinedLoader(val_dataloaders, "max_size_cycle")
 
     print_class_dist(train_dataloaders, title='Train set'), print_class_dist(val_dataloaders,
