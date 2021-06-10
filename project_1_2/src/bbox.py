@@ -4,15 +4,15 @@ import matplotlib.patches as patches
 import os
 
 
-def plt_bboxes(img, bboxes, path=None):
+def plt_bboxes(img, bboxes, filename=None):
     fig, axs = plt.subplots(1, 1, figsize=(10, 10))
     axs.imshow(img)
     for bbox in bboxes:
         l, t, w, h = bbox[0], bbox[2], bbox[1] - bbox[0], bbox[3] - bbox[2]
         rect = patches.Rectangle((l, t), w, h, linewidth=1, edgecolor='r', facecolor='none')
         axs.add_patch(rect)
-    if path is not None:
-        plt.savefig(os.path.join(path, 'bboxes.png'))
+    if filename is not None:
+        plt.savefig(filename)
 
 
 def bbox_intersection_over_union(boxA, boxB):
@@ -46,8 +46,8 @@ def non_maximum_suppression(bboxes, p_classes, p_threshold=0.6, iou_threshold=0.
     return final_bboxes, final_probs, final_class_idx
 
 
-def filter_bboxes(result, img, path=None):
+def filter_bboxes(result, img, filename=None):
     bboxes, p_classes = map(np.array, zip(*result))
     bboxes, probs, class_idx = non_maximum_suppression(bboxes, p_classes, p_threshold=0.1)
-    plt_bboxes(img, bboxes, path=path)
+    plt_bboxes(img, bboxes, filename=filename)
     return bboxes, probs, class_idx

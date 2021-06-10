@@ -74,7 +74,8 @@ def eval(cfg : DictConfig):
                         coord,
                         p
                     ))
-        filter_bboxes(result, original_image, path=None)
+        filename = os.path.join(wandb.run.dir, f'bbox_{i}.png')
+        filter_bboxes(result, original_image, filename=filename)
 
 
 
