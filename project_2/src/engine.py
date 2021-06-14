@@ -1,31 +1,43 @@
+from collections import Iterable
+
 from omegaconf import DictConfig
 import pytorch_lightning as pl
 import torch
 from torch import nn
 import torchmetrics
 
+from project_2.src.metrics.dice import Dice
+from project_2.src.metrics.iou import IoU
 from .model import Model
 
 
 class EngineModule(pl.LightningModule):
 
-    def __init__(self, config: DictConfig, main_metric: str="acc"):
+    def __init__(self, config: DictConfig, main_metrics: Iterable=("sensitivity", "specificity", "iou", "dice", "acc")):
         super().__init__()
         self.config = config
         self.model = Model(n_channels=config.model.in_dim, n_classes=config.model.out_dim)
         self.loss_func = nn.BCEWithLogitsLoss()
 
-        self.train_acc = torchmetrics.Accuracy()
-        self.val_acc = torchmetrics.Accuracy()
 
-        self.train_sensitivity = torchmetrics.Recall()
-        self.val_sensitivity = torchmetrics.Recall()
-        self.train_specificity = torchmetrics.Specificity()
-        self.val_specificity = torchmetrics.Specificity()
+        # TODO: instance average those?
+        self.train_acc = torchmetrics.Accuracy(multiclass=False)
+        self.val_acc = torchmetrics.Accuracy(multiclass=False)
+
+        self.train_sensitivity = torchmetrics.Recall(multiclass=False)
+        self.val_sensitivity = torchmetrics.Recall(multiclass=False)
+        self.train_specificity = torchmetrics.Specificity(multiclass=False)
+        self.val_specificity = torchmetrics.Specificity(multiclass=False)
+
+        self.train_iou = IoU()
+        self.val_iou = IoU()
+
+        self.train_dice = Dice()
+        self.val_dice = Dice()
 
 
-        self.metrics = ["acc", "f1", "sensitivity", "specificity"]
-        self.main_metric = main_metric
+        self.metrics = ["acc", "sensitivity", "specificity", "iou", "dice"]
+        self.main_metrics = main_metrics
 
     @property
     def lr(self):
@@ -39,18 +51,22 @@ class EngineModule(pl.LightningModule):
         metric(probs, labels)
         self.log(f"{mode}_{metric_name}", metric,
                  on_step=False,
-                 prog_bar=(metric_name == self.main_metric),
+                 prog_bar=(metric_name in self.main_metrics),
                  on_epoch=True, logger=True)
 
     def training_step(self, batch, batch_idx):
         images, labels = batch
         seg_hat = self.model(images)
-        loss = self.loss_func(seg_hat, labels)
+        loss = self.loss_func(seg_hat, labels.type(torch.float32))
 
         self.log('loss', loss, on_step=False, on_epoch=True,
                  prog_bar=False, logger=True)
         self.log('lr', self.lr, on_step=False, on_epoch=True,
                  prog_bar=False, logger=True)
+
+        probs = torch.sigmoid(seg_hat)
+        for metric_name in self.metrics:
+            self.update_and_log_metric(metric_name, probs, labels.type(torch.long), mode='train')
 
         return {'loss': loss}
 
@@ -60,7 +76,14 @@ class EngineModule(pl.LightningModule):
     def validation_step(self, batch, batch_idx):
         images, labels = batch
         seg_hat = self.model(images)
-        loss = self.loss_func(seg_hat, labels)
+        loss = self.loss_func(seg_hat, labels.type(torch.float32))
+
+        self.log('val_loss', loss, on_step=False, on_epoch=True,
+                 prog_bar=False, logger=True)
+
+        probs = torch.sigmoid(seg_hat)
+        for metric_name in self.metrics:
+            self.update_and_log_metric(metric_name, probs, labels.type(torch.long), mode='val')
 
         return {'val_loss': loss}
 

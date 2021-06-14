@@ -10,7 +10,7 @@ from omegaconf import DictConfig, OmegaConf
 from project_2.src.api.eval import run_eval
 
 
-wandb.init(project='p2', entity='dlcv')
+wandb.init(project='p3', entity='dlcv')
 
 
 @hydra.main(config_path='config', config_name="default_eval")
