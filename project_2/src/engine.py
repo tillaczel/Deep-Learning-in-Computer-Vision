@@ -12,8 +12,8 @@ class EngineModule(pl.LightningModule):
     def __init__(self, config: DictConfig, main_metric: str="acc"):
         super().__init__()
         self.config = config
-        self.model = Model(pretrained=config.model.pretrained, in_dim=config.model.in_dim, out_dim=config.model.out_dim)
-        self.loss_func = nn.CrossEntropyLoss()
+        self.model = Model(n_channels=config.model.in_dim, n_classes=config.model.out_dim)
+        self.loss_func = nn.BCEWithLogitsLoss()
 
 
         # TODO: batch average those?
@@ -44,22 +44,15 @@ class EngineModule(pl.LightningModule):
                  prog_bar=(metric_name == self.main_metric),
                  on_epoch=True, logger=True)
 
-
     def training_step(self, batch, batch_idx):
         images, labels = batch
-
-        pred = self.model(images).squeeze()  # [Bx1] -> [B]
-        loss = self.loss_func(pred, labels.type(torch.long))
+        seg_hat = self.model(images)
+        loss = self.loss_func(seg_hat, labels)
 
         self.log('loss', loss, on_step=False, on_epoch=True,
                  prog_bar=False, logger=True)
         self.log('lr', self.lr, on_step=False, on_epoch=True,
                  prog_bar=False, logger=True)
-
-        probs = torch.softmax(pred, dim=-1) # TODO: check if right dim
-
-        for metric_name in self.metrics:
-            self.update_and_log_metric(metric_name, probs, labels, mode='train')
 
         return {'loss': loss}
 
@@ -68,16 +61,8 @@ class EngineModule(pl.LightningModule):
 
     def validation_step(self, batch, batch_idx):
         images, labels = batch
-
-        pred = self.model(images).squeeze()  # [Bx1] -> [B]
-        loss = self.loss_func(pred, labels.type(torch.long))
-
-        probs = torch.softmax(pred, dim=-1) # TODO: check if right dim
-        self.log('val_loss', loss, on_step=False, on_epoch=True,
-                 prog_bar=False, logger=True)
-
-        for metric_name in self.metrics:
-            self.update_and_log_metric(metric_name, probs, labels, mode='val')
+        seg_hat = self.model(images)
+        loss = self.loss_func(seg_hat, labels)
 
         return {'val_loss': loss}
 
