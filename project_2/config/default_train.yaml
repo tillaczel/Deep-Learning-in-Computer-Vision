@@ -33,6 +33,6 @@ data:
   path: './data/'
   seg_reduce: 'mean'
   train_augmentation:
-    - 'random_flip'
+    - 'random_horizontal_flip'
     - 'random_crop'
 overlap: 0.2
