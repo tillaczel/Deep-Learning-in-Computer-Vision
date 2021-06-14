@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 from IPython.display import clear_output
+import torch
 
 def plot_predictions(input_data, predictions): 
     plt.rcParams['figure.figsize'] = [18, 6]
