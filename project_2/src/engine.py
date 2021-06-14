@@ -45,8 +45,9 @@ class EngineModule(pl.LightningModule):
 
     def training_step(self, batch, batch_idx):
         images, labels = batch
-
+        print(images.shape, labels.shape)
         seg_hat = self.model(images)
+        print(seg_hat.shape)
         loss = self.loss_func(seg_hat, labels)
 
         self.log('loss', loss, on_step=False, on_epoch=True,
@@ -61,16 +62,10 @@ class EngineModule(pl.LightningModule):
 
     def validation_step(self, batch, batch_idx):
         images, labels = batch
-
-        pred = self.model(images).squeeze()  # [Bx1] -> [B]
-        loss = self.loss_func(pred, labels.type(torch.long))
-
-        probs = torch.softmax(pred, dim=-1) # TODO: check if right dim
-        self.log('val_loss', loss, on_step=False, on_epoch=True,
-                 prog_bar=False, logger=True)
-
-        for metric_name in self.metrics:
-            self.update_and_log_metric(metric_name, probs, labels, mode='val')
+        print(images.shape, labels.shape)
+        seg_hat = self.model(images)
+        print(seg_hat.shape)
+        loss = self.loss_func(seg_hat, labels)
 
         return {'val_loss': loss}
 
