@@ -3,6 +3,7 @@ import torchvision.transforms as transforms
 import requests
 import os
 import zipfile
+import shutil
 
 
 def download_url(url, save_path, chunk_size=128):
@@ -15,6 +16,8 @@ def download_url(url, save_path, chunk_size=128):
 def extract_data(path_to_zip_file, directory_to_extract_to):
     with zipfile.ZipFile(path_to_zip_file, 'r') as zip_ref:
         zip_ref.extractall(directory_to_extract_to)
+    shutil.move(os.path.join(directory_to_extract_to, 'LIDC_crops', 'LIDC_DLCV_version'), directory_to_extract_to)
+    os.rmdir(os.path.join(directory_to_extract_to, 'LIDC_crops'))
 
 
 def get_dataset(url, data_path):
