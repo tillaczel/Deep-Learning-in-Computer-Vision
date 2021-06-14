@@ -63,6 +63,8 @@ class EngineModule(pl.LightningModule):
         print(segmentations.shape)
         print(preds.shape)
         
+        print("newew")
+        
         for i in range(1,6): # 6 images
             
             img, seg = dataset[i]
