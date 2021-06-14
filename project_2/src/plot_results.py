@@ -30,7 +30,7 @@ def get_data(dataset, model, device, n):
     images, segmentations, preds = list(), list(), list()
     for i in range(n):
         img, seg = dataset[i]
-        pred = model(img.unsqueeze().to(device))  # Do a forward pass of validation data to get predictions
+        pred = model(img.unsqueeze(0).to(device))  # Do a forward pass of validation data to get predictions
         images.append(img), segmentations.append(seg), preds.append(pred)
     images, segmentations, preds = torch.stack(images), torch.stack(segmentations), torch.stack(preds)
 
