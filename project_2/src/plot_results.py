@@ -9,4 +9,4 @@ def plot_predictions(input_data, predictions):
         plt.imshow(np.squeeze(input_data[i],0))
         plt.subplot(2, 6, i+7)
         plt.imshow(np.squeeze(predictions[i],0))
-    plt.savefig(foo.png);
+    plt.savefig('foo.png');
