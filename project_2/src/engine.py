@@ -59,11 +59,11 @@ class EngineModule(pl.LightningModule):
         # TESTING PURPOSES ONLY
         dataset = self.trainer.val_dataloaders[0].dataset[0]
         print(dataset)
-        images = dataset[0]
-        labels = dataset[1]
+        #images = dataset[0]
+        #labels = dataset[1]
         #batch = next(iter(data_loader))
-        preds = self.model(dataset)  # Do a forward pass of validation data to get predictions
-        plot_predictions(dataset, preds)
+        #preds = self.model(dataset)  # Do a forward pass of validation data to get predictions
+        #plot_predictions(dataset, preds)
         
         pass
 
