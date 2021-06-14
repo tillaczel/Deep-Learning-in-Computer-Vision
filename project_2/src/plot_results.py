@@ -3,8 +3,8 @@ from IPython.display import clear_output
 
 def plot_predictions(input_data, predictions): 
     plt.rcParams['figure.figsize'] = [18, 6]
-    plt.imshow(input_data[i])
-    plt.imshow(predictions[i])
+    plt.imshow(input_data)
+    plt.imshow(predictions)
     
     #for i in range(6):
     #    plt.subplot(2, 6, i+1)
