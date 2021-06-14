@@ -36,7 +36,6 @@ def get_data(dataset, model, device, n):
         images.append(img), segmentations.append(seg), preds.append(pred)
 
     images, segmentations, preds = map(torch.stack, [images, segmentations, preds])
-    images, segmentations, preds = [obj.detach().cpu().numpy() for obj in [images, segmentations, preds]]
-    images, segmentations, preds = map(np.moveaxis, [images, segmentations, preds], [1, 1, 1], [-1, -1, -1])
+    images, segmentations, preds = [obj.detach().cpu().numpy()[:, 0] for obj in [images, segmentations, preds]]
     return images, segmentations, preds
 
