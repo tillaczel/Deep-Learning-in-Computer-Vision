@@ -68,8 +68,7 @@ class EngineModule(pl.LightningModule):
         return {'val_loss': loss}
 
     def validation_epoch_end(self, outputs: list):
-        # Todo: save result in wandb
-        plot_predictions(self.trainer.val_dataloaders[0].dataset, self.model, self.device)
+        plot_predictions(self.trainer.val_dataloaders[0].dataset, self.model, self.device, self.current_epoch)
 
         pass
 

@@ -2,9 +2,10 @@ import matplotlib.pyplot as plt
 import torch
 import os
 import wandb
+import numpy as np
 
 
-def plot_predictions(dataset, model, device, n=6):
+def plot_predictions(dataset, model, device, n=6, current_epoch=None):
     input_data, segmentations, predictions = get_data(dataset, model, device, n=n)
 
     fig, axs = plt.subplots(3, 5, figsize=(n*5, 15))
@@ -21,7 +22,8 @@ def plot_predictions(dataset, model, device, n=6):
         axs[i, 2].set_title(f"Prediction")
         axs[i, 2].axis('off')
 
-    fname = os.path.join(wandb.run.dir, 'preds.png')
+    fname = f'preds_{current_epoch}.png' if current_epoch is not None else 'preds.png'
+    fname = os.path.join(wandb.run.dir, fname)
     plt.savefig(fname)
     wandb.save(fname)
 
@@ -32,7 +34,8 @@ def get_data(dataset, model, device, n):
         img, seg = dataset[i]
         pred = model(img.unsqueeze(0).to(device))  # Do a forward pass of validation data to get predictions
         images.append(img), segmentations.append(seg), preds.append(pred)
-    images, segmentations, preds = torch.stack(images), torch.stack(segmentations), torch.stack(preds)
-
-    return images.detach().cpu().numpy(), segmentations.detach().cpu().numpy(), preds.detach().cpu().numpy()
+    images, segmentations, preds = map(torch.stack, [images, segmentations, preds])
+    images, segmentations, preds = [obj.detach().cpu().numpy() for obj in [images, segmentations, preds]]
+    images, segmentations, preds = map(np.moveaxis, [images, segmentations, preds], [0, 0, 0], [-1, -1, -1])
+    return images, segmentations, preds
 
