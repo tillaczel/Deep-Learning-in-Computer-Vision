@@ -68,8 +68,10 @@ class EngineModule(pl.LightningModule):
       
             images = torch.cat((img,images),dim=0)
             segmentations = torch.cat((seg,segmentations),dim=0)
-            preds = torch.cat((pred,preds),dim=0)    
-        plot_predictions(images.cpu(), preds.cpu())
+            preds = torch.cat((pred,preds),dim=0)
+            
+            
+        plot_predictions(images.detach().numpy(), preds.detach().numpy())
         
         return {'loss': loss}
 
