@@ -5,7 +5,7 @@ from torch import nn
 import torchmetrics
 
 from .model import Model
-from .plot_results import *
+from .plot_results import plot_predictions
 
 
 class EngineModule(pl.LightningModule):
