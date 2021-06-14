@@ -4,6 +4,7 @@ import torch
 from torch import nn
 import torchmetrics
 
+from project_2.src.metrics.iou import IoU
 from .model import Model
 
 
@@ -25,8 +26,11 @@ class EngineModule(pl.LightningModule):
         self.train_specificity = torchmetrics.Specificity(multiclass=False)
         self.val_specificity = torchmetrics.Specificity(multiclass=False)
 
+        self.train_iou = IoU()
+        self.val_iou = IoU()
 
-        self.metrics = ["acc", "sensitivity", "specificity"]
+
+        self.metrics = ["acc", "sensitivity", "specificity", "iou"]
         self.main_metric = main_metric
 
     @property
