@@ -1,7 +1,6 @@
 import sys
 import os
 
-
 sys.path.append('git_repo')
 sys.path.append(os.path.split(os.getcwd())[0])
 
