@@ -79,7 +79,7 @@ class EngineModule(pl.LightningModule):
         #labels = dataset[1]
         #preds = self.model(dataset)  # Do a forward pass of validation data to get predictions
         #plot_predictions(dataset, preds)
-     
+        pass
 
     def configure_optimizers(self):
         optimizer = get_optimizer(self.config.training.optimizer, self.parameters())
