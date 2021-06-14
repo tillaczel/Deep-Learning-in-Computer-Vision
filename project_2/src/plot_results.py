@@ -6,10 +6,10 @@ import numpy as np
 
 
 def plot_predictions(dataset, model, device, n=6, current_epoch=None):
-    input_data, segmentations, predictions = get_data(dataset, model, device, n)
+    idxs = np.random.choice(np.arange(len(dataset)), replace=False, size=n)
+    input_data, segmentations, predictions = get_data(dataset, model, device, idxs)
     fig, axs = plt.subplots(n, 3, figsize=(15, n*5))
-    print(np.random.choice(np.arange(len(dataset)), replace=False, size=n))
-    for i in np.random.choice(np.arange(len(dataset)), replace=False, size=n):
+    for i in range(n):
         plot_subplot(axs[i, 0], input_data[i], 'Input')
         plot_subplot(axs[i, 1], segmentations[i], 'Segmentation')
         plot_subplot(axs[i, 2], predictions[i], 'Prediction')
@@ -27,10 +27,10 @@ def plot_subplot(ax, img, title):
     ax.axis('off')
 
 
-def get_data(dataset, model, device, n):
+def get_data(dataset, model, device, idxs):
     images, segmentations, preds = list(), list(), list()
-    for i in range(n):
-        img, seg = dataset[i]
+    for idx in idxs:
+        img, seg = dataset[idx]
         pred = model(img.unsqueeze(0).to(device))[0]  # Do a forward pass of validation data to get predictions
         images.append(img), segmentations.append(seg), preds.append(pred)
 
