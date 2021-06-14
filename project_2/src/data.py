@@ -16,7 +16,11 @@ def download_url(url, save_path, chunk_size=128):
 def extract_data(path_to_zip_file, directory_to_extract_to):
     with zipfile.ZipFile(path_to_zip_file, 'r') as zip_ref:
         zip_ref.extractall(directory_to_extract_to)
-    shutil.move(os.path.join(directory_to_extract_to, 'LIDC_crops', 'LIDC_DLCV_version'), directory_to_extract_to)
+
+    move_from = os.path.join(directory_to_extract_to, 'LIDC_crops', 'LIDC_DLCV_version')
+    set_folders = os.listdir(move_from)
+    for set_folder in set_folders:
+        shutil.move(os.path.join(move_from, set_folder), os.path.join(directory_to_extract_to, set_folder))
     os.rmdir(os.path.join(directory_to_extract_to, 'LIDC_crops'))
 
 
