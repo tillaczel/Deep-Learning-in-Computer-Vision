@@ -14,7 +14,7 @@ def run_training(cfg: DictConfig):
     wandb.save(cfg_file, base_path=wandb.run.dir)  # this will force sync it
 
     engine = EngineModule(cfg)
-    wandb.save('*.ckpt')  # should keep it up to date
+    wandb.save('*.ckpt', base_path=wandb.run.dir)  # should keep it up to date
     trainer = get_trainer(cfg, engine)
 
     if cfg.model.ensemble:
