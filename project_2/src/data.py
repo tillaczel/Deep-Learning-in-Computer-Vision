@@ -2,6 +2,7 @@ from torch.utils.data import DataLoader, Dataset
 import torchvision.transforms as transforms
 import requests
 import os
+import zipfile
 
 
 def download_url(url, save_path, chunk_size=128):
@@ -9,6 +10,30 @@ def download_url(url, save_path, chunk_size=128):
     with open(save_path, 'wb') as fd:
         for chunk in r.iter_content(chunk_size=chunk_size):
             fd.write(chunk)
+
+
+def extract_data(path_to_zip_file, directory_to_extract_to):
+    with zipfile.ZipFile(path_to_zip_file, 'r') as zip_ref:
+        zip_ref.extractall(directory_to_extract_to)
+
+
+def get_dataset(url, data_path):
+    raw_file, raw_folder = os.path.join(data_path, 'raw.zip'), os.path.join(data_path, 'raw')
+
+    if not os.path.isfile(raw_file):
+        print('Downloading data')
+        download_url(url, raw_file)
+    else:
+        print(f'Data already downloaded at {raw_file}')
+
+    if not os.path.isdir(raw_file):
+        print('Extracting data')
+        extract_data(raw_file, raw_folder)
+    else:
+        print(f'Data already extracted at {raw_folder}')
+
+    train_set, valid_set, test_set = None, None, None
+    return train_set, valid_set, test_set
 
 
 class LIDCIDRIDataset(Dataset):
@@ -22,16 +47,11 @@ class LIDCIDRIDataset(Dataset):
         pass
 
 
-def get_dataset(url, data_path):
-    raw_file = os.path.join(data_path, 'raw.zip')
-    download_url(url, raw_file)
-    return None, None
-
-
 def get_dataloaders(size, batch_size, url, data_path):
-    train_set, valid_set = get_dataset(url, data_path)
+    train_set, valid_set, test_set = get_dataset(url, data_path)
     train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=True, num_workers=2)
     valid_loader = DataLoader(valid_set, batch_size=batch_size, shuffle=False, num_workers=2)
+    test_loader = DataLoader(test_set, batch_size=batch_size, shuffle=False, num_workers=2)
     return train_loader, valid_loader
 
 
