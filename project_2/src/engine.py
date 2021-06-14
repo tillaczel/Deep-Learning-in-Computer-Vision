@@ -52,8 +52,7 @@ class EngineModule(pl.LightningModule):
         self.log('lr', self.lr, on_step=False, on_epoch=True,
                  prog_bar=False, logger=True)
 
-        
-        
+       
         ### TESTING PURPOSES ONLY
         
         dataset = self.trainer.val_dataloaders[0].dataset
@@ -67,7 +66,9 @@ class EngineModule(pl.LightningModule):
         print(segmentations.shape)
         
         preds = self.model(images.to(self.model.device)  # Do a forward pass of validation data to get predictions
-        plot_predictions(dataset, preds)
+        
+        print(preds.shape)
+        plot_predictions(images, preds)
         
         return {'loss': loss}
 
