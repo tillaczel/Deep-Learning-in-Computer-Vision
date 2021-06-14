@@ -61,7 +61,7 @@ class LIDCIDRIDataset(Dataset):
 
     def __getitem__(self, idx):
         fname = self.idx2fname[idx]
-        img, seg = Image.open(os.path.join(self.img_path, fname)), Image.open(os.path.join(self.seg_path, fname, '_l0'))
+        img, seg = Image.open(os.path.join(self.img_path, fname)), Image.open(os.path.join(self.seg_path, f'{fname}_l0'))
         img, seg = self.img_transform(img), self.seg_transform(img)
         return img, seg
 
