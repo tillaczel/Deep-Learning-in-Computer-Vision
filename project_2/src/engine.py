@@ -13,7 +13,7 @@ from .model import Model
 
 class EngineModule(pl.LightningModule):
 
-    def __init__(self, config: DictConfig, main_metrics: Iterable=("sensitivity", "specificity", "iou", "dice")):
+    def __init__(self, config: DictConfig, main_metrics: Iterable=("sensitivity", "specificity", "iou", "dice", "acc")):
         super().__init__()
         self.config = config
         self.model = Model(n_channels=config.model.in_dim, n_classes=config.model.out_dim)
