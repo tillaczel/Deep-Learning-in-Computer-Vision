@@ -17,6 +17,8 @@ training:
   early_stopping:
     monitor: 'val_loss'
     stopping_patience: 5
+    
+    '''
   scheduler:
     monitor: val_loss
     mode: min
@@ -24,6 +26,7 @@ training:
     patience: 3
     min_lr: 0.00001
     factor: 0.5
+    '''
   model_checkpoint:
     monitor: 'val_loss'
 data:
