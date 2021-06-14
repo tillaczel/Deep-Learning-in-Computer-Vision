@@ -16,6 +16,7 @@ def download_file(run_id, filename):
             return
     raise RuntimeError(f"File {filename} not found in dlcv/p2/{run_id}")
 
+
 def get_state_from_checkpoint(run_id, filename="model.ckpt", replace=True):
   if not os.path.isfile(filename) or replace:
     download_file(run_id, filename)
@@ -33,6 +34,7 @@ def plot_row(x, grad, y, predicted_hotdog, row, n_rows):
     plt.imshow(np.swapaxes(np.swapaxes(x[0].detach().numpy()/4 + 0.5, 0, 2), 0, 1))
     plt.title("Label: " + ['hotdog', 'not hotdog'][y.item()])
     plt.axis('off')
+
 
 def get_heatmap(x, model, normalize=True):
     model.train()
@@ -74,12 +76,3 @@ def plot_heatmaps(test_dataloader, engine):
     fname = os.path.join(wandb.run.dir, 'heatmaps.png')
     plt.savefig(fname)
     wandb.save(fname)
-
-
-def print_class_dist(dataloader, title=None):
-    labels = list()
-    for _, ys in dataloader:
-        labels.extend(ys.numpy().tolist())
-    if title is not None:
-        print(f'{title}:')
-    print({element: labels.count(element) for element in set(labels)})

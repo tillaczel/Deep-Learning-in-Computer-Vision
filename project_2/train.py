@@ -26,8 +26,6 @@ def run_training(cfg: DictConfig):
     train_loader, valid_loader, test_loader = \
         get_dataloaders(cfg.data.size, cfg.data.train_augmentation, cfg.training.batch_size, cfg.data.url, cfg.data.path)
 
-    print_class_dist(train_loader, title='Train set'), print_class_dist(valid_loader, title='Valid no_digit set')
-
     engine = EngineModule(cfg)
 
     wandb.save('*.ckpt')  # should keep it up to date
