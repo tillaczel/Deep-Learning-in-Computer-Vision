@@ -46,17 +46,13 @@ class EngineModule(pl.LightningModule):
     def training_step(self, batch, batch_idx):
         images, labels = batch
 
-        loss = self.loss_func(pred, labels)
+        seg_hat = self.model(images)
+        loss = self.loss_func(seg_hat, labels)
 
         self.log('loss', loss, on_step=False, on_epoch=True,
                  prog_bar=False, logger=True)
         self.log('lr', self.lr, on_step=False, on_epoch=True,
                  prog_bar=False, logger=True)
-
-        probs = torch.softmax(pred, dim=-1) # TODO: check if right dim
-
-        for metric_name in self.metrics:
-            self.update_and_log_metric(metric_name, probs, labels, mode='train')
 
         return {'loss': loss}
 
