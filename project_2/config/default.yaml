@@ -28,6 +28,7 @@ training:
     monitor: 'val_loss'
 data:
   size: 32
+  url: 'https://courses.compute.dtu.dk/02514/project_data/LIDC_DLCV_version.zip'
   path: './data/'
   train_augmentation:
     - 'random_crop'
