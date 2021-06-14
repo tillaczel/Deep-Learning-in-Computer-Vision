@@ -22,4 +22,4 @@ def run_training(cfg: DictConfig):
 
     trainer = get_trainer(cfg, engine)
 
-    trainer.fit(engine, train_dataloader=train_loader, val_dataloader=valid_loader)
+    trainer.fit(engine, train_dataloader=train_loader, val_dataloaders=valid_loader)
