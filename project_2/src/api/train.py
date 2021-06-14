@@ -14,7 +14,7 @@ def run_training(cfg: DictConfig):
     wandb.save(cfg_file)  # this will force sync it
 
     train_loader, valid_loader, test_loader = \
-        get_dataloaders(cfg.data.size, cfg.data.train_augmentation, cfg.training.batch_size, cfg.data.url, cfg.data.path)
+        get_dataloaders(cfg.data.size, cfg.data.train_augmentation, cfg.training.batch_size, cfg.data.url, cfg.data.path, cfg.data.seg_reduce)
 
     engine = EngineModule(cfg)
 

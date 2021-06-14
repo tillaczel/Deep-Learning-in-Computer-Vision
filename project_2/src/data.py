@@ -5,6 +5,7 @@ import os
 import zipfile
 import shutil
 from PIL import Image
+import torch
 
 
 def download_url(url, save_path, chunk_size=128):
@@ -25,7 +26,7 @@ def extract_data(path_to_zip_file, directory_to_extract_to):
     shutil.rmtree(os.path.join(directory_to_extract_to, 'LIDC_crops'))
 
 
-def get_dataset(url, data_path, train_transform, valid_transform, seg_transform):
+def get_dataset(url, data_path, train_transform, valid_transform, seg_transform, seg_reduce):
     os.mkdir(data_path) if not os.path.isdir(data_path) else None
     raw_file, raw_folder = os.path.join(data_path, 'raw.zip'), os.path.join(data_path, 'raw')
 
@@ -41,34 +42,50 @@ def get_dataset(url, data_path, train_transform, valid_transform, seg_transform)
     else:
         print(f'Data already extracted at {raw_folder}')
 
-    train_set = LIDCIDRIDataset(os.path.join(raw_folder, 'train'), train_transform, seg_transform)
-    valid_set = LIDCIDRIDataset(os.path.join(raw_folder, 'val'), valid_transform, seg_transform)
-    test_set = LIDCIDRIDataset(os.path.join(raw_folder, 'test'), valid_transform, seg_transform)
+    train_set = LIDCIDRIDataset(os.path.join(raw_folder, 'train'), train_transform, seg_transform, seg_reduce=seg_reduce)
+    valid_set = LIDCIDRIDataset(os.path.join(raw_folder, 'val'), valid_transform, seg_transform, seg_reduce=seg_reduce)
+    test_set = LIDCIDRIDataset(os.path.join(raw_folder, 'test'), valid_transform, seg_transform, seg_reduce=seg_reduce)
     return train_set, valid_set, test_set
 
 
 class LIDCIDRIDataset(Dataset):
-    def __init__(self, folder_path, img_transform, seg_transform):
+    def __init__(self, folder_path, img_transform, seg_transform, seg_reduce='mean'):
         self.img_path = os.path.join(folder_path, 'images')
         self.seg_path = os.path.join(folder_path, 'lesions')
 
         self.idx2fname = {i: fname for i, fname in enumerate(os.listdir(self.img_path))}
 
         self.img_transform, self.seg_transform = img_transform, seg_transform
+        self.seg_reduce = seg_reduce
+        self.get_seg = self._init_get_seg()
 
     def __len__(self):
         return len(self.idx2fname)
 
     def __getitem__(self, idx):
         fname = self.idx2fname[idx]
-        img, seg = Image.open(os.path.join(self.img_path, fname)), Image.open(os.path.join(self.seg_path, f'{fname[:-4]}_l0.png'))
-        img, seg = self.img_transform(img), self.seg_transform(img)
+        img = self.img_transform(Image.open(os.path.join(self.img_path, fname)))
+        seg = self.get_seg(fname)
         return img, seg
 
+    def _init_get_seg(self):
+        if self.seg_reduce == 'mean':
+            return lambda fname: torch.mean(self._read_seg(fname, range(4)), dim=0)
+        elif self.seg_reduce == 'all':
+            return lambda fname: self._read_seg(fname, range(4))
+        elif type(self.seg_reduce) == int:
+            return lambda fname: self._read_seg(fname, self.seg_reduce)
+        else:
+            raise ValueError(f'{self.seg_reduce} is not valid segmentation reduction')
 
-def get_dataloaders(size, train_augmentation, batch_size, url, data_path):
+    def _read_seg(self, fname, idxs):
+        segs = [Image.open(os.path.join(self.seg_path, f'{fname[:-4]}_l{idx}.png')) for idx in idxs]
+        return torch.stack(list(map(self.seg_transform, segs)))
+
+
+def get_dataloaders(size, train_augmentation, batch_size, url, data_path, seg_reduce):
     train_transform, valid_transform, seg_transform = get_transforms(size, train_augmentation)
-    train_set, valid_set, test_set = get_dataset(url, data_path, train_transform, valid_transform, seg_transform)
+    train_set, valid_set, test_set = get_dataset(url, data_path, train_transform, valid_transform, seg_transform, seg_reduce)
     train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=True, num_workers=2)
     valid_loader = DataLoader(valid_set, batch_size=batch_size, shuffle=False, num_workers=2)
     test_loader = DataLoader(test_set, batch_size=batch_size, shuffle=False, num_workers=2)

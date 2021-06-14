@@ -30,6 +30,7 @@ data:
   size: 128
   url: 'https://courses.compute.dtu.dk/02514/project_data/LIDC_DLCV_version.zip'
   path: './data/'
+  seg_reduce: 'mean'
   train_augmentation:
     - 'random_crop'
     - 'color_jitter'
