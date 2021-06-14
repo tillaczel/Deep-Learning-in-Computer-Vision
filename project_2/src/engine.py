@@ -68,21 +68,7 @@ class EngineModule(pl.LightningModule):
         return {'val_loss': loss}
 
     def validation_epoch_end(self, outputs: list):
-
-        dataset = self.trainer.val_dataloaders[0].dataset
-        images, segmentations = dataset[0]
-        images, segmentations = map(torch.unsqueeze, [images, segmentations], [0, 0])
-        preds = self.model(images.to(self.device))  # Do a forward pass of validation data to get predictions
-
-        for i in range(1, 6):  # 6 images
-            img, seg = dataset[i]
-            img, seg = map(torch.unsqueeze, [img, seg], [0, 0])
-            pred = self.model(img.to(self.device))
-
-            images = torch.cat((img, images), dim=0)
-            segmentations = torch.cat((seg, segmentations), dim=0)
-            preds = torch.cat((pred, preds), dim=0)
-        plot_predictions(images.detach().cpu().numpy(), preds.detach().cpu().numpy())
+        plot_predictions(self.trainer.val_dataloaders[0].dataset, self.model, self.device, current_epoch=self.current_epoch)
 
         pass
 

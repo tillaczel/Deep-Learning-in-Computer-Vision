@@ -1,14 +1,39 @@
 import matplotlib.pyplot as plt
-from IPython.display import clear_output
+import torch
+import os
+import wandb
 import numpy as np
 
-def plot_predictions(input_data, predictions): 
-    plt.rcParams['figure.figsize'] = [18, 6]
-    for i in range(6):
-        plt.axis('off')
-        plt.subplot(2, 6, i+1)
-        plt.imshow(np.squeeze(input_data[i],0),cmap="gray")
-        plt.subplot(2, 6, i+7)
-        plt.axis('off')
-        plt.imshow(np.squeeze(predictions[i],0),cmap="gray")
-    plt.savefig('foo.png');
+
+def plot_predictions(dataset, model, device, n=6, current_epoch=None):
+    idxs = np.random.choice(np.arange(len(dataset)), replace=False, size=n)
+    input_data, segmentations, predictions = get_data(dataset, model, device, idxs)
+    fig, axs = plt.subplots(n, 3, figsize=(15, n*5))
+    for i in range(n):
+        plot_subplot(axs[i, 0], input_data[i], 'Input')
+        plot_subplot(axs[i, 1], segmentations[i], 'Segmentation')
+        plot_subplot(axs[i, 2], predictions[i], 'Prediction')
+
+    fname = f'preds_{current_epoch}.png' if current_epoch is not None else 'preds.png'
+    fname = os.path.join(wandb.run.dir, fname)
+    plt.savefig(fname)
+    wandb.save(fname, base_path=wandb.run.dir)
+
+
+def plot_subplot(ax, img, title):
+    ax.imshow(img, cmap="gray")
+    ax.set_title(title)
+    ax.axis('off')
+
+
+def get_data(dataset, model, device, idxs):
+    images, segmentations, preds = list(), list(), list()
+    for idx in idxs:
+        img, seg = dataset[idx]
+        pred = torch.sigmoid(model(img.unsqueeze(0).to(device))[0])  # Do a forward pass of validation data to get predictions
+        images.append(img), segmentations.append(seg), preds.append(pred)
+
+    images, segmentations, preds = map(torch.stack, [images, segmentations, preds])
+    images, segmentations, preds = [obj.detach().cpu().numpy()[:, 0] for obj in [images, segmentations, preds]]
+    return images, segmentations, preds
+
