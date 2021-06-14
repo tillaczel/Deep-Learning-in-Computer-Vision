@@ -23,7 +23,8 @@ def run_training(cfg: DictConfig):
         fh.write(OmegaConf.to_yaml(cfg))
     wandb.save(cfg_file)  # this will force sync it
 
-    train_loader, valid_loader = get_dataloaders(cfg.data.size, cfg.training.batch_size, cfg.data.url, cfg.data.path)
+    train_loader, valid_loader, test_loader = \
+        get_dataloaders(cfg.data.size, cfg.data.train_augmentation, cfg.training.batch_size, cfg.data.url, cfg.data.path)
 
     # print_class_dist(train_loader, title='Train set'), print_class_dist(valid_loader, title='Valid no_digit set')
 

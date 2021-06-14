@@ -4,6 +4,7 @@ import requests
 import os
 import zipfile
 import shutil
+from PIL import Image
 
 
 def download_url(url, save_path, chunk_size=128):
@@ -24,7 +25,7 @@ def extract_data(path_to_zip_file, directory_to_extract_to):
     shutil.rmtree(os.path.join(directory_to_extract_to, 'LIDC_crops'))
 
 
-def get_dataset(url, data_path):
+def get_dataset(url, data_path, train_transform, valid_transform, seg_transform):
     os.mkdir(data_path) if not os.path.isdir(data_path) else None
     raw_file, raw_folder = os.path.join(data_path, 'raw.zip'), os.path.join(data_path, 'raw')
 
@@ -40,48 +41,58 @@ def get_dataset(url, data_path):
     else:
         print(f'Data already extracted at {raw_folder}')
 
-    train_set, valid_set, test_set = None, None, None
+    train_set = LIDCIDRIDataset(os.path.join(raw_folder, 'train'), train_transform, seg_transform)
+    valid_set = LIDCIDRIDataset(os.path.join(raw_folder, 'val'), valid_transform, seg_transform)
+    test_set = LIDCIDRIDataset(os.path.join(raw_folder, 'test'), valid_transform, seg_transform)
     return train_set, valid_set, test_set
 
 
 class LIDCIDRIDataset(Dataset):
-    def __init__(self, transform, url):
-        pass
+    def __init__(self, folder_path, img_transform, seg_transform):
+        self.img_path = os.path.join(folder_path, 'images')
+        self.seg_path = os.path.join(folder_path, 'lesions')
+
+        self.idx2fname = {i: fname for i, fname in enumerate(os.listdir(self.img_path))}
+
+        self.img_transform, self.seg_transform = img_transform, seg_transform
 
     def __len__(self):
-        pass
+        return len(self.idx2fname)
 
     def __getitem__(self, idx):
-        pass
+        fname = self.idx2fname[idx]
+        img, seg = Image.open(os.path.join(self.img_path, fname)), Image.open(os.path.join(self.seg_path, fname, '_l0'))
+        img, seg = self.img_transform(img), self.seg_transform(img)
+        return img, seg
 
 
-def get_dataloaders(size, batch_size, url, data_path):
-    train_set, valid_set, test_set = get_dataset(url, data_path)
+def get_dataloaders(size, train_augmentation, batch_size, url, data_path):
+    train_transform, valid_transform, seg_transform = get_transforms(size, train_augmentation)
+    train_set, valid_set, test_set = get_dataset(url, data_path, train_transform, valid_transform, seg_transform)
     train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=True, num_workers=2)
     valid_loader = DataLoader(valid_set, batch_size=batch_size, shuffle=False, num_workers=2)
     test_loader = DataLoader(test_set, batch_size=batch_size, shuffle=False, num_workers=2)
-    return train_loader, valid_loader
+    return train_loader, valid_loader, test_loader
 
 
-# def get_transforms(size, train_augmentation):
-#     norm_mean, norm_std = (0.485, 0.456, 0.406), (0.229, 0.224, 0.225)
-#     train_transform = list()
-#     if 'random_crop' in train_augmentation:
-#         train_transform.append(transforms.Resize((int(1.1 * size), int(1.1 * size))))
-#         train_transform.append(transforms.RandomCrop((size, size)))
-#     else:
-#         train_transform.append(transforms.Resize((size, size)))
-#     if 'random_horizontal_flip' in train_augmentation:
-#         train_transform.append(transforms.RandomHorizontalFlip())
-#     if 'color_jitter' in train_augmentation:
-#         train_transform.append(transforms.ColorJitter())
-#     train_transform.append(transforms.ToTensor())
-#     train_transform.append(transforms.Normalize(norm_mean, norm_std))
-#     train_transform = transforms.Compose(train_transform)
-#
-#     valid_transform = [transforms.Resize((size, size)),
-#                        transforms.ToTensor(),
-#                        transforms.Normalize(norm_mean, norm_std)]
-#     valid_transform = transforms.Compose(valid_transform)
-#     return train_transform, valid_transform
+def get_transforms(size, train_augmentation):
+    train_transform = list()
+    if 'random_crop' in train_augmentation:
+        train_transform.append(transforms.Resize((int(1.1 * size), int(1.1 * size))))
+        train_transform.append(transforms.RandomCrop((size, size)))
+    else:
+        train_transform.append(transforms.Resize((size, size)))
+    if 'random_horizontal_flip' in train_augmentation:
+        train_transform.append(transforms.RandomHorizontalFlip())
+    if 'color_jitter' in train_augmentation:
+        train_transform.append(transforms.ColorJitter())
+    train_transform.append(transforms.ToTensor())
+    train_transform = transforms.Compose(train_transform)
+
+    valid_transform = [transforms.Resize((size, size)), transforms.ToTensor()]
+    valid_transform = transforms.Compose(valid_transform)
+
+    seg_transform = [transforms.Resize((size, size)), transforms.ToTensor()]
+    seg_transform = transforms.Compose(seg_transform)
+    return train_transform, valid_transform, seg_transform
 
