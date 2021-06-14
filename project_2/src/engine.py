@@ -53,6 +53,19 @@ class EngineModule(pl.LightningModule):
         self.log('lr', self.lr, on_step=False, on_epoch=True,
                  prog_bar=False, logger=True)
 
+        
+        
+        ### TESTING PURPOSES ONLY
+        
+        dataset = self.trainer.val_dataloaders[0].dataset
+        print(dataset)
+        images, segmentations = dataset[0]
+        print(images.shape)
+        print(segmentations.shape)
+        
+        preds = self.model(images)  # Do a forward pass of validation data to get predictions
+        plot_predictions(dataset, preds)
+        
         return {'loss': loss}
 
     def training_epoch_end(self, outputs: list):
