@@ -1,6 +1,12 @@
 import torch
 from torchmetrics import Metric
 
+def calculate_iou(preds, target, threshold=0.5, spatial_dim=(2,3)):
+    preds_binary = preds >= threshold
+    intersection = torch.sum((preds_binary.bool() & target.bool()).int(), dim=spatial_dim)
+    union = torch.sum((preds_binary.bool() | target.bool()).int(), dim=spatial_dim)
+    iou_per_sample = (intersection + 1e-10) / (union + 1e-10)  # case 0/0 -> 1/1
+    return iou_per_sample
 
 class IoU(Metric):
     def __init__(self, average='macro', multiclass=False, num_labels=1,
@@ -20,21 +26,12 @@ class IoU(Metric):
     def update(self, preds: torch.Tensor, target: torch.Tensor):
         # preds, target = self._input_format(preds, target)
         # assert preds.shape == target.shape
-
-        preds_binary = preds >= self.threshold
-        # this would be pixel micro-average
-        # self.intersection += torch.sum(preds == target)
-        # self.union += torch.sum(preds | target)
-        # we want instance average?
-        intersection = torch.sum((preds_binary.bool() & target.bool()).int(), dim=self.spatial_dim)
-        union = torch.sum((preds_binary.bool() | target.bool()).int(), dim=self.spatial_dim)
-        iou_per_sample = intersection / (union + 1e-8)
-
+        iou_per_sample = calculate_iou(preds, target, threshold=self.threshold, spatial_dim=self.spatial_dim)
         self.iou_sum += torch.sum(iou_per_sample, dim=0) # sum over batch
         self.total += target.shape[0]
 
     def compute(self):
         if self.average == 'macro':
-            return torch.mean(self.iou_sum, dim=self.label_dim) / self.total
+            return torch.mean(self.iou_sum) / self.total
         else:
             return self.iou_sum / self.total
