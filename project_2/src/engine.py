@@ -61,8 +61,7 @@ class EngineModule(pl.LightningModule):
         print(dataset)
         images, segmentations = dataset[0]
         #images, segmentations = torch.unsqueeze(images,0), torch.unsqueeze(segmentations,0)
-        images, segmentations = map(torch.unsqueeze, [(images,0), (segmentations,0)])
-        
+        images, segmentations = map(torch.unsqueeze, [images,segmentations], [0,0])
         
         #torch.unsqueeze(images,0), torch.unsqueeze(segmentations,0)
         print(images.shape)
