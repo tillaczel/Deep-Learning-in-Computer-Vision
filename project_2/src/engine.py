@@ -15,6 +15,8 @@ class EngineModule(pl.LightningModule):
         self.model = Model(pretrained=config.model.pretrained, in_dim=config.model.in_dim, out_dim=config.model.out_dim)
         self.loss_func = nn.CrossEntropyLoss()
 
+
+        # TODO: batch average those?
         self.train_acc = torchmetrics.Accuracy()
         self.val_acc = torchmetrics.Accuracy()
 
@@ -24,7 +26,7 @@ class EngineModule(pl.LightningModule):
         self.val_specificity = torchmetrics.Specificity()
 
 
-        self.metrics = ["acc", "f1", "sensitivity", "specificity"]
+        self.metrics = ["acc", "sensitivity", "specificity"]
         self.main_metric = main_metric
 
     @property
