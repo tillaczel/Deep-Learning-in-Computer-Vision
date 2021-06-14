@@ -6,12 +6,8 @@ from project_2.src.data import get_dataloaders
 from project_2.src.engine import EngineModule
 from project_2.src.trainer import get_trainer
 
-wandb.init(project='p2', entity='dlcv')
 
-
-@hydra.main(config_path='config', config_name="default_train")
 def run_training(cfg: DictConfig):
-    print(OmegaConf.to_yaml(cfg))
     cfg_file = os.path.join(wandb.run.dir, 'train_config.yaml')
     with open(cfg_file, 'w') as fh:
         fh.write(OmegaConf.to_yaml(cfg))

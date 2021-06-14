@@ -28,6 +28,7 @@ def get_trainer(cfg, engine):
                          max_epochs=cfg.training.max_epochs, gpus=gpus)
     return trainer
 
+
 def get_test_trainer(cfg, engine):
     logger = pl.loggers.WandbLogger()
     logger.watch(engine)
