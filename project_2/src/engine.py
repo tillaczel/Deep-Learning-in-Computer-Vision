@@ -59,13 +59,18 @@ class EngineModule(pl.LightningModule):
         images, segmentations = dataset[0]
         images, segmentations = map(torch.unsqueeze, [images,segmentations], [0,0])   
         preds = self.model(images.to(self.device))  # Do a forward pass of validation data to get predictions
+        print(images.shape)
+        print(segmentations.shape)
+        print(preds.shape)
+        
         for i in range(1,6): # 6 images
+            
             img, seg = dataset[i]
             img, seg = map(torch.unsqueeze, [images,segmentations], [0,0])   
             pred = self.model(images.to(self.device))  # Do a forward pass of validation data to get predictions
-            images = torch.cat(img,images)
-            segmentations = torch.cat(seg,segmentations)
-            preds = torch.cat(pred,preds)    
+            images = torch.cat((img,images),dim=0)
+            segmentations = torch.cat((seg,segmentations),dim=0)
+            preds = torch.cat((pred,preds),dim=0)    
         plot_predictions(images, preds)
         
         return {'loss': loss}
