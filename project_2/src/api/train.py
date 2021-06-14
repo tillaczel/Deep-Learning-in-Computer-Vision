@@ -17,7 +17,6 @@ def run_training(cfg: DictConfig):
     wandb.save('*.ckpt')  # should keep it up to date
     trainer = get_trainer(cfg, engine)
 
-    # Todo: save models in wandb
     if cfg.model.ensemble:
         model_path = os.path.join(wandb.run.dir, 'models')
 

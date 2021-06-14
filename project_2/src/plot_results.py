@@ -6,7 +6,7 @@ import numpy as np
 
 
 def plot_predictions(dataset, model, device, n=6, current_epoch=None):
-    input_data, segmentations, predictions = get_data(dataset, model, device, n=n)
+    input_data, segmentations, predictions = get_data(dataset, model, device, n)
 
     fig, axs = plt.subplots(3, 5, figsize=(n*5, 15))
     for i in range(6):
@@ -34,7 +34,7 @@ def get_data(dataset, model, device, n):
         img, seg = dataset[i]
         pred = model(img.unsqueeze(0).to(device))  # Do a forward pass of validation data to get predictions
         images.append(img), segmentations.append(seg), preds.append(pred)
-    print(len(images))
+
     images, segmentations, preds = map(torch.stack, [images, segmentations, preds])
     images, segmentations, preds = [obj.detach().cpu().numpy() for obj in [images, segmentations, preds]]
     images, segmentations, preds = map(np.moveaxis, [images, segmentations, preds], [0, 0, 0], [-1, -1, -1])
