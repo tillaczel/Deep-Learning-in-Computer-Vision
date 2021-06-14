@@ -5,9 +5,8 @@ from torch import nn
 import torchmetrics
 
 from .model import Model
-from .plot_results import plot_predictions
 
-
+from project_2.src.plot_results import plot_predictions
 class EngineModule(pl.LightningModule):
 
     def __init__(self, config: DictConfig, main_metric: str="acc"):
