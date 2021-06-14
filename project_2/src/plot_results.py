@@ -9,5 +9,6 @@ def plot_predictions(input_data, predictions):
         plt.subplot(2, 6, i+1)
         plt.imshow(np.squeeze(input_data[i],0),cmap="gray")
         plt.subplot(2, 6, i+7)
+        plt.axis('off')
         plt.imshow(np.squeeze(predictions[i],0),cmap="gray")
     plt.savefig('foo.png');
