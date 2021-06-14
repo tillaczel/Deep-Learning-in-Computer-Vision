@@ -56,19 +56,16 @@ class EngineModule(pl.LightningModule):
         ### TESTING PURPOSES ONLY
         
         dataset = self.trainer.val_dataloaders[0].dataset
-        print(dataset)
         images, segmentations = dataset[0]
-        #images, segmentations = torch.unsqueeze(images,0), torch.unsqueeze(segmentations,0)
-        
-        images, segmentations = map(torch.unsqueeze, [images,segmentations], [0,0])
-        
-        #torch.unsqueeze(images,0), torch.unsqueeze(segmentations,0)
-        print(images.shape)
-        print(segmentations.shape)
-        
+        images, segmentations = map(torch.unsqueeze, [images,segmentations], [0,0])   
         preds = self.model(images.to(self.device))  # Do a forward pass of validation data to get predictions
-        
-        print(preds.shape)
+        for i in range(1,6): # 6 images
+            img, seg = dataset[i]
+            img, seg = map(torch.unsqueeze, [images,segmentations], [0,0])   
+            pred = self.model(images.to(self.device))  # Do a forward pass of validation data to get predictions
+            images = torch.cat(img,images)
+            segmentations = torch.cat(seg,segmentations)
+            preds = torch.cat(pred,preds)    
         plot_predictions(images, preds)
         
         return {'loss': loss}
