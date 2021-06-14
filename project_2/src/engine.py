@@ -5,6 +5,7 @@ from torch import nn
 import torchmetrics
 
 from .model import Model
+from .plot_results import *
 
 
 class EngineModule(pl.LightningModule):
@@ -65,7 +66,10 @@ class EngineModule(pl.LightningModule):
         return {'val_loss': loss}
 
     def validation_epoch_end(self, outputs: list):
-        #self.valid
+        dataset = self.trainer.val_dataloaders[0].dataset
+        images = dataset[0]
+        labels = dataset[1]
+        
 
     def configure_optimizers(self):
         optimizer = get_optimizer(self.config.training.optimizer, self.parameters())
