@@ -1,3 +1,4 @@
+git+https://github.com/PytorchLightning/metrics.git@master
 pytorch-lightning
 hydra-core
 wandb

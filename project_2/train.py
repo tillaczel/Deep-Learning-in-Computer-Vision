@@ -5,16 +5,14 @@ import os
 sys.path.append('git_repo')
 sys.path.append(os.path.split(os.getcwd())[0])
 
-from project_1_2.src.bbox import run_detection
 
 import hydra
 import wandb
 from omegaconf import DictConfig, OmegaConf
 
-from project_1_2.src.data import get_data_no_digit, get_data_svhn, get_dataloaders
-from project_1_2.src.engine import EngineModule
-from project_1_2.src.trainer import get_trainer
-from project_1_2.src.utils import print_class_dist
+from project_2.src.data import get_dataloaders
+from project_2.src.engine import EngineModule
+from project_2.src.trainer import get_trainer
 
 wandb.init(project='p2', entity='dlcv')
 
@@ -38,9 +36,6 @@ def run_training(cfg: DictConfig):
 
     trainer.fit(engine, train_dataloader=train_loader, val_dataloaders=valid_loader)
 
-    run_detection(engine)
-
-    # TODO: visualizations
 
 
 if __name__ == '__main__':

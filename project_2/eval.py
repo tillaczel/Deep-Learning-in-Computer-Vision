@@ -5,9 +5,7 @@ import os
 sys.path.append('git_repo')
 sys.path.append(os.path.split(os.getcwd())[0])
 
-from project_1_2.src.trainer import get_test_trainer
-from project_1_2.src.bbox import plt_bboxes, filter_bboxes, run_detection
-from project_1_2.src.utils import download_file, plot_heatmaps
+from project_2.src.utils import download_file
 import hydra
 import torch
 import wandb
@@ -15,8 +13,7 @@ from omegaconf import DictConfig, OmegaConf
 import pytorch_lightning as pl
 
 from tqdm import tqdm
-from project_1_2.src.data import get_data_raw
-from project_1_2.src.engine import EngineModule
+from project_2.src.engine import EngineModule
 from torch import nn
 import numpy as np
 
@@ -42,7 +39,6 @@ def eval(cfg : DictConfig):
 
     download_file(cfg.run_id, "model.ckpt")
     engine = EngineModule.load_from_checkpoint("model.ckpt", config=train_cfg)
-    run_detection(engine)
     # this will go to separate func
 
 

@@ -9,20 +9,22 @@ from .model import Model
 
 class EngineModule(pl.LightningModule):
 
-    def __init__(self, config: DictConfig, n_classes: int=11, main_metric: str="f1"):
+    def __init__(self, config: DictConfig, main_metric: str="acc"):
         super().__init__()
         self.config = config
         self.model = Model(pretrained=config.model.pretrained, in_dim=config.model.in_dim, out_dim=config.model.out_dim)
         self.loss_func = nn.CrossEntropyLoss()
 
-        self.train_acc = torchmetrics.Accuracy(multiclass=True, num_classes=n_classes)
-        self.val_acc = torchmetrics.Accuracy(multiclass=True, num_classes=n_classes)
+        self.train_acc = torchmetrics.Accuracy()
+        self.val_acc = torchmetrics.Accuracy()
 
-        self.train_f1 = torchmetrics.F1(multiclass=True, num_classes=n_classes, average="macro")
-        self.val_f1 = torchmetrics.F1(multiclass=True, num_classes=n_classes, average="macro")
+        self.train_sensitivity = torchmetrics.Recall()
+        self.val_sensitivity = torchmetrics.Recall()
+        self.train_specificity = torchmetrics.Specificity()
+        self.val_specificity = torchmetrics.Specificity()
 
 
-        self.metrics = ["acc", "f1"]
+        self.metrics = ["acc", "f1", "sensitivity", "specificity"]
         self.main_metric = main_metric
 
     @property
@@ -52,7 +54,7 @@ class EngineModule(pl.LightningModule):
         self.log('lr', self.lr, on_step=False, on_epoch=True,
                  prog_bar=False, logger=True)
 
-        probs = torch.softmax(pred, dim=-1)
+        probs = torch.softmax(pred, dim=-1) # TODO: check if right dim
 
         for metric_name in self.metrics:
             self.update_and_log_metric(metric_name, probs, labels, mode='train')
@@ -68,7 +70,7 @@ class EngineModule(pl.LightningModule):
         pred = self.model(images).squeeze()  # [Bx1] -> [B]
         loss = self.loss_func(pred, labels.type(torch.long))
 
-        probs = torch.softmax(pred, dim=-1)
+        probs = torch.softmax(pred, dim=-1) # TODO: check if right dim
         self.log('val_loss', loss, on_step=False, on_epoch=True,
                  prog_bar=False, logger=True)
 
