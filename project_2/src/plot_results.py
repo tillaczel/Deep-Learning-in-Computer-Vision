@@ -27,9 +27,12 @@ def plot_predictions(dataset, model, device, n=6):
 
 
 def get_data(dataset, model, device, n):
-    images, segmentations = dataset[0:n]
-    images, segmentations = map(torch.unsqueeze, [images, segmentations], [0, 0])
-    preds = model(images.to(device))  # Do a forward pass of validation data to get predictions
+    images, segmentations, preds = list(), list(), list()
+    for i in range(n):
+        img, seg = dataset[i]
+        pred = model(images.to(device))  # Do a forward pass of validation data to get predictions
+        images.append(img), segmentations.append(seg), preds.append(pred)
+    images, segmentations, preds = torch.stack(images), torch.stack(segmentations), torch.stack(preds)
 
     return images.detach().cpu().numpy(), segmentations.detach().cpu().numpy(), preds.detach().cpu().numpy()
 
