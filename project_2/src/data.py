@@ -22,6 +22,7 @@ class LIDCIDRIDataset(Dataset):
 
 
 def get_dataset(url, data_path):
+    download_url(url, data_path)
     return None, None
 
 
