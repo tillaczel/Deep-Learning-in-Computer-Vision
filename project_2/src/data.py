@@ -21,7 +21,7 @@ def extract_data(path_to_zip_file, directory_to_extract_to):
     set_folders = os.listdir(move_from)
     for set_folder in set_folders:
         shutil.move(os.path.join(move_from, set_folder), os.path.join(directory_to_extract_to, set_folder))
-    os.rmdir(os.path.join(directory_to_extract_to, 'LIDC_crops'))
+    shutil.rmtree(os.path.join(directory_to_extract_to, 'LIDC_crops'))
 
 
 def get_dataset(url, data_path):
