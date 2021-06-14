@@ -14,7 +14,7 @@ training:
   batch_size: 64
   optimizer:
     name: adam
-    lr: 0.0003
+    lr: 0.001
   early_stopping:
     monitor: 'val_loss'
     stopping_patience: 5
@@ -24,7 +24,7 @@ training:
     name: plateau
     patience: 3
     min_lr: 0.00001
-    factor: 0.5
+    factor: 0.1
   model_checkpoint:
     monitor: 'val_loss'
 data:
