@@ -2,30 +2,27 @@ import matplotlib.pyplot as plt
 import torch
 import os
 import wandb
-import numpy as np
 
 
 def plot_predictions(dataset, model, device, n=6, current_epoch=None):
     input_data, segmentations, predictions = get_data(dataset, model, device, n)
     print(input_data.shape, segmentations.shape, predictions.shape)
-    fig, axs = plt.subplots(3, 5, figsize=(n*5, 15))
+    fig, axs = plt.subplots(n, 3, figsize=(15, n*5))
     for i in range(6):
-        axs[i, 0].imshow(input_data[i], cmap="gray")
-        axs[i, 0].set_title(f"Input")
-        axs[i, 0].axis('off')
-
-        axs[i, 1].imshow(segmentations[i], cmap="gray")
-        axs[i, 1].set_title(f"Segmentation")
-        axs[i, 1].axis('off')
-
-        axs[i, 2].imshow(predictions[i], cmap="gray")
-        axs[i, 2].set_title(f"Prediction")
-        axs[i, 2].axis('off')
+        plot_subplot(axs[i, 0], input_data[i], 'Input')
+        plot_subplot(axs[i, 1], segmentations[i], 'Segmentation')
+        plot_subplot(axs[i, 2], predictions[i], 'Prediction')
 
     fname = f'preds_{current_epoch}.png' if current_epoch is not None else 'preds.png'
     fname = os.path.join(wandb.run.dir, fname)
     plt.savefig(fname)
     wandb.save(fname)
+
+
+def plot_subplot(ax, img, title):
+    ax.imshow(img, cmap="gray")
+    ax.set_title(title)
+    ax.axis('off')
 
 
 def get_data(dataset, model, device, n):
