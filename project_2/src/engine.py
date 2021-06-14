@@ -42,12 +42,9 @@ class EngineModule(pl.LightningModule):
                  prog_bar=(metric_name == self.main_metric),
                  on_epoch=True, logger=True)
 
-
     def training_step(self, batch, batch_idx):
         images, labels = batch
-        print(images.shape, labels.shape)
         seg_hat = self.model(images)
-        print(seg_hat.shape)
         loss = self.loss_func(seg_hat, labels)
 
         self.log('loss', loss, on_step=False, on_epoch=True,
@@ -62,9 +59,7 @@ class EngineModule(pl.LightningModule):
 
     def validation_step(self, batch, batch_idx):
         images, labels = batch
-        print(images.shape, labels.shape)
         seg_hat = self.model(images)
-        print(seg_hat.shape)
         loss = self.loss_func(seg_hat, labels)
 
         return {'val_loss': loss}
