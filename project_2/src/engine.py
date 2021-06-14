@@ -12,7 +12,7 @@ class EngineModule(pl.LightningModule):
     def __init__(self, config: DictConfig, main_metric: str="acc"):
         super().__init__()
         self.config = config
-        self.model = Model(in_dim=config.model.in_dim, out_dim=config.model.out_dim)
+        self.model = Model(n_channels=config.model.in_dim, n_classes=config.model.out_dim)
         self.loss_func = nn.CrossEntropyLoss()
 
         self.train_acc = torchmetrics.Accuracy()
