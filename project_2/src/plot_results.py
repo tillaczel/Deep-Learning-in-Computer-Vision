@@ -13,13 +13,13 @@ def plot_predictions(dataset, model, device, n=6):
         axs[i, 0].set_title(f"Input")
         axs[i, 0].axis('off')
 
-        axs[i, 0].imshow(segmentations[i], cmap="gray")
-        axs[i, 0].set_title(f"Segmentation")
-        axs[i, 0].axis('off')
+        axs[i, 1].imshow(segmentations[i], cmap="gray")
+        axs[i, 1].set_title(f"Segmentation")
+        axs[i, 1].axis('off')
 
-        axs[i, 0].imshow(predictions[i], cmap="gray")
-        axs[i, 0].set_title(f"Prediction")
-        axs[i, 0].axis('off')
+        axs[i, 2].imshow(predictions[i], cmap="gray")
+        axs[i, 2].set_title(f"Prediction")
+        axs[i, 2].axis('off')
 
     fname = os.path.join(wandb.run.dir, 'preds.png')
     plt.savefig(fname)
