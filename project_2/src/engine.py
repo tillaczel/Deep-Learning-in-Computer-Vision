@@ -6,13 +6,14 @@ import torch
 from torch import nn
 import torchmetrics
 
+from project_2.src.metrics.dice import Dice
 from project_2.src.metrics.iou import IoU
 from .model import Model
 
 
 class EngineModule(pl.LightningModule):
 
-    def __init__(self, config: DictConfig, main_metrics: Iterable=("sensitivity", "specificity", "iou")):
+    def __init__(self, config: DictConfig, main_metrics: Iterable=("sensitivity", "specificity", "iou", "dice")):
         super().__init__()
         self.config = config
         self.model = Model(n_channels=config.model.in_dim, n_classes=config.model.out_dim)
@@ -31,8 +32,11 @@ class EngineModule(pl.LightningModule):
         self.train_iou = IoU()
         self.val_iou = IoU()
 
+        self.train_dice = Dice()
+        self.val_dice = Dice()
 
-        self.metrics = ["acc", "sensitivity", "specificity", "iou"]
+
+        self.metrics = ["acc", "sensitivity", "specificity", "iou", "dice"]
         self.main_metrics = main_metrics
 
     @property
