@@ -1,16 +1,12 @@
 import matplotlib.pyplot as plt
+from IPython.display import clear_output
 
-def plot_img_and_mask(img, mask):
-    classes = mask.shape[2] if len(mask.shape) > 2 else 1
-    fig, ax = plt.subplots(1, classes + 1)
-    ax[0].set_title('Input image')
-    ax[0].imshow(img)
-    if classes > 1:
-        for i in range(classes):
-            ax[i+1].set_title(f'Output mask (class {i+1})')
-            ax[i+1].imshow(mask[:, :, i])
-    else:
-        ax[1].set_title(f'Output mask')
-        ax[1].imshow(mask)
-    plt.xticks([]), plt.yticks([])
-    plt.show()
+def plot_predictions(input_data, predictions): 
+    plt.rcParams['figure.figsize'] = [18, 6]
+    for i in range(6):
+        plt.subplot(2, 6, i+1)
+        plt.imshow(X[i])
+
+        plt.subplot(2, 6, i+7)
+        plt.imshow(Y[i])
+    plt.show();
