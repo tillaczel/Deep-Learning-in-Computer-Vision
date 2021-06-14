@@ -5,12 +5,12 @@ hydra:
 
 model:
   pretrained: true
-  out_dim: 11
-  in_dim: 2048
+  out_dim: 1
+  in_dim: 1
 
 training:
   max_epochs: 50
-  batch_size: 128
+  batch_size: 64
   optimizer:
     name: adam
     lr: 0.0003
@@ -27,7 +27,7 @@ training:
   model_checkpoint:
     monitor: 'val_loss'
 data:
-  size: 32
+  size: 128
   url: 'https://courses.compute.dtu.dk/02514/project_data/LIDC_DLCV_version.zip'
   path: './data/'
   train_augmentation:
