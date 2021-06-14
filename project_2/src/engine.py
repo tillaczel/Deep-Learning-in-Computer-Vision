@@ -4,41 +4,20 @@ from omegaconf import DictConfig
 import pytorch_lightning as pl
 import torch
 from torch import nn
-import torchmetrics
-
-from project_2.src.metrics.dice import Dice
-from project_2.src.metrics.iou import IoU
+from project_2.src.model import Model
 from project_2.src.plot_results import plot_predictions
-from .model import Model
+from project_2.src.metrics import Metrics
 
 
 class EngineModule(pl.LightningModule):
 
-    def __init__(self, config: DictConfig, main_metrics: Iterable=("sensitivity", "specificity", "iou", "dice", "acc")):
+    def __init__(self, config: DictConfig,
+                 main_metrics: Iterable = ("sensitivity", "specificity", "iou", "dice", "acc")):
         super().__init__()
         self.config = config
         self.model = Model(n_channels=config.model.in_dim, n_classes=config.model.out_dim)
         self.loss_func = nn.BCEWithLogitsLoss()
-
-
-        # TODO: instance average those?
-        self.train_acc = torchmetrics.Accuracy(multiclass=False)
-        self.val_acc = torchmetrics.Accuracy(multiclass=False)
-
-        self.train_sensitivity = torchmetrics.Recall(multiclass=False)
-        self.val_sensitivity = torchmetrics.Recall(multiclass=False)
-        self.train_specificity = torchmetrics.Specificity(multiclass=False)
-        self.val_specificity = torchmetrics.Specificity(multiclass=False)
-
-        self.train_iou = IoU()
-        self.val_iou = IoU()
-
-        self.train_dice = Dice()
-        self.val_dice = Dice()
-
-
-        self.metrics = ["acc", "sensitivity", "specificity", "iou", "dice"]
-        self.main_metrics = main_metrics
+        self.metrics = Metrics(main_metrics)
 
     @property
     def lr(self):
@@ -48,11 +27,11 @@ class EngineModule(pl.LightningModule):
         return self.model(x)
 
     def update_and_log_metric(self, metric_name, probs, labels, mode='train'):
-        metric = getattr(self, f"{mode}_{metric_name}")
+        metric = getattr(self.metrics, f"{mode}_{metric_name}")
         metric(probs, labels)
         self.log(f"{mode}_{metric_name}", metric,
                  on_step=False,
-                 prog_bar=(metric_name in self.main_metrics),
+                 prog_bar=(metric_name in self.metrics.main_metrics),
                  on_epoch=True, logger=True)
 
     def training_step(self, batch, batch_idx):
@@ -66,7 +45,7 @@ class EngineModule(pl.LightningModule):
                  prog_bar=False, logger=True)
 
         probs = torch.sigmoid(seg_hat)
-        for metric_name in self.metrics:
+        for metric_name in self.metrics.metrics:
             self.update_and_log_metric(metric_name, probs, labels.type(torch.long), mode='train')
 
         return {'loss': loss}
@@ -83,7 +62,7 @@ class EngineModule(pl.LightningModule):
                  prog_bar=False, logger=True)
 
         probs = torch.sigmoid(seg_hat)
-        for metric_name in self.metrics:
+        for metric_name in self.metrics.metrics:
             self.update_and_log_metric(metric_name, probs, labels.type(torch.long), mode='val')
 
         return {'val_loss': loss}
@@ -92,17 +71,17 @@ class EngineModule(pl.LightningModule):
 
         dataset = self.trainer.val_dataloaders[0].dataset
         images, segmentations = dataset[0]
-        images, segmentations = map(torch.unsqueeze, [images,segmentations], [0,0])
+        images, segmentations = map(torch.unsqueeze, [images, segmentations], [0, 0])
         preds = self.model(images.to(self.device))  # Do a forward pass of validation data to get predictions
 
-        for i in range(1,6): # 6 images
+        for i in range(1, 6):  # 6 images
             img, seg = dataset[i]
-            img, seg = map(torch.unsqueeze, [img,seg], [0,0])
+            img, seg = map(torch.unsqueeze, [img, seg], [0, 0])
             pred = self.model(img.to(self.device))
 
-            images = torch.cat((img,images),dim=0)
-            segmentations = torch.cat((seg,segmentations),dim=0)
-            preds = torch.cat((pred,preds),dim=0)
+            images = torch.cat((img, images), dim=0)
+            segmentations = torch.cat((seg, segmentations), dim=0)
+            preds = torch.cat((pred, preds), dim=0)
         plot_predictions(images.detach().cpu().numpy(), preds.detach().cpu().numpy())
 
         pass
