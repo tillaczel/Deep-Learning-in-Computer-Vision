@@ -7,7 +7,7 @@ import numpy as np
 
 def plot_predictions(dataset, model, device, n=6, current_epoch=None):
     input_data, segmentations, predictions = get_data(dataset, model, device, n)
-
+    print(input_data.shape, segmentations.shape, predictions.shape)
     fig, axs = plt.subplots(3, 5, figsize=(n*5, 15))
     for i in range(6):
         axs[i, 0].imshow(input_data[i], cmap="gray")
