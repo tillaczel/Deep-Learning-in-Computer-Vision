@@ -5,8 +5,8 @@ hydra:
 
 model:
   pretrained: true
-  out_dim: 11
-  in_dim: 2048
+  out_dim: 1
+  in_dim: 1
 
 training:
   max_epochs: 50
