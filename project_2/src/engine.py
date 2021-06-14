@@ -65,7 +65,7 @@ class EngineModule(pl.LightningModule):
         return {'val_loss': loss}
 
     def validation_epoch_end(self, outputs: list):
-        pass
+        #self.valid
 
     def configure_optimizers(self):
         optimizer = get_optimizer(self.config.training.optimizer, self.parameters())
