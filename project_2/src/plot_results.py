@@ -5,8 +5,9 @@ import numpy as np
 def plot_predictions(input_data, predictions): 
     plt.rcParams['figure.figsize'] = [18, 6]
     for i in range(6):
+        plt.axis('off')
         plt.subplot(2, 6, i+1)
-        plt.imshow(np.squeeze(input_data[i],0))
+        plt.imshow(np.squeeze(input_data[i],0),cmap="gray")
         plt.subplot(2, 6, i+7)
-        plt.imshow(np.squeeze(predictions[i],0))
+        plt.imshow(np.squeeze(predictions[i],0),cmap="gray")
     plt.savefig('foo.png');
