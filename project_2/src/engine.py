@@ -67,7 +67,7 @@ class EngineModule(pl.LightningModule):
         print(images.shape)
         print(segmentations.shape)
         
-        preds = self.model(images)  # Do a forward pass of validation data to get predictions
+        preds = self.model(images.to(self.model.device)  # Do a forward pass of validation data to get predictions
         plot_predictions(dataset, preds)
         
         return {'loss': loss}
