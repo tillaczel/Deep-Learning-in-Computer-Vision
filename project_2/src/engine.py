@@ -68,7 +68,7 @@ class EngineModule(pl.LightningModule):
         for i in range(1,6): # 6 images
             
             img, seg = dataset[i]
-            img, seg = map(torch.unsqueeze, [images,segmentations], [0,0])   
+            #img, seg = map(torch.unsqueeze, [images,segmentations], [0,0])   
             pred = self.model(images.to(self.device))  # Do a forward pass of validation data to get predictions
             
             print(img.shape)
