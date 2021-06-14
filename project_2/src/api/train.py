@@ -18,7 +18,7 @@ def run_training(cfg: DictConfig):
     trainer = get_trainer(cfg, engine)
 
     if cfg.model.ensemble:
-        model_path = os.path.join(wandb.run.dir, 'models')
+        model_path = os.path.join(wandb.run.dir, 'ensemble_models')
 
         os.mkdir(model_path) if not os.path.isdir(model_path) else None
         for i in range(4):

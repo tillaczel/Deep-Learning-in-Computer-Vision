@@ -15,6 +15,7 @@ def plot_predictions(dataset, model, device, n=6, current_epoch=None):
 
     fname = f'preds_{current_epoch}.png' if current_epoch is not None else 'preds.png'
     fname = os.path.join(wandb.run.dir, fname)
+    print(fname)
     plt.savefig(fname)
     wandb.save(fname)
 
