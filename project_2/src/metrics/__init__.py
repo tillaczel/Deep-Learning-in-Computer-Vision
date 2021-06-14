@@ -1,11 +1,13 @@
 import torchmetrics
+import pytorch_lightning as pl
 
 from project_2.src.metrics.dice import Dice
 from project_2.src.metrics.iou import IoU
 
 
-class Metrics:
+class Metrics(pl.LightningModule):
     def __init__(self, main_metrics):
+        super().__init__()
         # TODO: instance average those?
         self.train_acc = torchmetrics.Accuracy(multiclass=False)
         self.val_acc = torchmetrics.Accuracy(multiclass=False)
