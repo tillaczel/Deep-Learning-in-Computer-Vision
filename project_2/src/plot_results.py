@@ -34,6 +34,7 @@ def get_data(dataset, model, device, n):
         img, seg = dataset[i]
         pred = model(img.unsqueeze(0).to(device))  # Do a forward pass of validation data to get predictions
         images.append(img), segmentations.append(seg), preds.append(pred)
+    print(len(images))
     images, segmentations, preds = map(torch.stack, [images, segmentations, preds])
     images, segmentations, preds = [obj.detach().cpu().numpy() for obj in [images, segmentations, preds]]
     images, segmentations, preds = map(np.moveaxis, [images, segmentations, preds], [0, 0, 0], [-1, -1, -1])
