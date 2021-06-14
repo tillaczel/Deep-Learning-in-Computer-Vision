@@ -27,11 +27,11 @@ class EngineModule(pl.LightningModule):
         return self.model(x)
 
     def update_and_log_metric(self, metric_name, probs, labels, mode='train'):
-        metric = getattr(self, f"{mode}_{metric_name}")
+        metric = getattr(self.metrics, f"{mode}_{metric_name}")
         metric(probs, labels)
         self.log(f"{mode}_{metric_name}", metric,
                  on_step=False,
-                 prog_bar=(metric_name in self.main_metrics),
+                 prog_bar=(metric_name in self.metrics.main_metrics),
                  on_epoch=True, logger=True)
 
     def training_step(self, batch, batch_idx):
