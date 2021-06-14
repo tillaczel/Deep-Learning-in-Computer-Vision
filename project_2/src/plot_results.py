@@ -16,9 +16,8 @@ def plot_predictions(dataset, model, device, n=6, current_epoch=None):
 
     fname = f'preds_{current_epoch}.png' if current_epoch is not None else 'preds.png'
     fname = os.path.join(wandb.run.dir, fname)
-    print(fname)
     plt.savefig(fname)
-    wandb.save(fname)
+    wandb.save(fname, base_path=wandb.run.dir)
 
 
 def plot_subplot(ax, img, title):
@@ -31,7 +30,7 @@ def get_data(dataset, model, device, idxs):
     images, segmentations, preds = list(), list(), list()
     for idx in idxs:
         img, seg = dataset[idx]
-        pred = model(img.unsqueeze(0).to(device))[0]  # Do a forward pass of validation data to get predictions
+        pred = torch.sigmoid(model(img.unsqueeze(0).to(device))[0])  # Do a forward pass of validation data to get predictions
         images.append(img), segmentations.append(seg), preds.append(pred)
 
     images, segmentations, preds = map(torch.stack, [images, segmentations, preds])
