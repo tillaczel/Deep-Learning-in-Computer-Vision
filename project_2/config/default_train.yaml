@@ -17,7 +17,7 @@ training:
     lr: 0.001
   early_stopping:
     monitor: 'val_loss'
-    stopping_patience: 5
+    stopping_patience: 10
   scheduler:
     monitor: val_loss
     mode: min
