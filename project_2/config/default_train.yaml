@@ -10,7 +10,7 @@ model:
   ensemble: True
 
 training:
-  max_epochs: 50
+  max_epochs: 3
   batch_size: 64
   optimizer:
     name: adam
