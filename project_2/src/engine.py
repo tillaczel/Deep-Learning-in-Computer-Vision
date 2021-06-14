@@ -60,6 +60,11 @@ class EngineModule(pl.LightningModule):
         dataset = self.trainer.val_dataloaders[0].dataset
         print(dataset)
         images, segmentations = dataset[0]
+        #images, segmentations = torch.unsqueeze(images,0), torch.unsqueeze(segmentations,0)
+        images, segmentations = map(torch.unsqueeze, [images segmentations])
+        
+        
+        #torch.unsqueeze(images,0), torch.unsqueeze(segmentations,0)
         print(images.shape)
         print(segmentations.shape)
         
