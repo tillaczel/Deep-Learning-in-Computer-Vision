@@ -13,7 +13,7 @@ from project_2.src.data import get_dataloaders
 from project_2.src.engine import EngineModule
 from project_2.src.trainer import get_trainer
 
-wandb.init(project='p2', entity='dlcv')
+wandb.init(project='p3', entity='dlcv')
 
 @hydra.main(config_path='config', config_name="default_train")
 def run_training(cfg: DictConfig):

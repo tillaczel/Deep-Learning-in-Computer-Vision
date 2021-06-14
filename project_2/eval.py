@@ -18,7 +18,7 @@ from torch import nn
 import numpy as np
 
 
-wandb.init(project='p2', entity='dlcv')
+wandb.init(project='p3', entity='dlcv')
 
 
 

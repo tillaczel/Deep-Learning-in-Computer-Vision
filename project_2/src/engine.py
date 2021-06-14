@@ -16,14 +16,14 @@ class EngineModule(pl.LightningModule):
         self.loss_func = nn.BCEWithLogitsLoss()
 
 
-        # TODO: batch average those?
-        self.train_acc = torchmetrics.Accuracy()
-        self.val_acc = torchmetrics.Accuracy()
+        # TODO: instance average those?
+        self.train_acc = torchmetrics.Accuracy(multiclass=False)
+        self.val_acc = torchmetrics.Accuracy(multiclass=False)
 
-        self.train_sensitivity = torchmetrics.Recall()
-        self.val_sensitivity = torchmetrics.Recall()
-        self.train_specificity = torchmetrics.Specificity()
-        self.val_specificity = torchmetrics.Specificity()
+        self.train_sensitivity = torchmetrics.Recall(multiclass=False)
+        self.val_sensitivity = torchmetrics.Recall(multiclass=False)
+        self.train_specificity = torchmetrics.Specificity(multiclass=False)
+        self.val_specificity = torchmetrics.Specificity(multiclass=False)
 
 
         self.metrics = ["acc", "sensitivity", "specificity"]
@@ -47,12 +47,16 @@ class EngineModule(pl.LightningModule):
     def training_step(self, batch, batch_idx):
         images, labels = batch
         seg_hat = self.model(images)
-        loss = self.loss_func(seg_hat, labels)
+        loss = self.loss_func(seg_hat, labels.type(torch.float32))
 
         self.log('loss', loss, on_step=False, on_epoch=True,
                  prog_bar=False, logger=True)
         self.log('lr', self.lr, on_step=False, on_epoch=True,
                  prog_bar=False, logger=True)
+
+        probs = torch.sigmoid(seg_hat)
+        for metric_name in self.metrics:
+            self.update_and_log_metric(metric_name, probs, labels.type(torch.long), mode='train')
 
         return {'loss': loss}
 
@@ -62,7 +66,14 @@ class EngineModule(pl.LightningModule):
     def validation_step(self, batch, batch_idx):
         images, labels = batch
         seg_hat = self.model(images)
-        loss = self.loss_func(seg_hat, labels)
+        loss = self.loss_func(seg_hat, labels.type(torch.float32))
+
+        self.log('val_loss', loss, on_step=False, on_epoch=True,
+                 prog_bar=False, logger=True)
+
+        probs = torch.sigmoid(seg_hat)
+        for metric_name in self.metrics:
+            self.update_and_log_metric(metric_name, probs, labels.type(torch.long), mode='val')
 
         return {'val_loss': loss}
 
