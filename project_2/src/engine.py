@@ -1,3 +1,5 @@
+from collections import Iterable
+
 from omegaconf import DictConfig
 import pytorch_lightning as pl
 import torch
@@ -10,7 +12,7 @@ from .model import Model
 
 class EngineModule(pl.LightningModule):
 
-    def __init__(self, config: DictConfig, main_metric: str="acc"):
+    def __init__(self, config: DictConfig, main_metrics: Iterable=("sensitivity", "specificity", "iou")):
         super().__init__()
         self.config = config
         self.model = Model(n_channels=config.model.in_dim, n_classes=config.model.out_dim)
@@ -31,7 +33,7 @@ class EngineModule(pl.LightningModule):
 
 
         self.metrics = ["acc", "sensitivity", "specificity", "iou"]
-        self.main_metric = main_metric
+        self.main_metrics = main_metrics
 
     @property
     def lr(self):
@@ -45,7 +47,7 @@ class EngineModule(pl.LightningModule):
         metric(probs, labels)
         self.log(f"{mode}_{metric_name}", metric,
                  on_step=False,
-                 prog_bar=(metric_name == self.main_metric),
+                 prog_bar=(metric_name in self.main_metrics),
                  on_epoch=True, logger=True)
 
     def training_step(self, batch, batch_idx):
