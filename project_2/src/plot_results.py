@@ -2,13 +2,13 @@ import matplotlib.pyplot as plt
 import torch
 import os
 import wandb
+import numpy as np
 
 
 def plot_predictions(dataset, model, device, n=6, current_epoch=None):
     input_data, segmentations, predictions = get_data(dataset, model, device, n)
-    print(input_data.shape, segmentations.shape, predictions.shape)
     fig, axs = plt.subplots(n, 3, figsize=(15, n*5))
-    for i in range(6):
+    for i in np.random.choice(np.arange(len(dataset), n)):
         plot_subplot(axs[i, 0], input_data[i], 'Input')
         plot_subplot(axs[i, 1], segmentations[i], 'Segmentation')
         plot_subplot(axs[i, 2], predictions[i], 'Prediction')
