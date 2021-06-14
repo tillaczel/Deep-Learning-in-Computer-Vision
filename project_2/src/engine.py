@@ -13,7 +13,7 @@ class EngineModule(pl.LightningModule):
         super().__init__()
         self.config = config
         self.model = Model(n_channels=config.model.in_dim, n_classes=config.model.out_dim)
-        self.loss_func = nn.CrossEntropyLoss()
+        self.loss_func = nn.BCEWithLogitsLoss()
 
         self.train_acc = torchmetrics.Accuracy()
         self.val_acc = torchmetrics.Accuracy()
@@ -46,8 +46,7 @@ class EngineModule(pl.LightningModule):
     def training_step(self, batch, batch_idx):
         images, labels = batch
 
-        pred = self.model(images).squeeze()  # [Bx1] -> [B]
-        loss = self.loss_func(pred, labels.type(torch.long))
+        loss = self.loss_func(pred, labels)
 
         self.log('loss', loss, on_step=False, on_epoch=True,
                  prog_bar=False, logger=True)
