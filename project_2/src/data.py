@@ -1,6 +1,7 @@
 from torch.utils.data import DataLoader, Dataset
 import torchvision.transforms as transforms
 import requests
+import os
 
 
 def download_url(url, save_path, chunk_size=128):
@@ -22,7 +23,8 @@ class LIDCIDRIDataset(Dataset):
 
 
 def get_dataset(url, data_path):
-    download_url(url, data_path)
+    raw_file = os.path.join(data_path, 'raw.zip')
+    download_url(url, raw_file)
     return None, None
 
 
