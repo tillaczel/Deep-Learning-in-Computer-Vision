@@ -43,6 +43,7 @@ class EngineModule(pl.LightningModule):
 
     def training_step(self, batch, batch_idx):
         images, labels = batch
+        print(images.shape, labels.shape)
 
         pred = self.model(images).squeeze()  # [Bx1] -> [B]
         loss = self.loss_func(pred, labels.type(torch.long))
