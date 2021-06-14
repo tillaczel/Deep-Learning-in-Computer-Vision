@@ -13,13 +13,19 @@ def run_training(cfg: DictConfig):
         fh.write(OmegaConf.to_yaml(cfg))
     wandb.save(cfg_file)  # this will force sync it
 
-    train_loader, valid_loader, test_loader = \
-        get_dataloaders(cfg.data.size, cfg.data.train_augmentation, cfg.training.batch_size, cfg.data.url, cfg.data.path, cfg.data.seg_reduce)
-
     engine = EngineModule(cfg)
-
     wandb.save('*.ckpt')  # should keep it up to date
-
     trainer = get_trainer(cfg, engine)
 
-    trainer.fit(engine, train_dataloader=train_loader, val_dataloaders=valid_loader)
+    if cfg.model.ensemble:
+        for i in range(4):
+            train_loader, valid_loader, test_loader = \
+                get_dataloaders(cfg.data.size, cfg.data.train_augmentation, cfg.training.batch_size, cfg.data.url,
+                                cfg.data.path, i)
+            trainer.fit(engine, train_dataloader=train_loader, val_dataloaders=valid_loader)
+            trainer.save_checkpoint(f"example_{i}.ckpt")
+    else:
+        train_loader, valid_loader, test_loader = \
+            get_dataloaders(cfg.data.size, cfg.data.train_augmentation, cfg.training.batch_size, cfg.data.url,
+                            cfg.data.path, cfg.data.seg_reduce)
+        trainer.fit(engine, train_dataloader=train_loader, val_dataloaders=valid_loader)
