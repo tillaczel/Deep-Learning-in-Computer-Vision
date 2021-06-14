@@ -74,7 +74,7 @@ class LIDCIDRIDataset(Dataset):
         elif self.seg_reduce == 'all':
             return lambda fname: self._read_seg(fname, range(4))
         elif type(self.seg_reduce) == int:
-            return lambda fname: self._read_seg(fname, [self.seg_reduce])
+            return lambda fname: self._read_seg(fname, [self.seg_reduce])[0]
         else:
             raise ValueError(f'{self.seg_reduce} is not valid segmentation reduction')
 
