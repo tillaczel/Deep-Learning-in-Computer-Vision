@@ -10,7 +10,7 @@ model:
   ensemble: False
 
 training:
-  max_epochs: 30
+  max_epochs: 100
   batch_size: 64
   optimizer:
     name: adam
