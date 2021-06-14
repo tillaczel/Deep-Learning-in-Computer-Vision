@@ -57,13 +57,12 @@ class EngineModule(pl.LightningModule):
 
     def training_epoch_end(self, outputs: list):
         # TESTING PURPOSES ONLY
-        dataset = self.trainer.val_dataloaders[0].dataset[0]
+        dataset = self.trainer.val_dataloaders[0].dataset
         print(dataset)
-        #images = dataset[0]
-        #labels = dataset[1]
-        #batch = next(iter(data_loader))
-        #preds = self.model(dataset)  # Do a forward pass of validation data to get predictions
-        #plot_predictions(dataset, preds)
+        images, segmentations = dataset[0]
+        
+        preds = self.model(images)  # Do a forward pass of validation data to get predictions
+        plot_predictions(dataset, preds)
         
         pass
 
@@ -75,11 +74,11 @@ class EngineModule(pl.LightningModule):
         return {'val_loss': loss}
 
     def validation_epoch_end(self, outputs: list):
-        dataset = self.trainer.val_dataloaders[0].dataset
-        images = dataset[0]
-        labels = dataset[1]
-        preds = self.model(dataset)  # Do a forward pass of validation data to get predictions
-        plot_predictions(dataset, preds)
+        #dataset = self.trainer.val_dataloaders[0].dataset
+        #images = dataset[0]
+        #labels = dataset[1]
+        #preds = self.model(dataset)  # Do a forward pass of validation data to get predictions
+        #plot_predictions(dataset, preds)
      
 
     def configure_optimizers(self):
