@@ -28,6 +28,7 @@ class EngineModule(pl.LightningModule):
 
     def update_and_log_metric(self, metric_name, probs, labels, mode='train'):
         metric = getattr(self.metrics, f"{mode}_{metric_name}")
+        print(probs.device, labels.device)
         metric(probs, labels)
         self.log(f"{mode}_{metric_name}", metric,
                  on_step=False,
