@@ -69,6 +69,8 @@ class EngineModule(pl.LightningModule):
         dataset = self.trainer.val_dataloaders[0].dataset
         images = dataset[0]
         labels = dataset[1]
+        # Do a forward pass of validation data to get predictions
+        
         
 
     def configure_optimizers(self):
