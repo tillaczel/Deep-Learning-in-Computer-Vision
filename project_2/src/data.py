@@ -25,6 +25,7 @@ def extract_data(path_to_zip_file, directory_to_extract_to):
 
 
 def get_dataset(url, data_path):
+    os.mkdir(data_path) if not os.path.isdir(data_path) else None
     raw_file, raw_folder = os.path.join(data_path, 'raw.zip'), os.path.join(data_path, 'raw')
 
     if not os.path.isfile(raw_file):
@@ -33,7 +34,7 @@ def get_dataset(url, data_path):
     else:
         print(f'Data already downloaded at {raw_file}')
 
-    if not os.path.isdir(raw_file):
+    if not os.path.isdir(raw_folder):
         print('Extracting data')
         extract_data(raw_file, raw_folder)
     else:
