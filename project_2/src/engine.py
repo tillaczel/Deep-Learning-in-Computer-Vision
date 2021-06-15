@@ -56,7 +56,7 @@ class EngineModule(pl.LightningModule):
     def validation_step(self, batch, batch_idx):
         images, labels = batch
         seg_hat = self.model(images)
-        loss = self.loss_func(seg_hat, labels.type(torch.float32))
+        loss = self.loss_func(seg_hat, torch.cat((labels.type(torch.float32), labels.type(torch.float32)), dim=1))
 
         self.log('val_loss', loss, on_step=False, on_epoch=True,
                  prog_bar=False, logger=True)
