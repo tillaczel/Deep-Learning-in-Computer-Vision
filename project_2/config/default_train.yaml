@@ -5,7 +5,7 @@ hydra:
 
 model:
   pretrained: true
-  out_dim: 1
+  out_dim: 2
   in_dim: 1
   ensemble: False
 
