@@ -13,8 +13,8 @@ def run_training(cfg: DictConfig):
         fh.write(OmegaConf.to_yaml(cfg))
     wandb.save(cfg_file, base_path=wandb.run.dir)  # this will force sync it
 
-    engine = EngineModule(cfg)
     wandb.save('*.ckpt')  # should keep it up to date
+    engine = EngineModule(cfg)
     trainer = get_trainer(cfg, engine)
 
     if cfg.model.ensemble:
@@ -22,6 +22,8 @@ def run_training(cfg: DictConfig):
 
         os.mkdir(model_path) if not os.path.isdir(model_path) else None
         for i in range(4):
+            engine = EngineModule(cfg)
+            trainer = get_trainer(cfg, engine)
             train_loader, valid_loader, test_loader = \
                 get_dataloaders(cfg.data.size, cfg.data.train_augmentation, cfg.training.batch_size, cfg.data.url,
                                 cfg.data.path, i)
