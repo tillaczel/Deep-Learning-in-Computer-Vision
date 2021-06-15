@@ -25,7 +25,7 @@ def calc_mean(loader, model):
     model.eval()
 
     preds, segs = list(), list()
-    for img, seg in tqdm(loader):
+    for img, seg in tqdm(loader, desc='Mean model prediction'):
         pred = torch.sigmoid(model(img.to(device)))
         pred = pred.detach().cpu()
         preds.append(pred.type(torch.float16))

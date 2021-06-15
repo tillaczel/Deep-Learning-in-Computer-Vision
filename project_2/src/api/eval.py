@@ -24,7 +24,6 @@ def run_eval(cfg: DictConfig):
                         train_cfg.data.url, train_cfg.data.path, seg_reduce='all')
 
     download_file(cfg.run_id, "model.ckpt")
-    train_cfg.model.dropout_rate = 0
     engine = EngineModule.load_from_checkpoint("model.ckpt", config=train_cfg)
 
     calc_mean(test_loader, engine.model)
