@@ -25,9 +25,9 @@ def _plot_pred(input_data, segmentations, predictions_single, predictions_mc, n=
         plot_subplot(axs[i, 1], segmentations[i], 'Segmentation', show_title=show_title)
         plot_subplot(axs[i, 2], predictions_single[i], 'Prediction', show_title=show_title)
         plot_subplot(axs[i, 3], predictions_mc[i], 'MC Dropout', show_title=show_title)
-    plt.subplots_adjust(hspace=0.02)
-    plt.subplots_adjust(wspace=0.001)
-    fname = 'preds_{current_epoch}.png' if current_epoch is not None else 'preds.png'
+    plt.subplots_adjust(hspace=0.01)
+    plt.subplots_adjust(wspace=0.01)
+    fname = f'preds_{current_epoch}.png' if current_epoch is not None else 'preds.png'
     fname = os.path.join(wandb.run.dir, fname)
     plt.savefig(fname)
     wandb.save(fname, base_path=wandb.run.dir)
