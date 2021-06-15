@@ -4,7 +4,7 @@ from torchmetrics import Metric
 def calculate_accuracy(preds, target, threshold=0.5, spatial_dim=(2,3)):
     preds_binary = preds >= threshold
     target = target >= threshold
-    accuracy_per_sample = torch.mean(preds_binary == target, dim=spatial_dim)
+    accuracy_per_sample = torch.mean((preds_binary == target).float(), dim=spatial_dim)
     return accuracy_per_sample
 
 class Accuracy(Metric):
