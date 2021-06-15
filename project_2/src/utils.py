@@ -1,6 +1,7 @@
 import wandb
 import os
 import torch
+from tqdm import tqdm
 
 from project_2.src.engine import EngineModule
 
@@ -25,7 +26,7 @@ def get_state_from_checkpoint(run_id, filename="model.ckpt", replace=True):
 
 def get_ensemble_models(run_id, train_config, n_checkpoints=4):
     models = list()
-    for i in range(n_checkpoints):
+    for i in tqdm(range(n_checkpoints), desc='Downloading models'):
         download_file(run_id, f"ensemble_model_{i}.ckpt")
         engine = EngineModule.load_from_checkpoint(f"ensemble_model_{i}.ckpt", config=train_config)
         models.append(engine.model)

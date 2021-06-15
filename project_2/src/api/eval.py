@@ -29,13 +29,13 @@ def run_eval(cfg: DictConfig):
 
     # calc_inner_expert(test_loader)
 
-    if cfg.is_ensemble or True:
+    if train_cfg.is_ensemble:
         models = get_ensemble_models(cfg.run_id, train_cfg)
         preds, segs = get_ensemble_preds(test_loader, models)
         print("Ensemble scores:")
         print(get_metrics(preds, segs))
         print(calc_all_metrics(torch.mean(preds, dim=1).unsqueeze(1), torch.mean(segs, dim=1)))
-        del preds, segs
+        del preds, segs, models
 
     else:
         download_file(cfg.run_id, "model.ckpt")
