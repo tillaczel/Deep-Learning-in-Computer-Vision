@@ -57,7 +57,7 @@ class EngineModule(pl.LightningModule):
         images, labels = batch
         seg_hat = self.model(images)
         loss = self.loss_func(torch.moveaxis(seg_hat, 1, -1),
-                              torch.moveaxis(torch.cat((labels.type(torch.float32), labels.type(torch.float32)), dim=1), 1, -1))
+                              torch.moveaxis(labels.type(torch.float32), 1, -1))
 
         self.log('val_loss', loss, on_step=False, on_epoch=True,
                  prog_bar=False, logger=True)
