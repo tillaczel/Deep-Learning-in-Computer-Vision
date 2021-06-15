@@ -17,6 +17,7 @@ def get_metrics(pred, seg):
     for i in range(pred.shape[1]):
         for j in range(i+1, 4):
             result = calc_all_metrics(pred[:, i], seg[:, j].to(torch.int))
+            print(result)
             for k, v in result.items():
                 if k in results.keys():
                     results[k] += v/6
