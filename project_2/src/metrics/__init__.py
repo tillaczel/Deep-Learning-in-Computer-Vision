@@ -2,6 +2,7 @@ import torchmetrics
 import pytorch_lightning as pl
 from collections import Iterable
 
+from project_2.src.metrics.accuracy import Accuracy
 from project_2.src.metrics.dice import Dice
 from project_2.src.metrics.iou import IoU
 from project_2.src.metrics.precision import Precision
@@ -13,8 +14,8 @@ class Metrics(pl.LightningModule):
     def __init__(self, main_metrics: Iterable = ("sensitivity", "specificity", "iou", "dice", "acc")):
         super().__init__()
         # TODO: instance average those?
-        self.train_acc = torchmetrics.Accuracy(multiclass=False)
-        self.val_acc = torchmetrics.Accuracy(multiclass=False)
+        self.train_acc = Accuracy(multiclass=False)
+        self.val_acc = Accuracy(multiclass=False)
 
         self.train_sensitivity = Sensitivity(multiclass=False)
         self.val_sensitivity = Sensitivity(multiclass=False)
