@@ -20,8 +20,8 @@ def get_metrics(pred, seg):
     results = dict()
     for i in range(3):
         for j in range(i+1, 4):
-            result = calc_all_metrics(pred[:, i:i], seg[:, j:j].to(torch.int))
             print(pred[:, i:i].shape, seg[:, j:j].shape)
+            result = calc_all_metrics(pred[:, i:i], seg[:, j:j].to(torch.int))
             for k, v in result.items():
                 if k in results.keys():
                     results[k] += v/6
