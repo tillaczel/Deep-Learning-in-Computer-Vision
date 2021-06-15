@@ -4,6 +4,7 @@ from tqdm import tqdm
 
 from . import calc_all_metrics
 
+
 def get_mc_preds(loader, model, n_samples=32):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -20,7 +21,8 @@ def get_mc_preds(loader, model, n_samples=32):
         mc_preds.append(pred.type(torch.float16))
         segs.append(seg)
     model.eval()
-    return torch.stack(mc_preds)[:,:,0], torch.cat(segs, dim=0)
+    return torch.stack(mc_preds)[:, :, 0], torch.cat(segs, dim=0)
+
 
 def get_regular_preds(loader, model):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -37,5 +39,3 @@ def get_regular_preds(loader, model):
         preds.append(pred.type(torch.float16))
         segs.append(seg)
     return torch.cat(preds, dim=0), torch.cat(segs, dim=0)
-
-
