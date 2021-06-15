@@ -9,8 +9,7 @@ from project_2.src.metrics import Metrics
 
 class EngineModule(pl.LightningModule):
 
-    def __init__(self, config: DictConfig,
-                 main_metrics: None):
+    def __init__(self, config: DictConfig, main_metrics=None):
         super().__init__()
         self.config = config
         self.model = Model(n_channels=config.model.in_dim, n_classes=config.model.out_dim)
