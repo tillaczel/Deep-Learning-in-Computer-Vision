@@ -16,7 +16,7 @@ class EngineModule(pl.LightningModule):
         super().__init__()
         self.config = config
         self.model = Model(n_channels=config.model.in_dim, n_classes=config.model.out_dim)
-        self.loss_func = nn.BCEWithLogitsLoss()
+        self.loss_func = nn.BCEWithLogitsLoss(pos_weight=torch.tensor(config.training.loss.pos_weight))
         self.metrics = Metrics(main_metrics)
 
     @property
@@ -37,7 +37,7 @@ class EngineModule(pl.LightningModule):
     def training_step(self, batch, batch_idx):
         images, labels = batch
         seg_hat = self.model(images)
-        loss = self.loss_func(seg_hat, labels.type(torch.float32))
+        loss = self.loss_func(seg_hat.flatten(), labels.type(torch.float32).flatten())
 
         self.log('loss', loss, on_step=False, on_epoch=True,
                  prog_bar=False, logger=True)
