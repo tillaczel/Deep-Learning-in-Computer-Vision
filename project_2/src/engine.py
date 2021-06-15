@@ -46,7 +46,7 @@ class EngineModule(pl.LightningModule):
 
         probs = torch.sigmoid(seg_hat)
         for metric_name in self.metrics.metrics:
-            self.update_and_log_metric(metric_name, probs, labels.type(torch.long), mode='train')
+            self.update_and_log_metric(metric_name, probs, (labels >= 0.5).int(), mode='train')
 
         return {'loss': loss}
 
@@ -64,7 +64,7 @@ class EngineModule(pl.LightningModule):
 
         probs = torch.sigmoid(seg_hat)
         for metric_name in self.metrics.metrics:
-            self.update_and_log_metric(metric_name, probs, labels.type(torch.long), mode='val')
+            self.update_and_log_metric(metric_name, probs, (labels >= 0.5).int(), mode='val')
 
         return {'val_loss': loss}
 
