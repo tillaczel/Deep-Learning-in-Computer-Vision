@@ -14,7 +14,7 @@ wandb.init(project='p3', entity='dlcv')
 
 
 @hydra.main(config_path='config', config_name="default_eval")
-def main(cfg : DictConfig):
+def main(cfg: DictConfig):
     run_eval(cfg)
 
 
