@@ -17,8 +17,7 @@ training:
     lr: 0.001
   loss:
     pos_weight:
-      - 0.5
-      - 1.5
+      - 2
   early_stopping:
     monitor: 'val_loss'
     stopping_patience: 10
