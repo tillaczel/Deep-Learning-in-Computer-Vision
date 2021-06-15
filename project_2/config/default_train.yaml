@@ -36,4 +36,6 @@ data:
   seg_reduce: 'mean'
   train_augmentation:
     - 'random_horizontal_flip'
+    - 'random_vertical_flip'
+    - 'random_rotation'
 overlap: 0.2
