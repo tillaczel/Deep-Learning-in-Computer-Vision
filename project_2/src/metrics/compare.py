@@ -7,11 +7,6 @@ from . import calc_all_metrics
 def calc_inner_expert(loader):
     loader = DataLoader(loader.dataset, batch_size=len(loader.dataset), shuffle=False, num_workers=2)
     img, seg = next(iter(loader))
-    import matplotlib.pyplot as plt
-    for i in range(10):
-        a = torch.mean(seg[i], 0, keepdim=True)
-        plt.imshow(a[0, 0])
-        plt.savefig(f'foo_{i}')
     results = get_metrics(seg, seg)
     print('Inner expert', results)
     return results
