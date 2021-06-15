@@ -5,6 +5,7 @@ import wandb
 from omegaconf import DictConfig, OmegaConf
 
 from project_2.src.metrics import calc_all_metrics
+from project_2.src.metrics.energy import calculate_energy
 from project_2.src.metrics.eval_mc import get_mc_preds, get_regular_preds
 from project_2.src.utils import download_file
 from project_2.src.engine import EngineModule
@@ -33,10 +34,10 @@ def run_eval(cfg: DictConfig):
     else:
         download_file(cfg.run_id, "model.ckpt")
         engine = EngineModule.load_from_checkpoint("model.ckpt", config=train_cfg)
-        mc_preds, segs = get_mc_preds(test_loader, engine.model, n_samples=32)
+        mc_preds, segs = get_mc_preds(test_loader, engine.model, n_samples=16)
         print("MC scores:")
         print(calc_all_metrics(torch.mean(mc_preds, dim=1).unsqueeze(1), torch.mean(segs, dim=1)))
-
+        calculate_energy(mc_preds, segs)
         del mc_preds
         del segs
 
