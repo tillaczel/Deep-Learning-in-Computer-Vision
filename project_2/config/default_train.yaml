@@ -17,9 +17,7 @@ training:
     name: adam
     lr: 0.001
   loss:
-    pos_weight:
-      - 0.5
-      - 1.5
+    pos_weight: 1
   early_stopping:
     monitor: 'val_loss'
     stopping_patience: 10
@@ -39,5 +37,6 @@ data:
   seg_reduce: 'mean'
   train_augmentation:
     - 'random_horizontal_flip'
-    - 'random_crop'
+    - 'random_vertical_flip'
+    - 'random_rotation'
 overlap: 0.2
