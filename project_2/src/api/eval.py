@@ -1,8 +1,8 @@
 import os
-
 import torch
 import wandb
 from omegaconf import DictConfig, OmegaConf
+import pprint
 
 from project_2.src.metrics import calc_all_metrics
 from project_2.src.metrics.energy import calculate_energy
@@ -27,13 +27,13 @@ def run_eval(cfg: DictConfig):
         get_dataloaders(train_cfg.data.size, train_cfg.data.train_augmentation, train_cfg.training.batch_size,
                         train_cfg.data.url, train_cfg.data.path, seg_reduce='all')
 
-    # calc_inner_expert(test_loader)
+    calc_inner_expert(test_loader)
 
     if train_cfg.model.ensemble:
         models = get_ensemble_models(cfg.run_id, train_cfg)
         preds, segs = get_ensemble_preds(test_loader, models)
         print("Ensemble scores:")
-        print(get_metrics(preds, segs))
+        pprint.pprint(get_metrics(preds, segs))
         del preds, segs, models
 
     else:
