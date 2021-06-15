@@ -4,12 +4,10 @@ from torchmetrics import Metric
 def calculate_accuracy(preds, target, threshold=0.5, spatial_dim=(2,3)):
     preds_binary = preds >= threshold
     target = target >= threshold
-    intersection = torch.sum((preds_binary.bool() & target.bool()).int(), dim=spatial_dim)
-    union = torch.sum((preds_binary.bool() | target.bool()).int(), dim=spatial_dim)
-    accuracy_per_sample = (intersection + 1e-10) / (union + 1e-10)  # case 0/0 -> 1/1
+    accuracy_per_sample = torch.mean((preds_binary == target).float(), dim=spatial_dim)
     return accuracy_per_sample
 
-class IoU(Metric):
+class Accuracy(Metric):
     def __init__(self, average='macro', multiclass=False, num_labels=1,
                  threshold=0.5, label_dim=1, spatial_dim=(2,3), dist_sync_on_step=False):
         super().__init__(dist_sync_on_step=dist_sync_on_step)
