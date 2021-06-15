@@ -12,7 +12,7 @@ class EngineModule(pl.LightningModule):
     def __init__(self, config: DictConfig, main_metrics=None):
         super().__init__()
         self.config = config
-        self.model = Model(n_channels=config.model.in_dim, n_classes=config.model.out_dim)
+        self.model = Model(n_channels=config.model.in_dim, n_classes=config.model.out_dim, dropout_rate=config.model.dropout_rate)
         self.loss_func = nn.BCEWithLogitsLoss(pos_weight=torch.tensor([config.training.loss.pos_weight]))
         if main_metrics is not None:
             self.metrics = Metrics(main_metrics)
@@ -69,8 +69,8 @@ class EngineModule(pl.LightningModule):
         return {'val_loss': loss}
 
     def validation_epoch_end(self, outputs: list):
-        plot_predictions(self.trainer.val_dataloaders[0].dataset, self.model, self.device, current_epoch=self.current_epoch)
-
+        plot_predictions(self.trainer.val_dataloaders[0].dataset, self.model, self.device,
+                         current_epoch=self.current_epoch)
         pass
 
     def configure_optimizers(self):
