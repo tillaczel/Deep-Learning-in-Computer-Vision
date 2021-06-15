@@ -28,13 +28,14 @@ def run_eval(cfg: DictConfig):
 
     calc_inner_expert(test_loader)
 
-    download_file(cfg.run_id, "model.ckpt")
-    engine = EngineModule.load_from_checkpoint("model.ckpt", config=train_cfg)
+    #download_file(cfg.run_id, "model.ckpt")
+    #engine = EngineModule.load_from_checkpoint("model.ckpt", config=train_cfg)
 
     #calc_mean(test_loader, engine.model)
     #calc_inner_expert(test_loader)
 
     if cfg.is_ensemble:
+        train_cfg.model.dropout_rate=0
         print(get_ensemble_models(cfg.run_id, train_cfg))
     else:
         download_file(cfg.run_id, "model.ckpt")
