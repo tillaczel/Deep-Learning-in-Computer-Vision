@@ -17,9 +17,9 @@ def calc_inner_expert(loader):
     return results
 
 
-def get_metrics(pred, seg):
+def get_metrics(pred, seg, one_pred=True):
     results = dict()
-    if pred.shape[1] == 1:
+    if one_pred:
         for j in range(1, 4):
             result = calc_all_metrics(pred[:, 0], seg[:, j].to(torch.int))
             for k, v in result.items():

@@ -20,7 +20,7 @@ def get_mc_preds(loader, model, n_samples=32):
         mc_preds.append(pred.type(torch.float16))
         segs.append(seg)
     model.eval()
-    return torch.stack(mc_preds)[:, :, 0], torch.cat(segs, dim=0)
+    return torch.stack(mc_preds), torch.cat(segs, dim=0)
 
 
 def get_regular_preds(loader, model):
