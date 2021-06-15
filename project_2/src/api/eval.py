@@ -1,6 +1,7 @@
 import os
 import wandb
 from omegaconf import DictConfig, OmegaConf
+import torch
 
 from project_2.src.utils import download_file
 from project_2.src.engine import EngineModule
@@ -23,7 +24,7 @@ def run_eval(cfg: DictConfig):
                         train_cfg.data.url, train_cfg.data.path, 'all')
 
     for img, seg in test_loader:
-        calc_all_metrics(seg[0], seg[1])
+        calc_all_metrics(seg[0], seg[1].to(torch.int))
 
     download_file(cfg.run_id, "model.ckpt")
     engine = EngineModule.load_from_checkpoint("model.ckpt", config=train_cfg)
