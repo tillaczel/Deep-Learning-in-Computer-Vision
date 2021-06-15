@@ -13,7 +13,7 @@ def get_mc_preds(loader, model, n_samples=32):
 
     loader = DataLoader(loader.dataset, batch_size=1, shuffle=False, num_workers=2)
     mc_preds, segs = list(), list()
-    for img, seg in tqdm(loader):
+    for img, seg in tqdm(loader, desc='Getting preds'):
         img_repeated = img.repeat((n_samples, 1, 1, 1))
         pred = torch.sigmoid(model(img_repeated.to(device)))
         pred = pred.detach().cpu()
@@ -30,7 +30,7 @@ def get_regular_preds(loader, model):
     model.eval()
 
     preds, segs = list(), list()
-    for img, seg in tqdm(loader):
+    for img, seg in tqdm(loader, desc='Getting preds'):
         pred = torch.sigmoid(model(img.to(device)))
         pred = pred.detach().cpu()
         preds.append(pred.type(torch.float16))
@@ -41,16 +41,17 @@ def get_regular_preds(loader, model):
 def get_ensemble_preds(loader, models):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-    for model in models:
+    segs = next(iter(DataLoader(loader.dataset, batch_size=len(loader.dataset), shuffle=False, num_workers=2)))[1]
+    preds = list()
+    for i, model in enumerate(models):
         model.to(device)
         model.eval()
-
-        preds, segs = list(), list()
-        for img, seg in tqdm(loader):
+        preds_i = list()
+        for img, seg in tqdm(loader, desc=f'Getting preds {i}'):
             pred = torch.sigmoid(model(img.to(device)))
             pred = pred.detach().cpu()
-            preds.append(pred.type(torch.float16))
-            segs.append(seg)
-        preds, segs = torch.cat(preds, dim=0), torch.cat(segs, dim=0)
-        print(preds.shape, segs.shape)
+            preds_i.append(pred.type(torch.float16))
+        preds.append(torch.cat(preds_i, dim=0))
+    preds = torch.stack(preds, dim=1)
+    print(preds.shape, segs.shape)
     return None
