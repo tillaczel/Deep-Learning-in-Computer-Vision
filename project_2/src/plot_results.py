@@ -8,6 +8,10 @@ import numpy as np
 def plot_predictions(dataset, model, device, n=6, current_epoch=None):
     idxs = np.random.choice(np.arange(len(dataset)), replace=False, size=n)
     input_data, segmentations, predictions = get_data(dataset, model, device, idxs)
+    _plot_pred(input_data, segmentations, predictions, n=n, current_epoch=current_epoch)
+
+
+def _plot_pred(input_data, segmentations, predictions, n=6, current_epoch=None):
     fig, axs = plt.subplots(n, 3, figsize=(15, n*5))
     for i in range(n):
         plot_subplot(axs[i, 0], input_data[i], 'Input')
