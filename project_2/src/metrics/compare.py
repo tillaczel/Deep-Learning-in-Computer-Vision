@@ -10,7 +10,7 @@ def calc_inner_expert(loader):
     import matplotlib.pyplot as plt
     for i in range(10):
         a = torch.mean(seg[i], 0, keepdim=True)
-        plt.imshow(a[0])
+        plt.imshow(a[0, 0])
         plt.show()
     results = get_metrics(seg, seg)
     print('Inner expert', results)
