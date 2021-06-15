@@ -35,7 +35,7 @@ def get_regular_preds(loader, model):
         pred = pred.detach().cpu()
         preds.append(pred.type(torch.float16))
         segs.append(seg)
-    return torch.cat(preds, dim=0), torch.cat(segs, dim=0)
+    return torch.cat(preds, dim=0).unsqueeze(2), torch.cat(segs, dim=0)
 
 
 def get_ensemble_preds(loader, models):

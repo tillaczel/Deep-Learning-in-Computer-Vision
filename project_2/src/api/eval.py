@@ -34,7 +34,7 @@ def run_eval(cfg: DictConfig):
         models = get_ensemble_models(cfg.run_id, train_cfg)
         preds, segs = get_ensemble_preds(test_loader, models)
         print("Ensemble scores:")
-        pprint.pprint(get_metrics(preds, segs, one_pred=False))
+        pprint.pprint(get_metrics(preds, segs))
         del preds, segs, models
 
     else:
