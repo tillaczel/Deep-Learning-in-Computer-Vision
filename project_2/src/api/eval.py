@@ -34,8 +34,10 @@ def run_eval(cfg: DictConfig):
         models = get_ensemble_models(cfg.run_id, train_cfg)
         preds, segs = get_ensemble_preds(test_loader, models)
         print(preds.shape)
+        print("Ensemble single scores:")
+        pprint.pprint(get_metrics(preds, segs, one_pred=False))
         print("Ensemble scores:")
-        pprint.pprint(get_metrics(preds, segs))
+        pprint.pprint(get_metrics(torch.mean(preds, dim=1, keepdim=True), segs))
         del preds, segs, models
 
     else:
