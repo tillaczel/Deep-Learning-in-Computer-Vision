@@ -2,6 +2,18 @@ from torch import nn
 
 from project_2.src.model.unet_parts import DoubleConv, Down, Up, OutConv
 
+def dropout_on(layer):
+    children = layer.children()
+    # recurse over all children
+    for child in children:
+        dropout_on(child)
+
+    if isinstance(layer, (nn.Dropout,
+                          nn.Dropout2d,
+                          nn.Dropout3d,
+                          nn.AlphaDropout)):
+        layer.train()
+
 
 class Model(nn.Module):
     def __init__(self, n_channels, n_classes, dropout_rate=0, bilinear=True):
@@ -38,5 +50,4 @@ class Model(nn.Module):
 
     def eval_with_dropout(self):
         self.eval()
-        # for
-        raise NotImplementedError()
+        dropout_on(self)
