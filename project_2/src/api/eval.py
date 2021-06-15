@@ -10,7 +10,7 @@ from project_2.src.metrics.get_preds import get_mc_preds, get_regular_preds, get
 from project_2.src.utils import download_file, get_ensemble_models
 from project_2.src.engine import EngineModule
 from project_2.src.data import get_dataloaders
-from project_2.src.metrics.compare import calc_inner_expert, calc_mean
+from project_2.src.metrics.compare import calc_inner_expert, get_metrics
 
 
 def run_eval(cfg: DictConfig):
@@ -28,25 +28,26 @@ def run_eval(cfg: DictConfig):
                         train_cfg.data.url, train_cfg.data.path, seg_reduce='all')
 
     # calc_inner_expert(test_loader)
-    models = get_ensemble_models(cfg.run_id, train_cfg)
-    get_ensemble_preds(test_loader, models)
 
     if cfg.is_ensemble:
-        raise NotImplementedError
+        models = get_ensemble_models(cfg.run_id, train_cfg)
+        preds, segs = get_ensemble_preds(test_loader, models)
+        print("Ensemble scores:")
+        print(get_metrics(preds, segs))
+        print(calc_all_metrics(torch.mean(preds, dim=1).unsqueeze(1), torch.mean(segs, dim=1)))
+        del preds, segs
+
     else:
         download_file(cfg.run_id, "model.ckpt")
         engine = EngineModule.load_from_checkpoint("model.ckpt", config=train_cfg)
-        mc_preds, segs = get_mc_preds(test_loader, engine.model, n_samples=16)
+        preds, segs = get_mc_preds(test_loader, engine.model, n_samples=16)
         print("MC scores:")
-        print(calc_all_metrics(torch.mean(mc_preds, dim=1).unsqueeze(1), torch.mean(segs, dim=1)))
-        calculate_energy(mc_preds, segs)
-        del mc_preds
-        del segs
+        print(calc_all_metrics(torch.mean(preds, dim=1).unsqueeze(1), torch.mean(segs, dim=1)))
+        calculate_energy(preds, segs)
+        del preds, segs
 
-        single_preds, segs = get_regular_preds(test_loader, engine.model)
-        print("regular scores:")
-        print(calc_all_metrics(torch.mean(single_preds, dim=1).unsqueeze(1), torch.mean(segs, dim=1)))
+        preds, segs = get_regular_preds(test_loader, engine.model)
+        print("Regular scores:")
+        print(calc_all_metrics(torch.mean(preds, dim=1).unsqueeze(1), torch.mean(segs, dim=1)))
 
-        del single_preds
-        del segs
-    calc_mean(test_loader, engine.model)
+        del preds, segs

@@ -53,5 +53,4 @@ def get_ensemble_preds(loader, models):
             preds_i.append(pred.type(torch.float16))
         preds.append(torch.cat(preds_i, dim=0))
     preds = torch.stack(preds, dim=1)
-    print(preds.shape, segs.shape)
-    return None
+    return preds, segs
