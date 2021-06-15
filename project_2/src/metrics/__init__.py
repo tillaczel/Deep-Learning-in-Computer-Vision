@@ -40,6 +40,7 @@ def calc_all_metrics(probs, labels, mode='train'):
     for metric_name in metrics.metrics:
         metric = getattr(metrics, f"{mode}_{metric_name}")
         results[metric_name] = float(metric(probs, labels).cpu().numpy())
+    del metrics
     return results
 
 
