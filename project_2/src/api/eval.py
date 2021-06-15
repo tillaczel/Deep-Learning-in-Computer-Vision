@@ -5,6 +5,7 @@ from omegaconf import DictConfig, OmegaConf
 from project_2.src.utils import download_file
 from project_2.src.engine import EngineModule
 from project_2.src.data import get_dataloaders
+from project_2.src.metrics import calc_all_metrics
 
 
 def run_eval(cfg: DictConfig):
@@ -20,6 +21,8 @@ def run_eval(cfg: DictConfig):
     train_loader, valid_loader, test_loader = \
         get_dataloaders(train_cfg.data.size, train_cfg.data.train_augmentation, train_cfg.training.batch_size,
                         train_cfg.data.url, train_cfg.data.path, 'all')
+
+    calc_all_metrics(test_loader[0][1][0], test_loader[0][1][1])
 
     download_file(cfg.run_id, "model.ckpt")
     engine = EngineModule.load_from_checkpoint("model.ckpt", config=train_cfg)
