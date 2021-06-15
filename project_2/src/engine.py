@@ -16,7 +16,7 @@ class EngineModule(pl.LightningModule):
         super().__init__()
         self.config = config
         self.model = Model(n_channels=config.model.in_dim, n_classes=config.model.out_dim)
-        self.loss_func = nn.BCEWithLogitsLoss(pos_weight=torch.tensor(config.training.loss.pos_weight))
+        self.loss_func = nn.BCEWithLogitsLoss()
         self.metrics = Metrics(main_metrics)
 
     @property
