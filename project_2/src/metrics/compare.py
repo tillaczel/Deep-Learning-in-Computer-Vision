@@ -4,14 +4,24 @@ from torch.utils.data import DataLoader
 from . import calc_all_metrics
 
 
-def get_data():
-    pass
+def get_data(loader):
+    loader = DataLoader(loader.dataset, batch_size=len(loader.dataset), shuffle=False, num_workers=2)
+    img, seg = next(iter(loader))
+    return img, seg
 
 
 def calc_inner_expert(loader):
-    loader = DataLoader(loader.dataset, batch_size=len(loader.dataset), shuffle=False, num_workers=2)
-    img, seg = next(iter(loader))
+    img, seg = get_data(loader)
     results = get_metrics(seg, seg)
+    print('Inner expert', results)
+    return results
+
+
+def calc_mean(loader, model):
+    img, seg = get_data(loader)
+    pred = model(seg)
+    print(pred.shape)
+    results = get_metrics(pred, seg)
     print('Inner expert', results)
     return results
 

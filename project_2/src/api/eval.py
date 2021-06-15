@@ -5,7 +5,7 @@ from omegaconf import DictConfig, OmegaConf
 from project_2.src.utils import download_file
 from project_2.src.engine import EngineModule
 from project_2.src.data import get_dataloaders
-from project_2.src.metrics.compare import calc_inner_expert
+from project_2.src.metrics.compare import calc_inner_expert, calc_mean
 
 
 def run_eval(cfg: DictConfig):
@@ -22,6 +22,7 @@ def run_eval(cfg: DictConfig):
         get_dataloaders(train_cfg.data.size, train_cfg.data.train_augmentation, train_cfg.training.batch_size,
                         train_cfg.data.url, train_cfg.data.path, 'all')
 
+    calc_mean(test_loader)
     calc_inner_expert(test_loader)
 
     download_file(cfg.run_id, "model.ckpt")
