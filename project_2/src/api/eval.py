@@ -38,16 +38,15 @@ def run_eval(cfg: DictConfig):
         del preds, segs, models
 
     else:
-        download_file(cfg.run_id, "model.ckpt")
-        engine = EngineModule.load_from_checkpoint("model.ckpt", config=train_cfg)
+        download_file(cfg.run_id, "model-v1.ckpt")
+        engine = EngineModule.load_from_checkpoint("model-v1.ckpt", config=train_cfg)
         preds, segs = get_mc_preds(test_loader, engine.model, n_samples=16)
         print("MC scores:")
-        print(calc_all_metrics(torch.mean(preds, dim=1).unsqueeze(1), torch.mean(segs, dim=1)))
+        pprint.pprint(get_metrics(preds, segs))
         calculate_energy(preds, segs)
         del preds, segs
 
         preds, segs = get_regular_preds(test_loader, engine.model)
         print("Regular scores:")
-        print(calc_all_metrics(torch.mean(preds, dim=1).unsqueeze(1), torch.mean(segs, dim=1)))
-
+        pprint.pprint(get_metrics(preds, segs))
         del preds, segs

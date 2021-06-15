@@ -36,6 +36,3 @@ def run_training(cfg: DictConfig):
             get_dataloaders(cfg.data.size, cfg.data.train_augmentation, cfg.training.batch_size, cfg.data.url,
                             cfg.data.path, cfg.data.seg_reduce)
         trainer.fit(engine, train_dataloader=train_loader, val_dataloaders=valid_loader)
-        model_name = os.path.join(wandb.run.dir, f"model.ckpt")
-        trainer.save_checkpoint(model_name)
-        wandb.save(model_name, base_path=wandb.run.dir)
