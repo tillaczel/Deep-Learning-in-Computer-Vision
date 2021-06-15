@@ -4,6 +4,10 @@ from torch.utils.data import DataLoader
 from . import calc_all_metrics
 
 
+def get_data():
+    pass
+
+
 def calc_inner_expert(loader):
     loader = DataLoader(loader.dataset, batch_size=len(loader.dataset), shuffle=False, num_workers=2)
     img, seg = next(iter(loader))
