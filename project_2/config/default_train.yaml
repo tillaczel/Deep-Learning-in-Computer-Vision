@@ -16,8 +16,7 @@ training:
     name: adam
     lr: 0.001
   loss:
-    pos_weight:
-      - 2
+    pos_weight: 2
   early_stopping:
     monitor: 'val_loss'
     stopping_patience: 10
