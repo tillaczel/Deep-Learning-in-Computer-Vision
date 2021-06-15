@@ -9,8 +9,8 @@ def calc_inner_expert(loader):
     for img, seg in loader:
         results = get_metrics(seg, seg)
     import numpy as np
-    seg = torch.tensor(np.ones((100, 100)))
-    seg[:50] = 0
+    seg = torch.tensor(np.ones((1, 1, 100, 100)))
+    seg[:, :, 50] = 0
     results = get_metrics(seg, seg.T)
     print('Inner expert', results)
     return results
