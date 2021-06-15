@@ -26,11 +26,11 @@ class Dice(Metric):
 
     def update(self, preds: torch.Tensor, target: torch.Tensor):
         dice_per_sample = calculate_dice(preds, target, threshold=self.threshold, spatial_dim=self.spatial_dim)
-        self.iou_sum += torch.sum(dice_per_sample, dim=0) # sum over batch
+        self.dice_sum += torch.sum(dice_per_sample, dim=0) # sum over batch
         self.total += target.shape[0] # batch
 
     def compute(self):
         if self.average == 'macro':
             return torch.mean(self.dice_sum) / self.total
         else:
-            return self.iou_sum / self.total
+            return self.dice_sum / self.total
