@@ -20,10 +20,11 @@ def plot_predictions(dataset, model, device, n=6, current_epoch=None):
 def _plot_pred(input_data, segmentations, predictions_single, predictions_mc, n=6, current_epoch=None):
     fig, axs = plt.subplots(n, 4, figsize=(18, n*5))
     for i in range(n):
-        plot_subplot(axs[i, 0], input_data[i], 'Input')
-        plot_subplot(axs[i, 1], segmentations[i], 'Segmentation')
-        plot_subplot(axs[i, 2], predictions_single[i], 'Prediction')
-        plot_subplot(axs[i, 3], predictions_mc[i], 'MC Dropout')
+        show_title = i == 0
+        plot_subplot(axs[i, 0], input_data[i], 'Input', show_title=show_title)
+        plot_subplot(axs[i, 1], segmentations[i], 'Segmentation', show_title=show_title)
+        plot_subplot(axs[i, 2], predictions_single[i], 'Prediction', show_title=show_title)
+        plot_subplot(axs[i, 3], predictions_mc[i], 'MC Dropout', show_title=show_title)
     plt.subplots_adjust(hspace=0.02)
     plt.subplots_adjust(wspace=0.001)
     fname = 'preds_{current_epoch}.png' if current_epoch is not None else 'preds.png'
@@ -32,9 +33,10 @@ def _plot_pred(input_data, segmentations, predictions_single, predictions_mc, n=
     wandb.save(fname, base_path=wandb.run.dir)
 
 
-def plot_subplot(ax, img, title):
+def plot_subplot(ax, img, title, show_title=True):
     ax.imshow(img, cmap="gray")
-    ax.set_title(title)
+    if show_title:
+        ax.set_title(title)
     ax.axis('off')
 
 
