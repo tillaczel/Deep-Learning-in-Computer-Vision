@@ -3,9 +3,10 @@ from torchmetrics import Metric
 
 def calculate_specificity(preds, target, threshold=0.5, spatial_dim=(2,3)):
     preds_binary = preds >= threshold
-    intersection = torch.sum((preds_binary.bool() & target.bool()).int(), dim=spatial_dim)
-    preds_sum = torch.sum(preds_binary.bool().int(), dim=spatial_dim)
-    specificity_per_sample = (intersection + 1e-10) / (preds_sum + 1e-10)  # case 0/0 -> 1/1
+    target = target >= threshold
+    intersection = torch.sum((torch.logical_not(preds_binary.bool()) & torch.logical_not(target.bool())).int(), dim=spatial_dim)
+    target_sum = torch.sum(torch.logical_not(target.bool()).int(), dim=spatial_dim)
+    specificity_per_sample = (intersection + 1e-10) / (target_sum + 1e-10)  # case 0/0 -> 1/1
     return specificity_per_sample
 
 class Specificity(Metric):

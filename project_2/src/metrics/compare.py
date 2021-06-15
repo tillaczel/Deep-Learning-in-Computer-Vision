@@ -1,18 +1,38 @@
 import torch
 from torch.utils.data import DataLoader
+from tqdm import tqdm
 
 from . import calc_all_metrics
 
 
-def get_data():
-    pass
+def get_data(loader):
+    loader = DataLoader(loader.dataset, batch_size=len(loader.dataset), shuffle=False, num_workers=2)
+    img, seg = next(iter(loader))
+    return img, seg
 
 
 def calc_inner_expert(loader):
-    loader = DataLoader(loader.dataset, batch_size=len(loader.dataset), shuffle=False, num_workers=2)
-    img, seg = next(iter(loader))
+    img, seg = get_data(loader)
     results = get_metrics(seg, seg)
     print('Inner expert', results)
+    return results
+
+
+def calc_mean(loader, model):
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+    model.to(device)
+    model.eval()
+
+    preds, segs = list(), list()
+    for img, seg in tqdm(loader, desc='Mean model prediction'):
+        pred = torch.sigmoid(model(img.to(device)))
+        pred = pred.detach().cpu()
+        preds.append(pred.type(torch.float16))
+        segs.append(seg)
+    preds, segs = torch.cat(preds, dim=0).unsqueeze(1), torch.cat(segs, dim=0)
+    results = get_metrics(preds, segs)
+    print('Mean model', results)
     return results
 
 
