@@ -7,7 +7,7 @@ import numpy as np
 
 def plot_predictions(dataset, model, device, n=6, current_epoch=None):
     # idxs = np.random.choice(np.arange(len(dataset)), replace=False, size=n)
-    idxs = [114, 140, 670, 736, 235, 683, 937, 204, 1900, 1383, 913, 1844, 231, 318, 234, 137, 598][:n]
+    idxs = [115, 141, 671, 737, 238, 683, 937, 204, 1900, 1383, 913, 1844, 231, 318, 234, 137, 598][:n]
     _, _, predictions = get_data(dataset, model, device, idxs, mode='single')
     input_data, segmentations, predictions_mc = get_data(dataset, model, device, idxs, mode='mc_dropout')
     # average dropout/ensemble
