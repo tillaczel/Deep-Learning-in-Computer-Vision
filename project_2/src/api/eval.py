@@ -6,7 +6,7 @@ from project_2.src.utils import download_file
 from project_2.src.engine import EngineModule
 
 
-def run_eal(cfg: DictConfig):
+def run_eval(cfg: DictConfig):
     # load experiment config
     download_file(cfg.run_id, 'train_config.yaml')
     train_cfg = OmegaConf.load('train_config.yaml')

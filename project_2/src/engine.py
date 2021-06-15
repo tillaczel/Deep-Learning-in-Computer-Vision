@@ -15,7 +15,7 @@ class EngineModule(pl.LightningModule):
                  main_metrics: Iterable = ("sensitivity", "specificity", "iou", "dice", "acc")):
         super().__init__()
         self.config = config
-        self.model = Model(n_channels=config.model.in_dim, n_classes=config.model.out_dim)
+        self.model = Model(n_channels=config.model.in_dim, n_classes=config.model.out_dim, dropout_rate=config.model.dropout_rate)
         self.loss_func = nn.BCEWithLogitsLoss()
         self.metrics = Metrics(main_metrics)
 
