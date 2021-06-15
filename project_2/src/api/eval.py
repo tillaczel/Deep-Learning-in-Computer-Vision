@@ -22,11 +22,11 @@ def run_eval(cfg: DictConfig):
         get_dataloaders(train_cfg.data.size, train_cfg.data.train_augmentation, train_cfg.training.batch_size,
                         train_cfg.data.url, train_cfg.data.path, 'all')
 
-    calc_mean(test_loader)
-    calc_inner_expert(test_loader)
-
     download_file(cfg.run_id, "model.ckpt")
     engine = EngineModule.load_from_checkpoint("model.ckpt", config=train_cfg)
+
+    calc_mean(test_loader, engine.model)
+    calc_inner_expert(test_loader)
 
 
 
