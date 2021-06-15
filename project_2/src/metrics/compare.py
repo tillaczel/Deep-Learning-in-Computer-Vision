@@ -9,7 +9,7 @@ def calc_inner_expert(loader):
     img, seg = next(iter(loader))
     import matplotlib.pyplot as plt
     for i in range(10):
-        a = torch.mean(seg[i], 0, keepdim=1)
+        a = torch.mean(seg[i], 0, keepdim=True)
         plt.imshow(a[0])
         plt.show()
     results = get_metrics(seg, seg)
@@ -22,7 +22,6 @@ def get_metrics(pred, seg):
     for i in range(pred.shape[1]):
         for j in range(i+1, 4):
             result = calc_all_metrics(pred[:, i], seg[:, j].to(torch.int))
-            print(result)
             for k, v in result.items():
                 if k in results.keys():
                     results[k] += v/6
