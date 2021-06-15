@@ -33,6 +33,7 @@ def run_eval(cfg: DictConfig):
     if train_cfg.model.ensemble:
         models = get_ensemble_models(cfg.run_id, train_cfg)
         preds, segs = get_ensemble_preds(test_loader, models)
+        print(preds.shape)
         print("Ensemble scores:")
         pprint.pprint(get_metrics(preds, segs))
         del preds, segs, models
@@ -48,6 +49,5 @@ def run_eval(cfg: DictConfig):
 
         preds, segs = get_regular_preds(test_loader, engine.model)
         print("Regular scores:")
-        print(preds.shape, segs.shape)
         pprint.pprint(get_metrics(preds, segs))
         del preds, segs
