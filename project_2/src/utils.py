@@ -2,8 +2,7 @@ import wandb
 import os
 import torch
 
-import matplotlib.pyplot as plt
-import numpy as np
+from project_2.src.engine import EngineModule
 
 
 def download_file(run_id, filename):
@@ -18,8 +17,16 @@ def download_file(run_id, filename):
 
 
 def get_state_from_checkpoint(run_id, filename="model.ckpt", replace=True):
-  if not os.path.isfile(filename) or replace:
-    download_file(run_id, filename)
-  chpt = torch.load(filename, map_location=torch.device('cpu'))
-  return chpt['state_dict']
+    if not os.path.isfile(filename) or replace:
+        download_file(run_id, filename)
+    chpt = torch.load(filename, map_location=torch.device('cpu'))
+    return chpt['state_dict']
 
+
+def get_ensemble_models(run_id, train_config, n_checkpoints=4):
+    models = list()
+    for i in range(n_checkpoints):
+        download_file(run_id, f"ensemble_model_{i}.ckpt")
+        engine = EngineModule.load_from_checkpoint(f"ensemble_model_{i}.ckpt", config=train_config)
+        models.append(engine.model)
+    return models

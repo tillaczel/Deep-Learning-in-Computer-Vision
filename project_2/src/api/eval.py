@@ -6,7 +6,7 @@ from omegaconf import DictConfig, OmegaConf
 
 from project_2.src.metrics import calc_all_metrics
 from project_2.src.metrics.eval_mc import get_mc_preds, get_regular_preds
-from project_2.src.utils import download_file
+from project_2.src.utils import download_file, get_ensemble_models
 from project_2.src.engine import EngineModule
 from project_2.src.data import get_dataloaders
 from project_2.src.metrics.compare import calc_inner_expert, calc_mean
@@ -31,11 +31,11 @@ def run_eval(cfg: DictConfig):
     download_file(cfg.run_id, "model.ckpt")
     engine = EngineModule.load_from_checkpoint("model.ckpt", config=train_cfg)
 
-    calc_mean(test_loader, engine.model)
-    calc_inner_expert(test_loader)
+    #calc_mean(test_loader, engine.model)
+    #calc_inner_expert(test_loader)
 
     if cfg.is_ensemble:
-        raise NotImplementedError
+        print(get_ensemble_models(cfg.run_id, train_cfg))
     else:
         download_file(cfg.run_id, "model.ckpt")
         engine = EngineModule.load_from_checkpoint("model.ckpt", config=train_cfg)
