@@ -32,5 +32,5 @@ def calc_all_metrics(probs, labels, mode='train'):
     metrics = Metrics()
     for metric_name in metrics.metrics:
         metric = getattr(metrics, f"{mode}_{metric_name}")
-        metric(probs, labels)
-        print(metric)
+        print(metric(probs, labels))
+
