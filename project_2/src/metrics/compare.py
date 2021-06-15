@@ -6,7 +6,7 @@ from . import calc_all_metrics
 
 def calc_inner_expert(loader):
     loader = DataLoader(loader.dataset, batch_size=len(loader.dataset), shuffle=False, num_workers=2)
-    img, seg = next(loader)
+    img, seg = next(iter(loader))
     results = get_metrics(seg, seg)
     print('Inner expert', results)
     return results
