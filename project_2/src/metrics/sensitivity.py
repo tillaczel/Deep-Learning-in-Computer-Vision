@@ -3,8 +3,9 @@ from torchmetrics import Metric
 
 def calculate_sensitivity(preds, target, threshold=0.5, spatial_dim=(2,3)):
     preds_binary = preds >= threshold
-    intersection = torch.sum((preds_binary.bool() & target.bool()).int(), dim=spatial_dim)
-    target_sum = torch.sum(target.bool().int(), dim=spatial_dim)
+    target_binary = target >= threshold
+    intersection = torch.sum((preds_binary.bool() & target_binary.bool()).int(), dim=spatial_dim)
+    target_sum = torch.sum(target_binary.bool().int(), dim=spatial_dim)
     sensitivity_per_sample = (intersection + 1e-10) / (target_sum + 1e-10)  # case 0/0 -> 1/1
     return sensitivity_per_sample
 
