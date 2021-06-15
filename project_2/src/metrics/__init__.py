@@ -33,6 +33,6 @@ def calc_all_metrics(probs, labels, mode='train'):
     results = dict()
     for metric_name in metrics.metrics:
         metric = getattr(metrics, f"{mode}_{metric_name}")
-        results[metric_name] = metric(probs, labels).cpu().numpy()
+        results[metric_name] = metric(probs, labels).cpu().numpy()[0]
     print(results)
 
