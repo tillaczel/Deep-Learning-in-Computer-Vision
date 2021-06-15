@@ -23,7 +23,7 @@ class Sensitivity(Metric):
         self.multiclass = multiclass
         self.num_classes = num_labels
         self.add_state("sensitivity_sum", default=torch.zeros(num_labels), dist_reduce_fx="sum")
-        self.add_state("total", default=torch.tensor(0), dist_reduce_fx="sum")
+        self.add_state("total", default=torch.zeros(num_labels), dist_reduce_fx="sum")
 
     def update(self, preds: torch.Tensor, target: torch.Tensor):
         # preds, target = self._input_format(preds, target)
@@ -34,6 +34,6 @@ class Sensitivity(Metric):
 
     def compute(self):
         if self.average == 'macro':
-            return torch.mean(self.sensitivity_sum) / self.total
+            return torch.mean(self.sensitivity_sum / (self.total + 1e-10))
         else:
-            return self.sensitivity_sum / self.total
+            return self.sensitivity_sum / (self.total + 1e-10)
