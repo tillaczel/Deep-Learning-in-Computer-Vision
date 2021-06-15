@@ -28,6 +28,13 @@ def run_eval(cfg: DictConfig):
 
     calc_inner_expert(test_loader)
 
+    print('Sanity check')
+    a = torch.zeros((1,1,100,100))
+    b = torch.zeros((1,1,100,100))
+    a[:,:,:,:50] = 1
+    b[:,:,:50,:] = 1
+    print(calc_all_metrics(a, b))
+
     if cfg.is_ensemble:
         raise NotImplementedError
     else:
@@ -40,6 +47,7 @@ def run_eval(cfg: DictConfig):
 
         single_preds, segs2 = get_regular_preds(test_loader, engine.model)
         print("\n single preds, segs", single_preds.shape, segs2.shape)
+
 
         print(calc_all_metrics(torch.mean(mc_preds, dim=1), torch.mean(segs, dim=1)))
         print(calc_all_metrics(torch.mean(single_preds, dim=1), torch.mean(segs2, dim=1)))
