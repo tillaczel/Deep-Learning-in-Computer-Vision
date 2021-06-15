@@ -1,5 +1,3 @@
-from collections import Iterable
-
 from omegaconf import DictConfig
 import pytorch_lightning as pl
 import torch
@@ -11,13 +9,15 @@ from project_2.src.metrics import Metrics
 
 class EngineModule(pl.LightningModule):
 
-    def __init__(self, config: DictConfig,
-                 main_metrics: Iterable = ("sensitivity", "specificity", "iou", "dice", "acc")):
+    def __init__(self, config: DictConfig, main_metrics=None):
         super().__init__()
         self.config = config
         self.model = Model(n_channels=config.model.in_dim, n_classes=config.model.out_dim)
         self.loss_func = nn.BCEWithLogitsLoss(pos_weight=torch.tensor([config.training.loss.pos_weight]))
-        self.metrics = Metrics(main_metrics)
+        if main_metrics is not None:
+            self.metrics = Metrics(main_metrics)
+        else:
+            self.metrics = Metrics()
 
     @property
     def lr(self):
