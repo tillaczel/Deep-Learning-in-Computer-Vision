@@ -34,35 +34,13 @@ def run_eval(cfg: DictConfig):
         download_file(cfg.run_id, "model.ckpt")
         engine = EngineModule.load_from_checkpoint("model.ckpt", config=train_cfg)
         mc_preds, segs = get_mc_preds(test_loader, engine.model, n_samples=32)
-        print("\n preds, segs", mc_preds.shape, segs.shape)
+        print("MC scores:")
+        print(calc_all_metrics(torch.mean(mc_preds, dim=1).unsqueeze(1), torch.mean(segs, dim=1)))
 
         # tODO: make this nicer
 
-        single_preds, segs2 = get_regular_preds(test_loader, engine.model)
-        print("\n single preds, segs", single_preds.shape, segs2.shape)
-
-
-        print(calc_all_metrics(torch.mean(mc_preds, dim=1), torch.mean(segs, dim=1)))
-        print(calc_all_metrics(torch.mean(single_preds, dim=1), torch.mean(segs2, dim=1)))
+        single_preds, segs = get_regular_preds(test_loader, engine.model)
+        print("regular scores:")
+        print(calc_all_metrics(torch.mean(single_preds, dim=1).unsqueeze(1), torch.mean(segs, dim=1)))
 
     calc_mean(test_loader, engine.model)
-    calc_inner_expert(test_loader)
-
-    if cfg.is_ensemble:
-        raise NotImplementedError
-    else:
-        download_file(cfg.run_id, "model.ckpt")
-        engine = EngineModule.load_from_checkpoint("model.ckpt", config=train_cfg)
-        mc_preds, segs = get_mc_preds(test_loader, engine.model, n_samples=32)
-        print("\n preds, segs", mc_preds.shape, segs.shape)
-
-        # tODO: make this nicer
-
-        single_preds, segs2 = get_regular_preds(test_loader, engine.model)
-        print("\n single preds, segs", single_preds.shape, segs2.shape)
-
-        print(calc_all_metrics(torch.mean(mc_preds, dim=1), torch.mean(segs, dim=1)))
-        print(calc_all_metrics(torch.mean(single_preds, dim=1), torch.mean(segs2, dim=1)))
-
-
-
