@@ -8,3 +8,4 @@ data:
   path: './data/'
   train_augmentation: []
 batch_size: 64
+is_ensemble: false
