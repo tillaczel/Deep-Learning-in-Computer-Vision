@@ -61,7 +61,7 @@ def get_data_single(dataset, model, device, idxs):
     for idx in idxs:
         img, seg = dataset[idx]
         pred = torch.sigmoid(model(img.unsqueeze(0).to(device)))  # Do a forward pass of validation data to get predictions
-        images.append(img.unsqueeze(0)), segmentations.append(seg), preds.append(pred)
+        images.append(img), segmentations.append(seg), preds.append(pred)
 
     return refactor_outputs(images, segmentations, preds)
 
