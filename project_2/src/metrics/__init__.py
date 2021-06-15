@@ -4,6 +4,8 @@ from collections import Iterable
 
 from project_2.src.metrics.dice import Dice
 from project_2.src.metrics.iou import IoU
+from project_2.src.metrics.sensitivity import Sensitivity
+from project_2.src.metrics.specificity import Specificity
 
 
 class Metrics(pl.LightningModule):
@@ -13,10 +15,10 @@ class Metrics(pl.LightningModule):
         self.train_acc = torchmetrics.Accuracy(multiclass=False)
         self.val_acc = torchmetrics.Accuracy(multiclass=False)
 
-        self.train_sensitivity = torchmetrics.Recall(multiclass=False)
-        self.val_sensitivity = torchmetrics.Recall(multiclass=False)
-        self.train_specificity = torchmetrics.Specificity(multiclass=False)
-        self.val_specificity = torchmetrics.Specificity(multiclass=False)
+        self.train_sensitivity = Sensitivity(multiclass=False)
+        self.val_sensitivity = Sensitivity(multiclass=False)
+        self.train_specificity = Specificity(multiclass=False)
+        self.val_specificity = Specificity(multiclass=False)
 
         self.train_iou = IoU()
         self.val_iou = IoU()

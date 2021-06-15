@@ -2,6 +2,7 @@ import os
 import wandb
 from omegaconf import DictConfig, OmegaConf
 
+from project_2.src.metrics.eval_mc import get_mc_preds
 from project_2.src.utils import download_file
 from project_2.src.engine import EngineModule
 from project_2.src.data import get_dataloaders
@@ -20,7 +21,7 @@ def run_eval(cfg: DictConfig):
 
     train_loader, valid_loader, test_loader = \
         get_dataloaders(train_cfg.data.size, train_cfg.data.train_augmentation, train_cfg.training.batch_size,
-                        train_cfg.data.url, train_cfg.data.path, 'all')
+                        train_cfg.data.url, train_cfg.data.path, seg_reduce='all')
 
     download_file(cfg.run_id, "model.ckpt")
     train_cfg.model.dropout_rate = 0
@@ -28,6 +29,14 @@ def run_eval(cfg: DictConfig):
 
     calc_mean(test_loader, engine.model)
     calc_inner_expert(test_loader)
+
+    # WIP
+    # if cfg.is_ensemble:
+    #     raise NotImplementedError
+    # else:
+    #     download_file(cfg.run_id, "model.ckpt")
+    #     engine = EngineModule.load_from_checkpoint("model.ckpt", config=train_cfg)
+    #     mc_preds, segs = get_mc_preds(test_loader, engine.model, n_
 
 
 
