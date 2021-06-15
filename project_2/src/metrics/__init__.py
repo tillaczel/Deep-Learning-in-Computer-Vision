@@ -30,7 +30,9 @@ class Metrics(pl.LightningModule):
 
 def calc_all_metrics(probs, labels, mode='train'):
     metrics = Metrics()
+    results = dict()
     for metric_name in metrics.metrics:
         metric = getattr(metrics, f"{mode}_{metric_name}")
-        print(metric(probs, labels))
+        results[metric_name] = metric(probs, labels).cpu().numpy()
+    print(results)
 
