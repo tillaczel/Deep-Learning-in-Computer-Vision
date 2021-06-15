@@ -7,7 +7,7 @@ model:
   pretrained: true
   out_dim: 1
   in_dim: 1
-  ensemble: True
+  ensemble: False
   dropout_rate: 0.3
 
 training:

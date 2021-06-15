@@ -14,7 +14,6 @@ def get_data(loader):
 def calc_inner_expert(loader):
     img, seg = get_data(loader)
     results = get_metrics(seg, seg)
-    print('Inner expert', results)
     return results
 
 
