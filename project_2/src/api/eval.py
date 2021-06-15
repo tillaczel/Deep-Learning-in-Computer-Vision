@@ -22,7 +22,8 @@ def run_eval(cfg: DictConfig):
         get_dataloaders(train_cfg.data.size, train_cfg.data.train_augmentation, train_cfg.training.batch_size,
                         train_cfg.data.url, train_cfg.data.path, 'all')
 
-    calc_all_metrics(test_loader[0][1][0], test_loader[0][1][1])
+    for img, seg in test_loader:
+        calc_all_metrics(seg[0], seg[1])
 
     download_file(cfg.run_id, "model.ckpt")
     engine = EngineModule.load_from_checkpoint("model.ckpt", config=train_cfg)
