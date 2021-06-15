@@ -42,12 +42,12 @@ def run_eval(cfg: DictConfig):
         engine = EngineModule.load_from_checkpoint("model-v1.ckpt", config=train_cfg)
         preds, segs = get_mc_preds(test_loader, engine.model, n_samples=16)
         print("MC scores:")
-        print(preds.shape, segs.shape)
         pprint.pprint(get_metrics(preds, segs))
-        calculate_energy(preds, segs)
+        calculate_energy(preds[:, :, 0], segs)
         del preds, segs
 
         preds, segs = get_regular_preds(test_loader, engine.model)
         print("Regular scores:")
+        print(preds.shape, segs.shape)
         pprint.pprint(get_metrics(preds, segs))
         del preds, segs
