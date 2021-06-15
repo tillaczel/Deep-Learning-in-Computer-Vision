@@ -37,10 +37,13 @@ def run_eval(cfg: DictConfig):
         print("MC scores:")
         print(calc_all_metrics(torch.mean(mc_preds, dim=1).unsqueeze(1), torch.mean(segs, dim=1)))
 
-        # tODO: make this nicer
+        del mc_preds
+        del segs
 
         single_preds, segs = get_regular_preds(test_loader, engine.model)
         print("regular scores:")
         print(calc_all_metrics(torch.mean(single_preds, dim=1).unsqueeze(1), torch.mean(segs, dim=1)))
 
+        del single_preds
+        del segs
     calc_mean(test_loader, engine.model)
