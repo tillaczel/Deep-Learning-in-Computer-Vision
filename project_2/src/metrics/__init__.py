@@ -4,6 +4,7 @@ from collections import Iterable
 
 from project_2.src.metrics.dice import Dice
 from project_2.src.metrics.iou import IoU
+from project_2.src.metrics.precision import Precision
 from project_2.src.metrics.sensitivity import Sensitivity
 from project_2.src.metrics.specificity import Specificity
 
@@ -19,6 +20,8 @@ class Metrics(pl.LightningModule):
         self.val_sensitivity = Sensitivity(multiclass=False)
         self.train_specificity = Specificity(multiclass=False)
         self.val_specificity = Specificity(multiclass=False)
+        self.train_precision = Precision(multiclass=False)
+        self.val_precision = Precision(multiclass=False)
 
         self.train_iou = IoU()
         self.val_iou = IoU()
@@ -26,7 +29,7 @@ class Metrics(pl.LightningModule):
         self.train_dice = Dice()
         self.val_dice = Dice()
 
-        self.metrics = ["acc", "sensitivity", "specificity", "iou", "dice"]
+        self.metrics = ["acc", "sensitivity", "specificity", "iou", "dice", "precision"]
         self.main_metrics = main_metrics
 
 
