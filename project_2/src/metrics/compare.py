@@ -1,5 +1,6 @@
 import torch
 from torch.utils.data import DataLoader
+from tqdm import tqdm
 
 from . import calc_all_metrics
 
@@ -18,13 +19,17 @@ def calc_inner_expert(loader):
 
 
 def calc_mean(loader, model):
-    preds, segs = list(), list()
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+    model.to(device)
     model.eval()
-    with torch.no_grad():
-        for img, seg in loader:
-            img, seg = img, seg
-            preds.append(model(img))
-            segs.append(seg)
+
+    preds, segs = list(), list()
+    for img, seg in tqdm(loader):
+        pred = torch.sigmoid(model(img.to(device)))
+        pred = pred.detach().cpu()
+        preds.append(pred.type(torch.float16))
+        segs.append(seg)
     preds, segs = torch.stack(preds), torch.stack(segs)
     print(preds.shape, segs.shape)
     results = get_metrics(preds, segs)
