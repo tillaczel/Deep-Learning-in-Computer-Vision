@@ -4,10 +4,11 @@ from torchmetrics import Metric
 def calculate_sensitivity(preds, target, threshold=0.5, spatial_dim=(2,3)):
     preds_binary = preds >= threshold
     target = target >= threshold
+
     intersection = torch.sum((preds_binary.bool() & target.bool()).int(), dim=spatial_dim)
     target_sum = torch.sum(target.bool().int(), dim=spatial_dim)
     sensitivity_per_sample = (intersection) / (target_sum + 1e-10)  # case 0/0 -> 1/1
-    return sensitivity_per_sample
+    return sensitivity_per_sample, torch.sum((target_sum > 0).int(), dim=0)
 
 class Sensitivity(Metric):
     def __init__(self, average='macro', multiclass=False, num_labels=1,
@@ -27,9 +28,9 @@ class Sensitivity(Metric):
     def update(self, preds: torch.Tensor, target: torch.Tensor):
         # preds, target = self._input_format(preds, target)
         # assert preds.shape == target.shape
-        sensitivity_per_sample = calculate_sensitivity(preds, target, threshold=self.threshold, spatial_dim=self.spatial_dim)
+        sensitivity_per_sample, total = calculate_sensitivity(preds, target, threshold=self.threshold, spatial_dim=self.spatial_dim)
         self.sensitivity_sum += torch.sum(sensitivity_per_sample, dim=0) # sum over batch
-        self.total += target.shape[0]
+        self.total += total
 
     def compute(self):
         if self.average == 'macro':
