@@ -32,6 +32,7 @@ def calc_mean(loader, model):
         segs.append(seg)
     preds, segs = torch.cat(preds, dim=0).unsqueeze(1), torch.cat(segs, dim=0)
     results = get_metrics(preds, segs)
+    print('Mean model', results)
     return results
 
 
