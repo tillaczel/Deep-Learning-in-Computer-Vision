@@ -6,19 +6,15 @@ from . import calc_all_metrics
 
 def calc_inner_expert(loader):
     loader = DataLoader(loader.dataset, batch_size=len(loader.dataset), shuffle=False, num_workers=2)
-    for img, seg in loader:
-        results = get_metrics(seg, seg)
-    import numpy as np
-    seg = torch.tensor(np.ones((1, 4, 1, 100, 100)))
-    seg[:, :, :, 50] = 0
-    results = get_metrics(seg, torch.moveaxis(seg, -2, -1))
+    img, seg = next(loader)
+    results = get_metrics(seg, seg)
     print('Inner expert', results)
     return results
 
 
 def get_metrics(pred, seg):
     results = dict()
-    for i in range(3):
+    for i in range(pred.shape[1]):
         for j in range(i+1, 4):
             result = calc_all_metrics(pred[:, i], seg[:, j].to(torch.int))
             for k, v in result.items():
