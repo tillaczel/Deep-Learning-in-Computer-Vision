@@ -4,6 +4,7 @@ from torchmetrics import Metric
 def calculate_dice(preds, target, threshold=0.5, spatial_dim=(2,3)):
     # return (batch_size - 2 * torch.sum((y_real * sig_pred + eps) / (y_real + sig_pred + eps)) / 65536) / batch_size
     preds_binary = preds >= threshold
+    target = target >= threshold
     intersection = torch.sum((preds_binary.bool() & target.bool()).int(), dim=spatial_dim)
     summation = torch.sum(preds_binary.bool().int(), dim=spatial_dim) + torch.sum(target.bool().int(), dim=spatial_dim)
     dice_per_sample = (2 * intersection + 1e-10) / (summation + 1e-10)  # case 0/0 -> 1/1

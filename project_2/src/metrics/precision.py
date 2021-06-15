@@ -3,6 +3,7 @@ from torchmetrics import Metric
 
 def calculate_precision(preds, target, threshold=0.5, spatial_dim=(2,3)):
     preds_binary = preds >= threshold
+    target = target >= threshold
     intersection = torch.sum((preds_binary.bool() & target.bool()).int(), dim=spatial_dim)
     preds_sum = torch.sum(preds_binary.bool().int(), dim=spatial_dim)
     precision_per_sample = (intersection + 1e-10) / (preds_sum + 1e-10)  # case 0/0 -> 1/1
