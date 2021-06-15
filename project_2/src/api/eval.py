@@ -6,7 +6,7 @@ from project_2.src.metrics.eval_mc import get_mc_preds
 from project_2.src.utils import download_file
 from project_2.src.engine import EngineModule
 from project_2.src.data import get_dataloaders
-from project_2.src.metrics.inner_expert import calc_inner_expert
+from project_2.src.metrics.compare import calc_inner_expert
 
 
 def run_eval(cfg: DictConfig):
