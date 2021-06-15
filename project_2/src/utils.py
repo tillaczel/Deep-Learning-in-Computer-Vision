@@ -29,4 +29,5 @@ def get_ensemble_models(run_id, train_config, n_checkpoints=4):
         download_file(run_id, f"ensemble_model_{i}.ckpt")
         engine = EngineModule.load_from_checkpoint(f"ensemble_model_{i}.ckpt", config=train_config)
         models.append(engine.model)
+
     return models
