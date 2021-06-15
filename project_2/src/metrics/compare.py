@@ -19,9 +19,12 @@ def calc_inner_expert(loader):
 
 def calc_mean(loader, model):
     img, seg = get_data(loader)
-    pred = model(seg)
-    print(pred.shape)
-    results = get_metrics(pred, seg)
+    preds = list()
+    for i in range(4):
+        pred = model(img[:, i])
+    pred = torch.stack(pred, dim=1)
+    print(preds.shape)
+    results = get_metrics(preds, seg)
     print('Inner expert', results)
     return results
 
