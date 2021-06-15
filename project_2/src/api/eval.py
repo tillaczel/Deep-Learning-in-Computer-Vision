@@ -23,8 +23,9 @@ def run_eval(cfg: DictConfig):
         get_dataloaders(train_cfg.data.size, train_cfg.data.train_augmentation, train_cfg.training.batch_size,
                         train_cfg.data.url, train_cfg.data.path, seg_reduce='all')
 
-    # calc_inner_expert(test_loader)
+    calc_inner_expert(test_loader)
 
+    # WIP
     # if cfg.is_ensemble:
     #     raise NotImplementedError
     # else:
