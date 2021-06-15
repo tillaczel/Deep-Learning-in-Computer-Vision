@@ -5,22 +5,28 @@ import wandb
 import numpy as np
 
 
-def plot_predictions(dataset, model, device, n=6, current_epoch=None, mode='single'):
-    idxs = np.random.choice(np.arange(len(dataset)), replace=False, size=n)
-    input_data, segmentations, predictions = get_data(dataset, model, device, idxs, mode=mode)
-    # average dropout/ensemble (single will have
+def plot_predictions(dataset, model, device, n=6, current_epoch=None):
+    # idxs = np.random.choice(np.arange(len(dataset)), replace=False, size=n)
+    idxs = [11, 1329, 769, 835, 134, 983, 97, 404, 439, 1383, 913, 1844, 231, 318, 234, 137, 598][:n]
+    _, _, predictions = get_data(dataset, model, device, idxs, mode='single')
+    input_data, segmentations, predictions_mc = get_data(dataset, model, device, idxs, mode='mc_dropout')
+    # average dropout/ensemble
+    predictions_mc = np.mean(predictions_mc, axis=1)
     predictions = np.mean(predictions, axis=1)
-    _plot_pred(input_data, segmentations, predictions, mode=mode, n=n, current_epoch=current_epoch)
+    _plot_pred(input_data, segmentations, predictions, predictions_mc,
+               n=n, current_epoch=current_epoch)
 
 
-def _plot_pred(input_data, segmentations, predictions, mode, n=6, current_epoch=None):
-    fig, axs = plt.subplots(n, 3, figsize=(15, n*5))
+def _plot_pred(input_data, segmentations, predictions_single, predictions_mc, n=6, current_epoch=None):
+    fig, axs = plt.subplots(n, 4, figsize=(18, n*5))
     for i in range(n):
         plot_subplot(axs[i, 0], input_data[i], 'Input')
         plot_subplot(axs[i, 1], segmentations[i], 'Segmentation')
-        plot_subplot(axs[i, 2], predictions[i], 'Prediction')
-
-    fname = f'preds_{current_epoch}_{mode}.png' if current_epoch is not None else f'preds_{mode}.png'
+        plot_subplot(axs[i, 2], predictions_single[i], 'Prediction')
+        plot_subplot(axs[i, 3], predictions_mc[i], 'MC Dropout')
+    plt.subplots_adjust(hspace=0.02)
+    plt.subplots_adjust(wspace=0.001)
+    fname = 'preds_{current_epoch}.png' if current_epoch is not None else 'preds.png'
     fname = os.path.join(wandb.run.dir, fname)
     plt.savefig(fname)
     wandb.save(fname, base_path=wandb.run.dir)
