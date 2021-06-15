@@ -1,12 +1,11 @@
 import os
 import wandb
 from omegaconf import DictConfig, OmegaConf
-import torch
 
 from project_2.src.utils import download_file
 from project_2.src.engine import EngineModule
 from project_2.src.data import get_dataloaders
-from project_2.src.metrics import calc_all_metrics
+from project_2.src.metrics.inner_expert import calc_inner_expert
 
 
 def run_eval(cfg: DictConfig):
@@ -23,10 +22,10 @@ def run_eval(cfg: DictConfig):
         get_dataloaders(train_cfg.data.size, train_cfg.data.train_augmentation, train_cfg.training.batch_size,
                         train_cfg.data.url, train_cfg.data.path, 'all')
 
-    for img, seg in test_loader:
-        calc_all_metrics(seg[0], seg[1].to(torch.int))
+    calc_inner_expert(test_loader)
 
     download_file(cfg.run_id, "model.ckpt")
     engine = EngineModule.load_from_checkpoint("model.ckpt", config=train_cfg)
+
 
 
