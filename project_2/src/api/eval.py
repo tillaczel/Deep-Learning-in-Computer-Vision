@@ -25,20 +25,13 @@ def run_eval(cfg: DictConfig):
 
     # calc_inner_expert(test_loader)
 
-    import numpy as np
-    white = 0
-    black = 0
-    for image, seg in test_loader:
-        white += np.sum(seg.numpy() == 1)
-        black += np.sum(seg.numpy() == 0)
-    print(white, '/' , black + white)
-    print(white / (black + white))
-    if cfg.is_ensemble:
-        raise NotImplementedError
-    else:
-        download_file(cfg.run_id, "model.ckpt")
-        engine = EngineModule.load_from_checkpoint("model.ckpt", config=train_cfg)
-        mc_preds, segs = get_mc_preds(test_loader, engine.model, n_samples=32)
+    # if cfg.is_ensemble:
+    #     raise NotImplementedError
+    # else:
+    #     download_file(cfg.run_id, "model.ckpt")
+    #     engine = EngineModule.load_from_checkpoint("model.ckpt", config=train_cfg)
+    #     mc_preds, segs = get_mc_preds(test_loader, engine.model, n_samples=32)
+
 
 
 
