@@ -4,7 +4,7 @@ import wandb
 
 from project_2.src.utils import download_file
 from project_2.src.engine import EngineModule
-from project_2.src.data import get_dataloaders
+#from project_2.src.data import get_dataloaders
 
 
 def run_eal(cfg: DictConfig):
