@@ -11,7 +11,7 @@ model:
   dropout_rate: 0
 
 training:
-  max_epochs: 1
+  max_epochs: 100
   batch_size: 64
   optimizer:
     name: adam
