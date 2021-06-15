@@ -11,7 +11,7 @@ def calc_inner_expert(loader):
     for i in range(10):
         a = torch.mean(seg[i], 0, keepdim=True)
         plt.imshow(a[0, 0])
-        plt.show()
+        plt.savefig(f'foo_{i}')
     results = get_metrics(seg, seg)
     print('Inner expert', results)
     return results
