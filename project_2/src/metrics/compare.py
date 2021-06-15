@@ -20,7 +20,7 @@ def calc_inner_expert(loader):
 def calc_mean(loader, model):
     preds, segs = list(), list()
     model.eval()
-    with torch.no_grad:
+    with torch.no_grad():
         for img, seg in loader:
             img, seg = img, seg
             preds.append(model(img))
