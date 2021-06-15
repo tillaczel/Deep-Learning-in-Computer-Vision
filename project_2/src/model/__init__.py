@@ -17,10 +17,10 @@ class Model(nn.Module):
         self.down3 = Down(256, 512, dropout_rate=dropout_rate)
         factor = 2 if bilinear else 1
         self.down4 = Down(512, 1024 // factor, dropout_rate=dropout_rate)
-        self.up1 = Up(1024, 512 // factor, bilinear, dropout_rate=dropout_rate)
-        self.up2 = Up(512, 256 // factor, bilinear, dropout_rate=dropout_rate)
-        self.up3 = Up(256, 128 // factor, bilinear, dropout_rate=dropout_rate)
-        self.up4 = Up(128, 64, bilinear, dropout_rate=dropout_rate)
+        self.up1 = Up(1024, 512 // factor, bilinear=bilinear, dropout_rate=dropout_rate)
+        self.up2 = Up(512, 256 // factor, bilinear=bilinear, dropout_rate=dropout_rate)
+        self.up3 = Up(256, 128 // factor, bilinear=bilinear, dropout_rate=dropout_rate)
+        self.up4 = Up(128, 64, bilinear=bilinear, dropout_rate=dropout_rate)
         self.outc = OutConv(64, n_classes)
 
     def forward(self, x):
@@ -35,3 +35,8 @@ class Model(nn.Module):
         x = self.up4(x, x1)
         logits = self.outc(x)
         return logits
+
+    def eval_with_dropout(self):
+        self.eval()
+        # for
+        raise NotImplementedError()
