@@ -29,7 +29,7 @@ def run_eval(cfg: DictConfig):
 
     # calc_inner_expert(test_loader)
 
-    if train_cfg.is_ensemble:
+    if train_cfg.model.ensemble:
         models = get_ensemble_models(cfg.run_id, train_cfg)
         preds, segs = get_ensemble_preds(test_loader, models)
         print("Ensemble scores:")
