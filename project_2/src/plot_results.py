@@ -60,8 +60,8 @@ def get_data_single(dataset, model, device, idxs):
     images, segmentations, preds = list(), list(), list()
     for idx in idxs:
         img, seg = dataset[idx]
-        pred = torch.sigmoid(model(img.unsqueeze(0).to(device))[0])  # Do a forward pass of validation data to get predictions
-        images.append(img.unsqueeze(0)), segmentations.append(seg), preds.append(pred.unsqueeze(0))
+        pred = torch.sigmoid(model(img.unsqueeze(0).to(device)))  # Do a forward pass of validation data to get predictions
+        images.append(img.unsqueeze(0)), segmentations.append(seg), preds.append(pred)
 
     return refactor_outputs(images, segmentations, preds)
 
@@ -72,7 +72,7 @@ def get_data_mc(dataset, model, device, idxs, n_samples=64):
     for idx in idxs:
         img, seg = dataset[idx]
         img_repeated = img.unsqueeze(0).repeat((n_samples, 1, 1, 1))
-        pred = torch.sigmoid(model(img_repeated.to(device))[0])  # Do a forward pass of validation data to get predictions
+        pred = torch.sigmoid(model(img_repeated.to(device)))  # Do a forward pass of validation data to get predictions
         images.append(img), segmentations.append(seg), preds.append(pred)
 
     return refactor_outputs(images, segmentations, preds)

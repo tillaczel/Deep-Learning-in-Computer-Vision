@@ -70,7 +70,7 @@ class EngineModule(pl.LightningModule):
     def validation_epoch_end(self, outputs: list):
         plot_predictions(self.trainer.val_dataloaders[0].dataset, self.model, self.device,
                          current_epoch=self.current_epoch, mode='single')
-        if self.model.dropout > 0:
+        if self.model.dropout_rate > 0:
             plot_predictions(self.trainer.val_dataloaders[0].dataset, self.model, self.device,
                              current_epoch=self.current_epoch, mode='mc_dropout')
 
