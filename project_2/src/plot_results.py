@@ -7,9 +7,13 @@ import numpy as np
 
 def plot_predictions(dataset, model, device, n=6, current_epoch=None, mode='single'):
     idxs = np.random.choice(np.arange(len(dataset)), replace=False, size=n)
-    input_data, segmentations, predictions = get_data_single(dataset, model, device, idxs)
-    # average dropout/ensemble (single will have 
+    input_data, segmentations, predictions = get_data(dataset, model, device, idxs, mode=mode)
+    # average dropout/ensemble (single will have
     predictions = np.mean(predictions, axis=1)
+    _plot_pred(input_data, segmentations, predictions, mode=mode, n=n, current_epoch=current_epoch)
+
+
+def _plot_pred(input_data, segmentations, predictions, mode, n=6, current_epoch=None):
     fig, axs = plt.subplots(n, 3, figsize=(15, n*5))
     for i in range(n):
         plot_subplot(axs[i, 0], input_data[i], 'Input')
@@ -28,7 +32,7 @@ def plot_subplot(ax, img, title):
     ax.axis('off')
 
 
-def get_data(dataset, model, device, idxs, mode, mode_config):
+def get_data(dataset, model, device, idxs, mode, mode_config=None):
     if mode_config is None: # use default kwargs
         mode_config = {}
 
