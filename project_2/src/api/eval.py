@@ -28,13 +28,6 @@ def run_eval(cfg: DictConfig):
 
     calc_inner_expert(test_loader)
 
-    print('Sanity check')
-    a = torch.zeros((1,1,100,100))
-    b = torch.zeros((1,1,100,100))
-    a[:,:,:,:50] = 1
-    b[:,:,:50,:] = 1
-    print(calc_all_metrics(a, b))
-
     if cfg.is_ensemble:
         raise NotImplementedError
     else:
