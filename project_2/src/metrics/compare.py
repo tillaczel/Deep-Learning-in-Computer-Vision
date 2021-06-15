@@ -30,7 +30,7 @@ def calc_mean(loader, model):
         pred = pred.detach().cpu()
         preds.append(pred.type(torch.float16))
         segs.append(seg)
-    preds, segs = torch.stack(preds), torch.stack(segs)
+    preds, segs = torch.cat(preds, dim=0), torch.cat(segs, dim=0)
     print(preds.shape, segs.shape)
     results = get_metrics(preds, segs)
     print('Inner expert', results)
