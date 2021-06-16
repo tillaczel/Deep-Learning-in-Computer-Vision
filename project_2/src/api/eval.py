@@ -7,6 +7,7 @@ import pprint
 from project_2.src.metrics import calc_all_metrics
 from project_2.src.metrics.energy import calculate_energy
 from project_2.src.metrics.get_preds import get_mc_preds, get_regular_preds, get_ensemble_preds
+from project_2.src.plot_results import plot_predictions, plot_predictions_ensemble, plot_uncertainty
 from project_2.src.utils import download_file, get_ensemble_models
 from project_2.src.engine import EngineModule
 from project_2.src.data import get_dataloaders
@@ -30,19 +31,30 @@ def run_eval(cfg: DictConfig):
     print("Inner expert scores:")
     pprint.pprint(calc_inner_expert(test_loader))
 
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
     if train_cfg.model.ensemble:
         models = get_ensemble_models(cfg.run_id, train_cfg)
+        plot_predictions_ensemble(test_loader.dataset, models, device, n=10)
+        plot_uncertainty(test_loader.dataset, models, n=10)
+
         preds, segs = get_ensemble_preds(test_loader, models)
         print(preds.shape)
         print("Ensemble single scores:")
         pprint.pprint(get_metrics(preds, segs, one_pred=False))
         print("Ensemble scores:")
         pprint.pprint(get_metrics(torch.mean(preds, dim=1, keepdim=True), segs))
+        calculate_energy(preds[:, :, 0], segs)
+
         del preds, segs, models
+
 
     else:
         download_file(cfg.run_id, "model-v1.ckpt")
         engine = EngineModule.load_from_checkpoint("model-v1.ckpt", config=train_cfg)
+        plot_predictions(test_loader.dataset, engine.model, device, n=10)
+        plot_uncertainty(test_loader.dataset, [engine.model], n=10)
+
         preds, segs = get_mc_preds(test_loader, engine.model, n_samples=16)
         print("MC scores:")
         pprint.pprint(get_metrics(preds, segs))
@@ -53,3 +65,4 @@ def run_eval(cfg: DictConfig):
         print("Regular scores:")
         pprint.pprint(get_metrics(preds, segs))
         del preds, segs
+

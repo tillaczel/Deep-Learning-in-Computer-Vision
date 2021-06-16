@@ -7,6 +7,7 @@ def calculate_energy(preds, segs):
     E2 = []
     n_experts = segs.shape[1]
     n_samples = preds.shape[1]
+    print(f'Calculating energy with {n_experts} experts and {n_samples} samples')
 
     for n in range(len(preds)):
         x = preds[n]
