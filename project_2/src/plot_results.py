@@ -21,8 +21,8 @@ def plot_uncertainty(dataset, models, n=6, current_epoch=None):
 
 def _plot_uncertainty(input_data, all_seg, all_preds, n=6, suffix="", current_epoch=None):
     # Visualise means and variance
-    means_preds, means_seg, vars_preds, vars_seg = np.mean(all_preds, axis=0), np.mean(all_seg, axis=0), np.var(
-        all_preds, axis=0), np.var(all_seg, axis=0)
+    means_preds, means_seg, vars_preds, vars_seg = np.mean(all_preds, axis=1), np.mean(all_seg, axis=1), np.var(
+        all_preds, axis=1), np.var(all_seg, axis=1)
     print('before scaling:')
     print('var pred', vars_preds.min(), vars_preds.max())
     print('var seg', vars_seg.min(), vars_seg.max())
@@ -64,7 +64,7 @@ def _plot_pred(input_data, segmentations, predictions_single, predictions_mc, n=
         # show_title = i == 0
         show_title = True
         plot_subplot(axs[i, 0], input_data[i], 'Original image', show_title=show_title)
-        plot_subplot(axs[i, 1], segmentations[i].mean(axis=1), 'Mean Annotation', show_title=show_title)
+        plot_subplot(axs[i, 1], segmentations[i].mean(axis=0), 'Mean Annotation', show_title=show_title)
         plot_subplot(axs[i, 2], predictions_single[i], 'Prediction', show_title=show_title)
         plot_subplot(axs[i, 3], predictions_mc[i], 'MC Dropout', show_title=show_title)
     plt.subplots_adjust(hspace=0.01)
@@ -96,7 +96,7 @@ def _plot_pred_ens(input_data, segmentations, predictions_single, predictions_mc
         # show_title = i == 0
         show_title = True
         plot_subplot(axs[i, 0], input_data[i], 'Original image', show_title=show_title)
-        plot_subplot(axs[i, 1], segmentations[i].mean(axis=1), 'Mean Annotation', show_title=show_title)
+        plot_subplot(axs[i, 1], segmentations[i].mean(axis=0), 'Mean Annotation', show_title=show_title)
         plot_subplot(axs[i, 2], predictions_single[i], 'Single model', show_title=show_title)
         plot_subplot(axs[i, 3], predictions_mc[i], 'MC Dropout', show_title=show_title)
         plot_subplot(axs[i, 4], predictions_ens[i], 'Ensemble', show_title=show_title)
