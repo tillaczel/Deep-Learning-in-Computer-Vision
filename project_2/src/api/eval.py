@@ -41,6 +41,8 @@ def run_eval(cfg: DictConfig):
         pprint.pprint(get_metrics(preds, segs, one_pred=False))
         print("Ensemble scores:")
         pprint.pprint(get_metrics(torch.mean(preds, dim=1, keepdim=True), segs))
+        calculate_energy(preds[:, :, 0], segs)
+
         del preds, segs, models
 
         plot_predictions_ensemble(test_loader.dataset, models, device, n=10)

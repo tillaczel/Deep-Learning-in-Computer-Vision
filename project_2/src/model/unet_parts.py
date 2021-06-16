@@ -16,15 +16,13 @@ class DoubleConv(nn.Module):
             nn.BatchNorm2d(mid_channels),
             nn.ReLU(inplace=True),
         ]
-        if dropout_rate != 0:
-            layers.append(nn.Dropout2d(p=dropout_rate))
+        layers.append(nn.Dropout2d(p=dropout_rate))
         layers += [
             nn.Conv2d(mid_channels, out_channels, kernel_size=3, padding=1),
             nn.BatchNorm2d(out_channels),
             nn.ReLU(inplace=True)
         ]
-        if dropout_rate != 0:
-            layers.append(nn.Dropout2d(p=dropout_rate))
+        layers.append(nn.Dropout2d(p=dropout_rate))
 
         self.double_conv = nn.Sequential(*layers)
 
