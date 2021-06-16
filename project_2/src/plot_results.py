@@ -33,6 +33,37 @@ def _plot_pred(input_data, segmentations, predictions_single, predictions_mc, n=
     wandb.save(fname, base_path=wandb.run.dir)
 
 
+def plot_predictions_ensemble(dataset, models, device, n=6, current_epoch=None):
+    # idxs = np.random.choice(np.arange(len(dataset)), replace=False, size=n)
+    idxs = [117, 143, 673, 737, 238, 683, 937, 204, 1900, 1383, 913, 1844, 231, 318, 234, 137, 598][:n]
+    _, _, predictions = get_data(dataset, models[0], device, idxs, mode='single')
+    input_data, segmentations, predictions_mc = get_data(dataset, models[0], device, idxs, mode='mc_dropout')
+    _, _, predictions_ens = get_data(dataset, models, device, idxs, mode='ensemble')
+    # average dropout/ensemble
+    predictions_mc = np.mean(predictions_mc, axis=1)
+    predictions_ens = np.mean(predictions_ens, axis=1)
+    predictions = np.mean(predictions, axis=1)
+    _plot_pred(input_data, segmentations, predictions, predictions_mc,
+               n=n, current_epoch=current_epoch)
+
+
+def _plot_pred_ens(input_data, segmentations, predictions_single, predictions_mc, predictions_ens, n=6, current_epoch=None):
+    fig, axs = plt.subplots(n, 5, figsize=(20, n*5))
+    for i in range(n):
+        show_title = i == 0
+        plot_subplot(axs[i, 0], input_data[i], 'Input', show_title=show_title)
+        plot_subplot(axs[i, 1], segmentations[i], 'Segmentation', show_title=show_title)
+        plot_subplot(axs[i, 2], predictions_single[i], 'Single model', show_title=show_title)
+        plot_subplot(axs[i, 3], predictions_mc[i], 'MC Dropout', show_title=show_title)
+        plot_subplot(axs[i, 4], predictions_ens[i], 'Ensemble', show_title=show_title)
+    plt.subplots_adjust(hspace=0.01)
+    plt.subplots_adjust(wspace=0.01)
+    fname = f'preds_{current_epoch}.png' if current_epoch is not None else 'preds.png'
+    fname = os.path.join(wandb.run.dir, fname)
+    plt.savefig(fname)
+    wandb.save(fname, base_path=wandb.run.dir)
+
+
 def plot_subplot(ax, img, title, show_title=True):
     ax.imshow(img, cmap="gray")
     if show_title:
@@ -60,9 +91,19 @@ def refactor_outputs(images, segmentations, preds):
     return images, segmentations, preds
 
 
-def get_data_ensemble(dataset, model, device, idxs):
-    raise NotImplementedError
-
+def get_data_ensemble(dataset, models, device, idxs):
+    images, segmentations, preds = list(), list(), list()
+    for idx in idxs:
+        img, seg = dataset[idx]
+        images.append(img), segmentations.append(seg)
+        preds_i = list()
+        for i, model in enumerate(models):
+            model.to(device)
+            model.eval()
+            pred = torch.sigmoid(model(img.unsqueeze(0).to(device)))
+            preds_i.append(pred)
+        preds.append(torch.cat(preds_i, dim=0))
+    return refactor_outputs(images, segmentations, preds)
 
 def get_data_single(dataset, model, device, idxs):
     images, segmentations, preds = list(), list(), list()
