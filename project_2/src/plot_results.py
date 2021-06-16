@@ -22,7 +22,7 @@ def _plot_pred(input_data, segmentations, predictions_single, predictions_mc, n=
     for i in range(n):
         show_title = i == 0
         plot_subplot(axs[i, 0], input_data[i], 'Input', show_title=show_title)
-        plot_subplot(axs[i, 1], segmentations[i], 'Segmentation', show_title=show_title)
+        plot_subplot(axs[i, 1], segmentations[i][0], 'Segmentation', show_title=show_title)
         plot_subplot(axs[i, 2], predictions_single[i], 'Prediction', show_title=show_title)
         plot_subplot(axs[i, 3], predictions_mc[i], 'MC Dropout', show_title=show_title)
     plt.subplots_adjust(hspace=0.01)
@@ -52,7 +52,7 @@ def _plot_pred_ens(input_data, segmentations, predictions_single, predictions_mc
     for i in range(n):
         show_title = i == 0
         plot_subplot(axs[i, 0], input_data[i], 'Input', show_title=show_title)
-        plot_subplot(axs[i, 1], segmentations[i], 'Segmentation', show_title=show_title)
+        plot_subplot(axs[i, 1], segmentations[i][0], 'Segmentation', show_title=show_title)
         plot_subplot(axs[i, 2], predictions_single[i], 'Single model', show_title=show_title)
         plot_subplot(axs[i, 3], predictions_mc[i], 'MC Dropout', show_title=show_title)
         plot_subplot(axs[i, 4], predictions_ens[i], 'Ensemble', show_title=show_title)
@@ -124,7 +124,7 @@ def get_data_mc(dataset, model, device, idxs, n_samples=32):
     for idx in idxs:
         img, seg = dataset[idx]
         img_repeated = img.unsqueeze(0).repeat((n_samples, 1, 1, 1))
-        pred = torch.sigmoid(model(img_repeated.to(device)))  # Do a forward pass of validation data to get predictions
+        pred = torch.sigmoid(model(img_repeated.to(device))).detach().cpu()  # Do a forward pass of validation data to get predictions
         images.append(img), segmentations.append(seg), preds.append(pred)
 
     return refactor_outputs(images, segmentations, preds)
