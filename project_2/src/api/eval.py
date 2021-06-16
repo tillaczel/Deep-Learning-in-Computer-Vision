@@ -35,6 +35,8 @@ def run_eval(cfg: DictConfig):
 
     if train_cfg.model.ensemble:
         models = get_ensemble_models(cfg.run_id, train_cfg)
+        plot_predictions_ensemble(test_loader.dataset, models, device, n=10)
+
         preds, segs = get_ensemble_preds(test_loader, models)
         print(preds.shape)
         print("Ensemble single scores:")
@@ -45,11 +47,12 @@ def run_eval(cfg: DictConfig):
 
         del preds, segs, models
 
-        plot_predictions_ensemble(test_loader.dataset, models, device, n=10)
 
     else:
         download_file(cfg.run_id, "model-v1.ckpt")
         engine = EngineModule.load_from_checkpoint("model-v1.ckpt", config=train_cfg)
+        plot_predictions(test_loader.dataset, engine.model, device, n=10)
+
         preds, segs = get_mc_preds(test_loader, engine.model, n_samples=16)
         print("MC scores:")
         pprint.pprint(get_metrics(preds, segs))
@@ -61,4 +64,3 @@ def run_eval(cfg: DictConfig):
         pprint.pprint(get_metrics(preds, segs))
         del preds, segs
 
-        plot_predictions(test_loader.dataset, engine.model, device, n=10)

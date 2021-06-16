@@ -43,7 +43,7 @@ def plot_predictions_ensemble(dataset, models, device, n=6, current_epoch=None):
     predictions_mc = np.mean(predictions_mc, axis=1)
     predictions_ens = np.mean(predictions_ens, axis=1)
     predictions = np.mean(predictions, axis=1)
-    _plot_pred(input_data, segmentations, predictions, predictions_mc,
+    _plot_pred_ens(input_data, segmentations, predictions, predictions_mc, predictions_ens,
                n=n, current_epoch=current_epoch)
 
 
@@ -115,7 +115,7 @@ def get_data_single(dataset, model, device, idxs):
     return refactor_outputs(images, segmentations, preds)
 
 
-def get_data_mc(dataset, model, device, idxs, n_samples=64):
+def get_data_mc(dataset, model, device, idxs, n_samples=32):
     model.eval_with_dropout()
     images, segmentations, preds = list(), list(), list()
     for idx in idxs:
