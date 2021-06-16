@@ -20,9 +20,10 @@ def plot_predictions(dataset, model, device, n=6, current_epoch=None):
 def _plot_pred(input_data, segmentations, predictions_single, predictions_mc, n=6, current_epoch=None):
     fig, axs = plt.subplots(n, 4, figsize=(18, n*5))
     for i in range(n):
-        show_title = i == 0
-        plot_subplot(axs[i, 0], input_data[i], 'Input', show_title=show_title)
-        plot_subplot(axs[i, 1], segmentations[i][0], 'Segmentation', show_title=show_title)
+        # show_title = i == 0
+        show_title = True
+        plot_subplot(axs[i, 0], input_data[i], 'Original image', show_title=show_title)
+        plot_subplot(axs[i, 1], segmentations[i][0], 'Mean Annotation', show_title=show_title)
         plot_subplot(axs[i, 2], predictions_single[i], 'Prediction', show_title=show_title)
         plot_subplot(axs[i, 3], predictions_mc[i], 'MC Dropout', show_title=show_title)
     plt.subplots_adjust(hspace=0.01)
@@ -50,9 +51,10 @@ def plot_predictions_ensemble(dataset, models, device, n=6, current_epoch=None):
 def _plot_pred_ens(input_data, segmentations, predictions_single, predictions_mc, predictions_ens, n=6, current_epoch=None):
     fig, axs = plt.subplots(n, 5, figsize=(20, n*5))
     for i in range(n):
-        show_title = i == 0
-        plot_subplot(axs[i, 0], input_data[i], 'Input', show_title=show_title)
-        plot_subplot(axs[i, 1], segmentations[i][0], 'Segmentation', show_title=show_title)
+        # show_title = i == 0
+        show_title = True
+        plot_subplot(axs[i, 0], input_data[i], 'Original image', show_title=show_title)
+        plot_subplot(axs[i, 1], segmentations[i][0], 'Mean Annotation', show_title=show_title)
         plot_subplot(axs[i, 2], predictions_single[i], 'Single model', show_title=show_title)
         plot_subplot(axs[i, 3], predictions_mc[i], 'MC Dropout', show_title=show_title)
         plot_subplot(axs[i, 4], predictions_ens[i], 'Ensemble', show_title=show_title)
