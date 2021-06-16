@@ -14,7 +14,7 @@ def plot_uncertainty(dataset, models, n=6, current_epoch=None):
         _plot_uncertainty(all_input_data, all_seg, all_preds, n=n, suffix="_ensemble", current_epoch=current_epoch)
 
     print('MC dropout')
-    all_input_data, all_seg, all_preds = get_data_mc(dataset, models, device, idxs)
+    all_input_data, all_seg, all_preds = get_data_mc(dataset, models[0], device, idxs)
     print('all preds', all_preds.shape, all_preds.min(), all_preds.max())
     _plot_uncertainty(all_input_data, all_seg, all_preds, n=n, suffix="_dropout", current_epoch=current_epoch)
 
@@ -23,16 +23,23 @@ def _plot_uncertainty(input_data, all_seg, all_preds, n=6, suffix="", current_ep
     # Visualise means and variance
     means_preds, means_seg, vars_preds, vars_seg = np.mean(all_preds, axis=0), np.mean(all_seg, axis=0), np.var(
         all_preds, axis=0), np.var(all_seg, axis=0)
+    print('before scaling:')
+    print('var pred', vars_preds.min(), vars_preds.max())
+    print('var seg', vars_seg.min(), vars_seg.max())
+
     vars_preds = (vars_preds - vars_preds.min()) / (vars_preds.max() - vars_preds.min())
-    print('car', vars_preds.min(), vars_preds.max())
+    vars_seg = (vars_seg - vars_seg.min()) / (vars_seg.max() - vars_seg.min())
+    print('scaled:')
+    print('var pred', vars_preds.min(), vars_preds.max())
+    print('var seg', vars_seg.min(), vars_seg.max())
     fig, axs = plt.subplots(n, 5, figsize=(15, n * 5))
     for i in range(n):
         show_title = True
         plot_subplot(axs[i, 0], input_data[i], 'Input', show_title=show_title)
         plot_subplot(axs[i, 1], means_preds[i], 'Mean of predictions', show_title=show_title)
-        plot_subplot(axs[i, 2], vars_preds[i], 'Variance of predictions', show_title=show_title, cmap='gist_heat')
+        plot_subplot(axs[i, 2], vars_preds[i], 'Var. of predictions', show_title=show_title, cmap='gist_heat')
         plot_subplot(axs[i, 3], np.squeeze(means_seg[i]), 'Mean of segmentations', show_title=show_title)
-        plot_subplot(axs[i, 4], np.squeeze(vars_seg[i]), 'Variance of segmentations', show_title=show_title, cmap='gist_heat')
+        plot_subplot(axs[i, 4], np.squeeze(vars_seg[i]), 'Var. of segmentations', show_title=show_title, cmap='gist_heat')
     fname = f'uncertanty_{current_epoch}{suffix}.png' if current_epoch is not None else f'uncertanty{suffix}.png'
     fname = os.path.join(wandb.run.dir, fname)
     plt.savefig(fname)
@@ -57,7 +64,7 @@ def _plot_pred(input_data, segmentations, predictions_single, predictions_mc, n=
         # show_title = i == 0
         show_title = True
         plot_subplot(axs[i, 0], input_data[i], 'Original image', show_title=show_title)
-        plot_subplot(axs[i, 1], segmentations[i][0], 'Mean Annotation', show_title=show_title)
+        plot_subplot(axs[i, 1], segmentations[i].mean(axis=1), 'Mean Annotation', show_title=show_title)
         plot_subplot(axs[i, 2], predictions_single[i], 'Prediction', show_title=show_title)
         plot_subplot(axs[i, 3], predictions_mc[i], 'MC Dropout', show_title=show_title)
     plt.subplots_adjust(hspace=0.01)
@@ -75,6 +82,7 @@ def plot_predictions_ensemble(dataset, models, device, n=6, current_epoch=None):
     input_data, segmentations, predictions_mc = get_data(dataset, models[0], device, idxs, mode='mc_dropout')
     _, _, predictions_ens = get_data(dataset, models, device, idxs, mode='ensemble')
     # average dropout/ensemble
+    print('seg shape', segmentations.shape)
     predictions_mc = np.mean(predictions_mc, axis=1)
     predictions_ens = np.mean(predictions_ens, axis=1)
     predictions = np.mean(predictions, axis=1)
@@ -88,7 +96,7 @@ def _plot_pred_ens(input_data, segmentations, predictions_single, predictions_mc
         # show_title = i == 0
         show_title = True
         plot_subplot(axs[i, 0], input_data[i], 'Original image', show_title=show_title)
-        plot_subplot(axs[i, 1], segmentations[i][0], 'Mean Annotation', show_title=show_title)
+        plot_subplot(axs[i, 1], segmentations[i].mean(axis=1), 'Mean Annotation', show_title=show_title)
         plot_subplot(axs[i, 2], predictions_single[i], 'Single model', show_title=show_title)
         plot_subplot(axs[i, 3], predictions_mc[i], 'MC Dropout', show_title=show_title)
         plot_subplot(axs[i, 4], predictions_ens[i], 'Ensemble', show_title=show_title)
@@ -123,7 +131,8 @@ def get_data(dataset, model, device, idxs, mode, mode_config=None):
 def refactor_outputs(images, segmentations, preds):
     images, segmentations, preds = map(torch.stack, [images, segmentations, preds])
     preds = preds.detach().cpu().numpy()[:, :, 0] # remove channels dim
-    images, segmentations = [obj.detach().cpu().numpy()[:, 0] for obj in [images, segmentations]]
+    segmentations = segmentations.detach().cpu().numpy()[:, :, 0] # remove channels dim
+    images = images.detach().cpu().numpy()[:, 0] # remove channels dim
     return images, segmentations, preds
 
 
