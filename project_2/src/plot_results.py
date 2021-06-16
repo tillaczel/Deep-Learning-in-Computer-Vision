@@ -106,6 +106,8 @@ def get_data_ensemble(dataset, models, device, idxs):
     return refactor_outputs(images, segmentations, preds)
 
 def get_data_single(dataset, model, device, idxs):
+    model.to(device)
+    model.eval()
     images, segmentations, preds = list(), list(), list()
     for idx in idxs:
         img, seg = dataset[idx]
@@ -116,6 +118,7 @@ def get_data_single(dataset, model, device, idxs):
 
 
 def get_data_mc(dataset, model, device, idxs, n_samples=32):
+    model.to(device)
     model.eval_with_dropout()
     images, segmentations, preds = list(), list(), list()
     for idx in idxs:
