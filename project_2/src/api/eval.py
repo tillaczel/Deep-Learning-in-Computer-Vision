@@ -1,16 +1,16 @@
 import os
-
 import torch
 import wandb
 from omegaconf import DictConfig, OmegaConf
+import pprint
 
 from project_2.src.metrics import calc_all_metrics
 from project_2.src.metrics.energy import calculate_energy
-from project_2.src.metrics.eval_mc import get_mc_preds, get_regular_preds
-from project_2.src.utils import download_file
+from project_2.src.metrics.get_preds import get_mc_preds, get_regular_preds, get_ensemble_preds
+from project_2.src.utils import download_file, get_ensemble_models
 from project_2.src.engine import EngineModule
 from project_2.src.data import get_dataloaders
-from project_2.src.metrics.compare import calc_inner_expert, calc_mean
+from project_2.src.metrics.compare import calc_inner_expert, get_metrics
 
 
 def run_eval(cfg: DictConfig):
@@ -27,24 +27,29 @@ def run_eval(cfg: DictConfig):
         get_dataloaders(train_cfg.data.size, train_cfg.data.train_augmentation, train_cfg.training.batch_size,
                         train_cfg.data.url, train_cfg.data.path, seg_reduce='all')
 
-    calc_inner_expert(test_loader)
+    print("Inner expert scores:")
+    pprint.pprint(calc_inner_expert(test_loader))
 
-    if cfg.is_ensemble:
-        raise NotImplementedError
+    if train_cfg.model.ensemble:
+        models = get_ensemble_models(cfg.run_id, train_cfg)
+        preds, segs = get_ensemble_preds(test_loader, models)
+        print(preds.shape)
+        print("Ensemble single scores:")
+        pprint.pprint(get_metrics(preds, segs, one_pred=False))
+        print("Ensemble scores:")
+        pprint.pprint(get_metrics(torch.mean(preds, dim=1, keepdim=True), segs))
+        del preds, segs, models
+
     else:
-        download_file(cfg.run_id, "model.ckpt")
-        engine = EngineModule.load_from_checkpoint("model.ckpt", config=train_cfg)
-        mc_preds, segs = get_mc_preds(test_loader, engine.model, n_samples=16)
+        download_file(cfg.run_id, "model-v1.ckpt")
+        engine = EngineModule.load_from_checkpoint("model-v1.ckpt", config=train_cfg)
+        preds, segs = get_mc_preds(test_loader, engine.model, n_samples=16)
         print("MC scores:")
-        print(calc_all_metrics(torch.mean(mc_preds, dim=1).unsqueeze(1), torch.mean(segs, dim=1)))
-        calculate_energy(mc_preds, segs)
-        del mc_preds
-        del segs
+        pprint.pprint(get_metrics(preds, segs))
+        calculate_energy(preds[:, :, 0], segs)
+        del preds, segs
 
-        single_preds, segs = get_regular_preds(test_loader, engine.model)
-        print("regular scores:")
-        print(calc_all_metrics(torch.mean(single_preds, dim=1).unsqueeze(1), torch.mean(segs, dim=1)))
-
-        del single_preds
-        del segs
-    calc_mean(test_loader, engine.model)
+        preds, segs = get_regular_preds(test_loader, engine.model)
+        print("Regular scores:")
+        pprint.pprint(get_metrics(preds, segs))
+        del preds, segs

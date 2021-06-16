@@ -13,37 +13,27 @@ def get_data(loader):
 
 def calc_inner_expert(loader):
     img, seg = get_data(loader)
-    results = get_metrics(seg, seg)
-    print('Inner expert', results)
+    results = get_metrics(seg, seg, one_pred=False)
     return results
 
 
-def calc_mean(loader, model):
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
-    model.to(device)
-    model.eval()
-
-    preds, segs = list(), list()
-    for img, seg in tqdm(loader, desc='Mean model prediction'):
-        pred = torch.sigmoid(model(img.to(device)))
-        pred = pred.detach().cpu()
-        preds.append(pred.type(torch.float16))
-        segs.append(seg)
-    preds, segs = torch.cat(preds, dim=0).unsqueeze(1), torch.cat(segs, dim=0)
-    results = get_metrics(preds, segs)
-    print('Mean model', results)
-    return results
-
-
-def get_metrics(pred, seg):
+def get_metrics(pred, seg, one_pred=True):
     results = dict()
-    for i in range(pred.shape[1]):
-        for j in range(i+1, 4):
-            result = calc_all_metrics(pred[:, i], seg[:, j].to(torch.int))
+    if one_pred:
+        for j in range(1, 4):
+            result = calc_all_metrics(pred[:, 0], seg[:, j].to(torch.int))
             for k, v in result.items():
                 if k in results.keys():
-                    results[k] += v/6
+                    results[k] += v / 3
                 else:
-                    results[k] = v/6
+                    results[k] = v / 3
+    else:
+        for i in range(pred.shape[1]):
+            for j in range(1 + i, 4):
+                result = calc_all_metrics(pred[:, i], seg[:, j].to(torch.int))
+                for k, v in result.items():
+                    if k in results.keys():
+                        results[k] += v / 6
+                    else:
+                        results[k] = v / 6
     return results
