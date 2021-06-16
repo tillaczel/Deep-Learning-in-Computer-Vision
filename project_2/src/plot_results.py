@@ -4,6 +4,40 @@ import os
 import wandb
 import numpy as np
 
+def plot_uncertainty(dataset, models, n=6, current_epoch=None):
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    idxs = [117, 143, 673, 737, 238, 683, 937, 204, 1900, 1383, 913, 1844, 231, 318, 234, 137, 598][:n]
+    if len(models) > 1:
+        print('Ensemble')
+        all_input_data, all_seg, all_preds = get_data_ensemble(dataset, models, device, idxs)
+        print('all preds', all_preds.shape, all_preds.min(), all_preds.max())
+        _plot_uncertainty(all_input_data, all_seg, all_preds, n=n, suffix="_ensemble", current_epoch=current_epoch)
+
+    print('MC dropout')
+    all_input_data, all_seg, all_preds = get_data_mc(dataset, models, device, idxs)
+    print('all preds', all_preds.shape, all_preds.min(), all_preds.max())
+    _plot_uncertainty(all_input_data, all_seg, all_preds, n=n, suffix="_dropout", current_epoch=current_epoch)
+
+
+def _plot_uncertainty(input_data, all_seg, all_preds, n=6, suffix="", current_epoch=None):
+    # Visualise means and variance
+    means_preds, means_seg, vars_preds, vars_seg = np.mean(all_preds, axis=0), np.mean(all_seg, axis=0), np.var(
+        all_preds, axis=0), np.var(all_seg, axis=0)
+    vars_preds = (vars_preds - vars_preds.min()) / (vars_preds.max() - vars_preds.min())
+    print('car', vars_preds.min(), vars_preds.max())
+    fig, axs = plt.subplots(n, 5, figsize=(15, n * 5))
+    for i in range(n):
+        show_title = True
+        plot_subplot(axs[i, 0], input_data[i], 'Input', show_title=show_title)
+        plot_subplot(axs[i, 1], means_preds[i], 'Mean of predictions', show_title=show_title)
+        plot_subplot(axs[i, 2], vars_preds[i], 'Variance of predictions', show_title=show_title, cmap='gist_heat')
+        plot_subplot(axs[i, 3], np.squeeze(means_seg[i]), 'Mean of segmentations', show_title=show_title)
+        plot_subplot(axs[i, 4], np.squeeze(vars_seg[i]), 'Variance of segmentations', show_title=show_title, cmap='gist_heat')
+    fname = f'uncertanty_{current_epoch}{suffix}.png' if current_epoch is not None else f'uncertanty{suffix}.png'
+    fname = os.path.join(wandb.run.dir, fname)
+    plt.savefig(fname)
+    wandb.save(fname, base_path=wandb.run.dir)
+
 
 def plot_predictions(dataset, model, device, n=6, current_epoch=None):
     # idxs = np.random.choice(np.arange(len(dataset)), replace=False, size=n)
@@ -66,8 +100,8 @@ def _plot_pred_ens(input_data, segmentations, predictions_single, predictions_mc
     wandb.save(fname, base_path=wandb.run.dir)
 
 
-def plot_subplot(ax, img, title, show_title=True):
-    ax.imshow(img, cmap="gray")
+def plot_subplot(ax, img, title, show_title=True, cmap="gray"):
+    ax.imshow(img, cmap=cmap)
     if show_title:
         ax.set_title(title)
     ax.axis('off')
