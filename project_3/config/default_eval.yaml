@@ -1,0 +1,11 @@
+#defaults:
+hydra:
+  run:
+    dir: ./
+run_id: 1u9im5s1
+data:
+  size: 32
+  path: './data/'
+  train_augmentation: []
+batch_size: 64
+is_ensemble: false

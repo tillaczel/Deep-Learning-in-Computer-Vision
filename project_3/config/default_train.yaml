@@ -1,0 +1,42 @@
+#defaults:
+hydra:
+  run:
+    dir: ./
+
+model:
+  pretrained: true
+  out_dim: 1
+  in_dim: 1
+  ensemble: True
+  dropout_rate: 0.3
+
+training:
+  max_epochs: 100
+  batch_size: 64
+  optimizer:
+    name: adam
+    lr: 0.001
+  loss:
+    pos_weight: 1
+  early_stopping:
+    monitor: 'val_loss'
+    stopping_patience: 10
+  scheduler:
+    monitor: val_loss
+    mode: min
+    name: plateau
+    patience: 3
+    min_lr: 0.00001
+    factor: 0.1
+  model_checkpoint:
+    monitor: 'val_loss'
+data:
+  size: 128
+  url: 'https://courses.compute.dtu.dk/02514/project_data/LIDC_DLCV_version.zip'
+  path: './data/'
+  seg_reduce: 'mean'
+  train_augmentation:
+    - 'random_horizontal_flip'
+    - 'random_vertical_flip'
+    - 'random_rotation'
+overlap: 0.2
