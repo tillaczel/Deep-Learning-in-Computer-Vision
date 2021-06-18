@@ -49,7 +49,7 @@ class EngineModule(pl.LightningModule):
         return d, g_identity, g_gan, g_cycle
 
     def training_step(self, batch, batch_idx):
-        d, g_identity, g_gan, g_cycle = self.get_loss_weights()
+        loss_weight_d, loss_weight_g_identity, loss_weight_g_gan, loss_weight_g_cycle = self.get_loss_weights()
 
         real_h, real_z = batch['horse'], batch['zebra']
         g_opt, d_opt, = self.optimizers()
@@ -75,7 +75,8 @@ class EngineModule(pl.LightningModule):
         del fake_h, fake_z, pred_h_fake, pred_z_fake
 
         # Total loss
-        loss_d = loss_h_real + loss_z_real + loss_h_fake + loss_z_fake
+        loss_d_unweighted = loss_h_real + loss_z_real + loss_h_fake + loss_z_fake
+        loss_d = loss_weight_d * loss_d_unweighted
 
         # Step discriminator
         d_opt.zero_grad()
@@ -105,7 +106,8 @@ class EngineModule(pl.LightningModule):
         del fake_h, fake_z, recovered_h, recovered_z
 
         # Total loss
-        loss_g = loss_identity_h + loss_identity_z + loss_gan_z2h + loss_gan_h2z + loss_cycle_hzh + loss_cycle_zhz
+        loss_g = loss_weight_g_identity * (loss_identity_h + loss_identity_z) + loss_weight_g_gan * (loss_gan_z2h + loss_gan_h2z) + loss_weight_g_cycle * (loss_cycle_hzh + loss_cycle_zhz)
+        loss_g_unweighted = loss_identity_h + loss_identity_z + loss_gan_z2h + loss_gan_h2z + loss_cycle_hzh + loss_cycle_zhz
 
         # Step generator
         g_opt.zero_grad()
@@ -113,9 +115,11 @@ class EngineModule(pl.LightningModule):
         g_opt.step()
 
         self.log('loss_g', loss_g, on_step=False, on_epoch=True, prog_bar=True, logger=True)
+        self.log('loss_g_unweighted', loss_g_unweighted, on_step=False, on_epoch=True, prog_bar=True, logger=True)
         self.log('loss_d', loss_d, on_step=False, on_epoch=True, prog_bar=True, logger=True)
+        self.log('loss_d_unweighted', loss_d_unweighted, on_step=False, on_epoch=True, prog_bar=True, logger=True)
         # for tracking general progress
-        self.log('loss_sum', loss_d + loss_g, on_step=False, on_epoch=True, prog_bar=True, logger=True)
+        self.log('loss_sum', loss_g_unweighted + loss_d_unweighted, on_step=False, on_epoch=True, prog_bar=True, logger=True)
 
         self.log('loss_identity_h', loss_identity_h, on_step=False, on_epoch=True, prog_bar=False, logger=True)
         self.log('loss_identity_z', loss_identity_z, on_step=False, on_epoch=True, prog_bar=False, logger=True)
