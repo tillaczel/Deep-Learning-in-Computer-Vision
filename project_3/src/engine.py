@@ -26,7 +26,7 @@ class EngineModule(pl.LightningModule):
         return self.model(x)
 
     def training_step(self, batch, batch_idx):
-        images, labels = batch
+        print(batch)
 
         g_opt, d_opt, = self.optimizers()
 
@@ -34,7 +34,6 @@ class EngineModule(pl.LightningModule):
                  prog_bar=False, logger=True)
         self.log('lr', self.lr, on_step=False, on_epoch=True,
                  prog_bar=False, logger=True)
-
 
         return {'loss': loss}
 
