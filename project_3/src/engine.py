@@ -21,6 +21,9 @@ class EngineModule(pl.LightningModule):
         device = 'cuda' if torch.cuda.is_available() else 'cpu'
         self.target_real = torch.autograd.Variable(torch.ones((batch_size, 1), device=device), requires_grad=False)
         self.target_fake = torch.autograd.Variable(torch.zeros((batch_size, 1), device=device), requires_grad=False)
+        self.target_real_val = torch.ones((20, 1), device=device)
+        self.target_fake_val = torch.zeros((20, 1), device=device)
+
         self.test_dataset_horse = test_dataset_horse
         self.test_dataset_zebra = test_dataset_zebra
 
@@ -72,7 +75,7 @@ class EngineModule(pl.LightningModule):
         del fake_h, fake_z, pred_h_fake, pred_z_fake
 
         # Total loss
-        loss_d = loss_h_real+loss_z_real+loss_h_fake+loss_z_fake
+        loss_d = loss_h_real + loss_z_real + loss_h_fake + loss_z_fake
 
         # Step discriminator
         d_opt.zero_grad()
@@ -109,7 +112,6 @@ class EngineModule(pl.LightningModule):
         loss_g.backward()
         g_opt.step()
 
-
         self.log('loss_g', loss_g, on_step=False, on_epoch=True, prog_bar=True, logger=True)
         self.log('loss_d', loss_d, on_step=False, on_epoch=True, prog_bar=True, logger=True)
         # for tracking general progress
@@ -135,12 +137,9 @@ class EngineModule(pl.LightningModule):
     def validation_step(self, batch, batch_idx):
         with torch.no_grad():
             real_h, real_z = batch['horse'], batch['zebra']
-            print(real_h.shape, real_h.size())
 
-            if len(real_h.size()) == 0:
+            if real_h.size()[-1] == 0:
                 return
-
-            g_opt, d_opt, = self.optimizers()
             # TODO: normalizatoin
             # --------------------- #
             #   Fit discriminator   #
@@ -148,19 +147,19 @@ class EngineModule(pl.LightningModule):
 
             # Real loss
             pred_h_real, pred_z_real = self.d_h(real_h), self.d_z(real_z)
-            loss_h_real = self.loss.criterion_GAN(pred_h_real, self.target_real)
-            loss_z_real = self.loss.criterion_GAN(pred_z_real, self.target_real)
+            loss_h_real = self.loss.criterion_GAN(pred_h_real, self.target_real_val)
+            loss_z_real = self.loss.criterion_GAN(pred_z_real, self.target_real_val)
             del pred_h_real, pred_z_real
 
             # Fake loss
             fake_h, fake_z = self.g_z2h(real_z), self.g_h2z(real_h)
             pred_h_fake, pred_z_fake = self.d_h(fake_h), self.d_z(fake_z)
-            loss_h_fake = self.loss.criterion_GAN(pred_h_fake, self.target_fake)
-            loss_z_fake = self.loss.criterion_GAN(pred_z_fake, self.target_fake)
+            loss_h_fake = self.loss.criterion_GAN(pred_h_fake, self.target_fake_val)
+            loss_z_fake = self.loss.criterion_GAN(pred_z_fake, self.target_fake_val)
             del fake_h, fake_z, pred_h_fake, pred_z_fake
 
             # Total loss
-            loss_d = loss_h_real+loss_z_real+loss_h_fake+loss_z_fake
+            loss_d = loss_h_real + loss_z_real + loss_h_fake + loss_z_fake
 
             # --------------------- #
             #     Fit generator     #
@@ -174,8 +173,8 @@ class EngineModule(pl.LightningModule):
             # GAN loss
             fake_h, fake_z = self.g_z2h(real_z), self.g_h2z(real_h)
             pred_fake_h, pred_fake_z = self.d_h(fake_h), self.d_z(fake_z)
-            loss_gan_z2h = self.loss.criterion_GAN(pred_fake_h, self.target_real)
-            loss_gan_h2z = self.loss.criterion_GAN(pred_fake_z, self.target_real)
+            loss_gan_z2h = self.loss.criterion_GAN(pred_fake_h, self.target_real_val)
+            loss_gan_h2z = self.loss.criterion_GAN(pred_fake_z, self.target_real_val)
             del pred_fake_h, pred_fake_z
 
             # Cycle loss
@@ -205,8 +204,10 @@ class EngineModule(pl.LightningModule):
             self.log('val_loss_z_fake', loss_z_fake, on_step=False, on_epoch=True, prog_bar=False, logger=True)
 
     def validation_epoch_end(self, outputs: list):
-        make_plots(self.test_dataset_horse, self.g_h2z, self.g_z2h, self.device, n=4, current_epoch=self.current_epoch, suffix='_h2z')
-        make_plots(self.test_dataset_zebra, self.g_z2h, self.g_h2z, self.device, n=4, current_epoch=self.current_epoch, suffix='_z2h')
+        make_plots(self.test_dataset_horse, self.g_h2z, self.g_z2h, self.device, n=4, current_epoch=self.current_epoch,
+                   suffix='_h2z')
+        make_plots(self.test_dataset_zebra, self.g_z2h, self.g_h2z, self.device, n=4, current_epoch=self.current_epoch,
+                   suffix='_z2h')
 
     def configure_optimizers(self):
         optimizer_g = torch.optim.Adam(list(self.g_h2z.parameters()) + list(self.g_z2h.parameters()),
