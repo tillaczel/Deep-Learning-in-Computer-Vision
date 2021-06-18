@@ -3,7 +3,7 @@ import os
 import torch
 from tqdm import tqdm
 
-from project_2.src.engine import EngineModule
+from project_3.src.engine import EngineModule
 
 
 def download_file(run_id, filename):

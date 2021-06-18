@@ -7,7 +7,7 @@ sys.path.append(os.path.split(os.getcwd())[0])
 import hydra
 import wandb
 from omegaconf import DictConfig, OmegaConf
-from project_2.src.api.eval import run_eval
+from project_3.src.api.eval import run_eval
 
 
 wandb.init(project='p3', entity='dlcv')

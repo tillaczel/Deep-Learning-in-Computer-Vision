@@ -4,14 +4,14 @@ import wandb
 from omegaconf import DictConfig, OmegaConf
 import pprint
 
-from project_2.src.metrics import calc_all_metrics
-from project_2.src.metrics.energy import calculate_energy
-from project_2.src.metrics.get_preds import get_mc_preds, get_regular_preds, get_ensemble_preds
-from project_2.src.plot_results import plot_predictions, plot_predictions_ensemble, plot_uncertainty
-from project_2.src.utils import download_file, get_ensemble_models
-from project_2.src.engine import EngineModule
-from project_2.src.data import get_dataloaders
-from project_2.src.metrics.compare import calc_inner_expert, get_metrics
+from project_3.src.metrics import calc_all_metrics
+from project_3.src.metrics.energy import calculate_energy
+from project_3.src.metrics.get_preds import get_mc_preds, get_regular_preds, get_ensemble_preds
+from project_3.src.plot_results import plot_predictions, plot_predictions_ensemble, plot_uncertainty
+from project_3.src.utils import download_file, get_ensemble_models
+from project_3.src.engine import EngineModule
+from project_3.src.data import get_dataloaders
+from project_3.src.metrics.compare import calc_inner_expert, get_metrics
 
 
 def run_eval(cfg: DictConfig):
