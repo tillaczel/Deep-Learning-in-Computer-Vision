@@ -7,6 +7,7 @@ import shutil
 from PIL import Image
 import torch
 import gdown
+import matplotlib.pyplot as plt
 
 def download_url(url, save_path, chunk_size=128):
     gdown.download(url, save_path, quiet=False)
@@ -97,3 +98,6 @@ def get_transforms(size, train_augmentation):
 
     return train_transform, valid_transform
 
+def plot_image(img):
+    plt.imshow(img.moveaxis(0, -1))
+    plt.axis('off')
