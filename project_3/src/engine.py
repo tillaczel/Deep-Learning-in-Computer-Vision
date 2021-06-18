@@ -16,6 +16,8 @@ class EngineModule(pl.LightningModule):
         self.G_A2B, self.G_B2A, self.D_A, self.D_B = None, None, None, None
         self.loss_func = nn.BCEWithLogitsLoss(pos_weight=torch.tensor([config.training.loss.pos_weight]))
 
+        self.automatic_optimization = False
+
     @property
     def lr(self):
         return self.optimizers().param_groups[0]['lr']
