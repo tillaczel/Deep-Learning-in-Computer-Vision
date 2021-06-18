@@ -17,8 +17,9 @@ class EngineModule(pl.LightningModule):
         self.loss = Losses()
 
         batch_size = config.training.batch_size
-        self.target_real = torch.autograd.Variable(torch.ones(batch_size, device=self.device), requires_grad=False)
-        self.target_fake = torch.autograd.Variable(torch.zeros(batch_size, device=self.device), requires_grad=False)
+        device = 'cuda' if torch.cuda.is_available() else 'cpu'
+        self.target_real = torch.autograd.Variable(torch.ones((batch_size, 1), device=device), requires_grad=False)
+        self.target_fake = torch.autograd.Variable(torch.zeros((batch_size, 1), device=device), requires_grad=False)
 
         self.automatic_optimization = False
 
