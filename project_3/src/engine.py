@@ -16,8 +16,7 @@ class EngineModule(pl.LightningModule):
         self.g_h2z, self.g_z2h, self.d_h, self.d_z = get_networks()
         self.loss = Losses()
 
-        # TODO: batch_size to config
-        batch_size = 64
+        batch_size = config.training.batch_size
         self.target_real = torch.autograd.Variable(torch.ones(batch_size, device=self.device), requires_grad=False)
         self.target_fake = torch.autograd.Variable(torch.zeros(batch_size, device=self.device), requires_grad=False)
 
