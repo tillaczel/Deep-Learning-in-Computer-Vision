@@ -19,5 +19,5 @@ def run_training(cfg: DictConfig):
 
     train_loader, valid_loader = \
         get_dataloaders(cfg.data.size, cfg.data.train_augmentation, cfg.training.batch_size, cfg.data.url,
-                        cfg.data.path)
+                        cfg.data.path, samples_per_epoch=cfg.training.samples_per_epoch)
     trainer.fit(engine, train_dataloader=train_loader, val_dataloaders=valid_loader)

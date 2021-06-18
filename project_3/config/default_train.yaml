@@ -11,6 +11,7 @@ model:
   dropout_rate: 0.3
 
 training:
+  samples_per_epoch: 1536
   max_epochs: 100
   batch_size: 16
   optimizer:

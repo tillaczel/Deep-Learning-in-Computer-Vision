@@ -96,26 +96,29 @@ def split_dataset(dataset, valid_transform, split=0.8, seed=2312):
     return dataset, val_dataset
 
 
-def get_dataloaders(size, train_augmentation, batch_size, url, data_path):
+def get_dataloaders(size, train_augmentation, batch_size, url, data_path, samples_per_epoch=1536):
     train_transform, valid_transform = get_transforms(size, [])
     train_horse, train_zebra, test_horse, test_zebra = get_dataset(url, data_path, train_transform, valid_transform)
     # we skip it for now
     # train_horse, val_horse = split_dataset(train_horse, valid_transform, split=0.8, seed=2312)
     # train_zebra, val_zebra = split_dataset(train_zebra, valid_transform, split=0.8, seed=2312)
-    train_loader_horse = DataLoader(train_horse, batch_size=batch_size, shuffle=True, num_workers=2)
-    train_loader_zebra = DataLoader(train_zebra, batch_size=batch_size, shuffle=True, num_workers=2)
+    horse_sampler = torch.utils.data.RandomSampler(train_horse, replacement=True, num_samples=samples_per_epoch, generator=None)
+    zebra_sampler = torch.utils.data.RandomSampler(train_zebra, replacement=True, num_samples=samples_per_epoch, generator=None)
+
+    train_loader_horse = DataLoader(train_horse, batch_size=batch_size, sampler=horse_sampler, num_workers=2)
+    train_loader_zebra = DataLoader(train_zebra, batch_size=batch_size, sampler=zebra_sampler, num_workers=2)
     train_loaders = {
         'horse': train_loader_horse,
         'zebra': train_loader_zebra,
     }
     # pad horses with None to the length of zebra
-    #pad_dataset(test_horse, len(test_zebra))
+    pad_dataset(test_horse, len(test_zebra))
 
     test_loader_horse = DataLoader(test_horse, batch_size=batch_size, shuffle=False, num_workers=2)
     test_loader_zebra = DataLoader(test_zebra, batch_size=batch_size, shuffle=False, num_workers=2)
 
     # combine dataloaders
-    test_loaders = CombinedLoader({
+    test_loaders =  CombinedLoader({
         'horse': test_loader_horse,
         'zebra': test_loader_zebra,
     }, "max_size_cycle")
