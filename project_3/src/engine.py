@@ -34,11 +34,36 @@ class EngineModule(pl.LightningModule):
         real_h, real_z = batch['horse'], batch['zebra']
         g_opt, d_opt, = self.optimizers()
         # augment_images = DiffAugment(images, policy='color,translation,cutout')
-        print(real_h.shape)
 
-        # ----------------- #
-        #   Fit generator   #
-        # ----------------- #
+        # TODO: add loss weights
+        # TODO: normalizatoin
+        # --------------------- #
+        #   Fit discriminator   #
+        # --------------------- #
+
+
+        # Real loss
+        pred_h_real, pred_z_real = self.d_h(real_h), self.d_z(real_z)
+        loss_h_real = self.loss.criterion_GAN(pred_h_real, self.target_real)
+        loss_z_real = self.loss.criterion_GAN(pred_z_real, self.target_real)
+
+        # Fake loss
+        fake_h, fake_z = self.g_z2h(real_z), self.g_h2z(real_h)
+        pred_h_fake, pred_z_fake = self.d_h(fake_h.detach()), self.d_z(fake_z.detach())
+        loss_h_fake = self.loss.criterion_GAN(pred_h_fake, self.target_fake)
+        loss_z_fake = self.loss.criterion_GAN(pred_z_fake, self.target_fake)
+
+        # Total loss
+        loss_d = loss_h_real+loss_z_real+loss_h_fake+loss_z_fake
+
+        # Step discriminator
+        d_opt.zero_grad()
+        loss_d.backward()
+        d_opt.step()
+
+        # --------------------- #
+        #     Fit generator     #
+        # --------------------- #
         # Identity loss
         same_h, same_z = self.g_z2h(real_h), self.g_h2z(real_z)
         loss_identity_h = self.loss.criterion_identity(same_h, real_h)
@@ -61,17 +86,16 @@ class EngineModule(pl.LightningModule):
         # Total loss
         loss_g = loss_identity_h + loss_identity_z + loss_gan_z2h + loss_gan_h2z + loss_cycle_hzh + loss_cycle_zhz
 
-        # Step
+        # Step generator
         g_opt.zero_grad()
         loss_g.backward()
         g_opt.step()
 
-        self.log('loss', loss, on_step=False, on_epoch=True,
-                 prog_bar=False, logger=True)
-        self.log('lr', self.lr, on_step=False, on_epoch=True,
-                 prog_bar=False, logger=True)
+        self.log('loss_g', loss_g, on_step=False, on_epoch=True, prog_bar=False, logger=True)
+        self.log('loss_d', loss_d, on_step=False, on_epoch=True, prog_bar=False, logger=True)
+        self.log('lr', self.lr, on_step=False, on_epoch=True, prog_bar=False, logger=True)
 
-        return {'loss': loss}
+        return {'loss_g': loss_g, 'loss_d': loss_d}
 
     def training_epoch_end(self, outputs: list):
         pass
