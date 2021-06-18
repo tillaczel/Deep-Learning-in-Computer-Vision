@@ -2,7 +2,9 @@ from omegaconf import DictConfig
 import pytorch_lightning as pl
 import torch
 from torch import nn
+from torchvision import models, transforms
 
+from project_3.src.fid import FrechetInceptionDistance
 from project_3.src.model import get_networks
 from project_3.src.loss import Losses
 from project_3.src.DiffAugment_pytorch import DiffAugment
@@ -26,6 +28,13 @@ class EngineModule(pl.LightningModule):
 
         self.test_dataset_horse = test_dataset_horse
         self.test_dataset_zebra = test_dataset_zebra
+
+        self.inception =  models.inception_v3(pretrained=True)
+        # TODO cut layer
+        self.inception.fc = nn.Identity() # not sure if it works
+        self.inception_normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+
+        self.fid_identity_h = FrechetInceptionDistance(self.inception, self.inception_normalize)
 
         self.warmup_epochs = config.training.warmup_epochs
         self.automatic_optimization = False
@@ -172,7 +181,11 @@ class EngineModule(pl.LightningModule):
             same_h, same_z = self.g_z2h(real_h), self.g_h2z(real_z)
             loss_identity_h = self.loss.criterion_identity(same_h, real_h)
             loss_identity_z = self.loss.criterion_identity(same_z, real_z)
+
+            # TODO: FID ?
+            self.fid_identity_h(same_h, real_h)
             del same_h, same_z
+
 
             # GAN loss
             fake_h, fake_z = self.g_z2h(real_z), self.g_h2z(real_h)
