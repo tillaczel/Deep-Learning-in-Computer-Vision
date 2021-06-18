@@ -108,7 +108,7 @@ def get_dataloaders(size, train_augmentation, batch_size, url, data_path):
         'zebra': train_loader_zebra,
     }
     # pad horses with None to the length of zebra
-    pad_dataset(test_horse, len(test_zebra))
+    #pad_dataset(test_horse, len(test_zebra))
 
     test_loader_horse = DataLoader(test_horse, batch_size=batch_size, shuffle=False, num_workers=2)
     test_loader_zebra = DataLoader(test_zebra, batch_size=batch_size, shuffle=False, num_workers=2)
