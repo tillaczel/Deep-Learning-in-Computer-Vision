@@ -73,7 +73,7 @@ class ImageDataset(Dataset):
 
         img = Image.open(os.path.join(self.img_path, fname)).convert('RGB')
         img = self.img_transform(img)
-        return img
+        return img * 2 - 1
 
 
 def pad_dataset(dataset, length):
