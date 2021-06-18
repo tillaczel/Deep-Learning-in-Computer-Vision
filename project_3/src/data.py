@@ -77,7 +77,7 @@ class ImageDataset(Dataset):
 
 def pad_dataset(dataset, length):
     while len(dataset.fnames) < length:
-        dataset.fnames.append(None)
+        dataset.fnames.append(torch.tensor(None))
 
 
 def split_dataset(dataset, valid_transform, split=0.8, seed=2312):
