@@ -42,19 +42,7 @@ class EngineModule(pl.LightningModule):
         pass
 
     def validation_step(self, batch, batch_idx):
-        images, labels = batch
-        seg_hat = self.model(images)
-        loss = self.loss_func(torch.moveaxis(seg_hat, 1, -1),
-                              torch.moveaxis(labels.type(torch.float32), 1, -1))
-
-        self.log('val_loss', loss, on_step=False, on_epoch=True,
-                 prog_bar=False, logger=True)
-
-        probs = torch.sigmoid(seg_hat)
-        for metric_name in self.metrics.metrics:
-            self.update_and_log_metric(metric_name, probs, (labels >= 0.5).int(), mode='val')
-
-        return {'val_loss': loss}
+        pass
 
     def validation_epoch_end(self, outputs: list):
         pass
