@@ -6,6 +6,7 @@ from torch import nn
 from project_3.src.model import get_networks
 from project_3.src.plot_results import plot_predictions
 from project_3.src.loss import Losses
+from project_3.src.DiffAugment_pytorch import DiffAugment
 
 
 class EngineModule(pl.LightningModule):
@@ -35,8 +36,10 @@ class EngineModule(pl.LightningModule):
 
     def training_step(self, batch, batch_idx):
         g_opt, d_opt, = self.optimizers()
+
         images, labels = batch
-        seg_hat = self.model(images)
+        augment_images = DiffAugment(images, policy='color,translation,cutout')
+        seg_hat = self.model(augment_images)
         loss = self.loss_func(seg_hat, labels.type(torch.float32))
 
         self.log('loss', loss, on_step=False, on_epoch=True,
