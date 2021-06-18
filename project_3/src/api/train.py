@@ -20,7 +20,7 @@ def run_training(cfg: DictConfig):
                         cfg.data.path, samples_per_epoch=cfg.training.samples_per_epoch)
 
 
-    engine = EngineModule(cfg, test_dataset_horse, test_dataset_zebra, inception)
+    engine = EngineModule(cfg, test_dataset_horse, test_dataset_zebra)
     trainer = get_trainer(cfg, engine)
 
     trainer.fit(engine, train_dataloader=train_loader, val_dataloaders=valid_loader)
