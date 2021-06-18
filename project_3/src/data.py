@@ -71,7 +71,8 @@ class ImageDataset(Dataset):
         if fname is None:
             return []
 
-        img = self.img_transform(Image.open(os.path.join(self.img_path, fname)))
+        img = Image.open(os.path.join(self.img_path, fname)).convert('RGB')
+        img = self.img_transform(img)
         return img
 
 
@@ -108,7 +109,7 @@ def get_dataloaders(size, train_augmentation, batch_size, url, data_path):
         'zebra': train_loader_zebra,
     }
     # pad horses with None to the length of zebra
-    pad_dataset(test_horse, len(test_zebra))
+    #pad_dataset(test_horse, len(test_zebra))
 
     test_loader_horse = DataLoader(test_horse, batch_size=batch_size, shuffle=False, num_workers=2)
     test_loader_zebra = DataLoader(test_zebra, batch_size=batch_size, shuffle=False, num_workers=2)
@@ -136,6 +137,7 @@ def get_transforms(size, train_augmentation):
     #     train_transform.append(transforms.RandomRotation(10))
     # if 'color_jitter' in train_augmentation:
     #     train_transform.append(transforms.ColorJitter())
+    train_transform.append(transforms.Resize((size, size)))
     train_transform.append(transforms.ToTensor())
     train_transform = transforms.Compose(train_transform)
 
@@ -143,4 +145,3 @@ def get_transforms(size, train_augmentation):
     valid_transform = transforms.Compose(valid_transform)
 
     return train_transform, valid_transform
-

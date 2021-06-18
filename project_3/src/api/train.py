@@ -17,7 +17,7 @@ def run_training(cfg: DictConfig):
     engine = EngineModule(cfg)
     trainer = get_trainer(cfg, engine)
 
-    train_loader, valid_loader, test_loader = \
+    train_loader, valid_loader = \
         get_dataloaders(cfg.data.size, cfg.data.train_augmentation, cfg.training.batch_size, cfg.data.url,
-                        cfg.data.path, cfg.data.seg_reduce)
+                        cfg.data.path)
     trainer.fit(engine, train_dataloader=train_loader, val_dataloaders=valid_loader)

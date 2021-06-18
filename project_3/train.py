@@ -9,7 +9,7 @@ sys.path.append(os.path.split(os.getcwd())[0])
 
 from project_3.src.api.train import run_training
 
-wandb.init(project='p3', entity='dlcv')
+wandb.init(project='p4', entity='dlcv')
 
 
 @hydra.main(config_path='config', config_name="default_train")
