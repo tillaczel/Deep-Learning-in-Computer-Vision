@@ -137,6 +137,7 @@ def get_transforms(size, train_augmentation):
     #     train_transform.append(transforms.RandomRotation(10))
     # if 'color_jitter' in train_augmentation:
     #     train_transform.append(transforms.ColorJitter())
+    train_transform.append(transforms.Resize((size, size)))
     train_transform.append(transforms.ToTensor())
     train_transform = transforms.Compose(train_transform)
 
