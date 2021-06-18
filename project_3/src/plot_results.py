@@ -18,9 +18,9 @@ def plot_images_and_predictions(input_images, predsA2B, predsB2A, current_epoch=
     fig, axs = plt.subplots(n, 3, figsize=(15, n * 5))
     for i in range(n):
         show_title = True
-        plot_subplot(axs[i, 0], input_images[i].moveaxis(0,-1), 'Input image', show_title=show_title)
-        plot_subplot(axs[i, 1], predsA2B[i][0].moveaxis(0,-1), 'Predicted (A2B) image', show_title=show_title)
-        plot_subplot(axs[i, 2], predsB2A[i][0].moveaxis(0,-1), 'Reconstructed (B2A) image', show_title=show_title)
+        plot_subplot(axs[i, 0], input_images[i].moveaxis(0,-1) / 2 + 0.5, 'Input image', show_title=show_title)
+        plot_subplot(axs[i, 1], predsA2B[i][0].moveaxis(0,-1) / 2 + 0.5, 'Predicted (A2B) image', show_title=show_title)
+        plot_subplot(axs[i, 2], predsB2A[i][0].moveaxis(0,-1) / 2 + 0.5, 'Reconstructed (B2A) image', show_title=show_title)
 
     fname = f'converted_images{suffix}_{current_epoch}.png' if current_epoch is not None else f'converted_images{suffix}.png'
     fname = os.path.join(wandb.run.dir, fname)
