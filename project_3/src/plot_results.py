@@ -38,7 +38,7 @@ def get_data(dataset, modelA2B, modelB2A, device, n=4):
         img, labels = dataset[idx]
         predA2B = modelA2B(img.unsqueeze(0).to(device)) # Do a forward pass A2B
         predB2A = modelB2A(predA2B.unsqueeze(0).to(device)) # Forward pass B2A (reconstruct image)
-        images.append(img), predsA2B.append(predA2B), predsB2A.append(predB2A)
+        images.append(img), predsA2B.append(predA2B.detach().cpu()), predsB2A.append(predB2A.detach().cpu())
 
     return images, predsA2B, predsB2A
     #return refactor_outputs(images, preds)
