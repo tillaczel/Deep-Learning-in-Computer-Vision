@@ -33,9 +33,9 @@ def get_data(dataset, modelA2B, modelB2A, device, n=4):
     modelA2B.to(device), modelB2A.to(device)
     modelA2B.eval(), modelB2A.eval()
     images, predsA2B, predsB2A  = list(), list(), list()
-    idxs = np.random.choice(np.arange(len(dataset)), replace=False, size=n)
+    idxs = np.random.choice(np.arange(120), replace=False, size=n)
     for idx in idxs:
-        img, labels = dataset[idx]
+        img = dataset[idx]
         predA2B = modelA2B(img.unsqueeze(0).to(device)) # Do a forward pass A2B
         predB2A = modelB2A(predA2B.unsqueeze(0).to(device)) # Forward pass B2A (reconstruct image)
         images.append(img), predsA2B.append(predA2B.detach().cpu()), predsB2A.append(predB2A.detach().cpu())
