@@ -8,7 +8,7 @@ from PIL import Image
 import torch
 import gdown
 from pytorch_lightning.trainer.supporters import CombinedLoader
-
+import numpy as np
 
 def download_url(url, save_path, chunk_size=128):
     gdown.download(url, save_path, quiet=False)
@@ -69,7 +69,7 @@ class ImageDataset(Dataset):
         fname = self.fnames[idx]
 
         if fname is None:
-            return []
+            return torch.empty(0)
 
         img = Image.open(os.path.join(self.img_path, fname)).convert('RGB')
         img = self.img_transform(img)
@@ -114,8 +114,9 @@ def get_dataloaders(size, train_augmentation, batch_size, url, data_path, sample
     # pad horses with None to the length of zebra
     pad_dataset(test_horse, len(test_zebra))
 
-    test_loader_horse = DataLoader(test_horse, batch_size=batch_size, shuffle=False, num_workers=2)
-    test_loader_zebra = DataLoader(test_zebra, batch_size=batch_size, shuffle=False, num_workers=2)
+    # fix batch size so the last 20 empty don't get mixed with regular ones
+    test_loader_horse = DataLoader(test_horse, batch_size=20, shuffle=False, num_workers=2)
+    test_loader_zebra = DataLoader(test_zebra, batch_size=20, shuffle=False, num_workers=2)
 
     # combine dataloaders
     test_loaders =  CombinedLoader({
