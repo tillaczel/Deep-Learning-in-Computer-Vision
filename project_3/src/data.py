@@ -71,7 +71,8 @@ class ImageDataset(Dataset):
         if fname is None:
             return []
 
-        img = self.img_transform(Image.open(os.path.join(self.img_path, fname)))
+        img = Image.open(os.path.join(self.img_path, fname)).convert('RGB')
+        img = self.img_transform(img)
         return img
 
 
