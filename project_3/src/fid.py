@@ -2,6 +2,7 @@ import torch
 from torchmetrics import Metric
 
 # def calculate_fid(act1, act2):
+#     # https://machinelearningmastery.com/how-to-implement-the-frechet-inception-distance-fid-from-scratch/
 #     # calculate mean and covariance statistics
 #     mu1, sigma1 = act1.mean(axis=0), cov(act1, rowvar=False)
 #     mu2, sigma2 = act2.mean(axis=0), cov(act2, rowvar=False)
