@@ -37,7 +37,6 @@ class EngineModule(pl.LightningModule):
         #   Fit discriminator   #
         # --------------------- #
 
-
         # Real loss
         pred_h_real, pred_z_real = self.d_h(real_h), self.d_z(real_z)
         loss_h_real = self.loss.criterion_GAN(pred_h_real, self.target_real)
