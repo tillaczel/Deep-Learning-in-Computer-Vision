@@ -11,7 +11,9 @@ model:
   dropout_rate: 0.3
 
 training:
-  warmup_epochs: 10
+  warmup_epochs: 20
+  weight_identity: 10
+  weight_cycle: 3
   samples_per_epoch: 1536
   max_epochs: 100
   batch_size: 16

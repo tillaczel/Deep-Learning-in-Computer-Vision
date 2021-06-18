@@ -37,6 +37,8 @@ class EngineModule(pl.LightningModule):
         self.fid_identity_h = FrechetInceptionDistance(self.inception, self.inception_normalize)
 
         self.warmup_epochs = config.training.warmup_epochs
+        self.weight_identity = config.training.weight_identity
+        self.weight_cycle = config.training.weight_cycle
         self.automatic_optimization = False
 
     def forward(self, x):
@@ -51,11 +53,7 @@ class EngineModule(pl.LightningModule):
             d = 1
             g_gan = 1
 
-        # keep reconstruction losses constant
-        g_identity = 1
-        g_cycle = 1
-
-        return d, g_identity, g_gan, g_cycle
+        return d, self.weight_identity, g_gan, self.weight_cycle
 
     def training_step(self, batch, batch_idx):
         loss_weight_d, loss_weight_g_identity, loss_weight_g_gan, loss_weight_g_cycle = self.get_loss_weights()
