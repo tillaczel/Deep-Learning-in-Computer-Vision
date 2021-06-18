@@ -25,11 +25,7 @@ training:
     monitor: 'val_loss'
 data:
   size: 128
-  url: 'https://courses.compute.dtu.dk/02514/project_data/LIDC_DLCV_version.zip'
+  url: 'https://drive.google.com/uc?id=1jPelB2jzNZJq3ZU9Uk_Mkt4MJtF3DRgg'
   path: './data/'
-  seg_reduce: 'mean'
-  train_augmentation:
-    - 'random_horizontal_flip'
-    - 'random_vertical_flip'
-    - 'random_rotation'
+  train_augmentation: []
 overlap: 0.2
