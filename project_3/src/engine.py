@@ -6,11 +6,12 @@ from torch import nn
 from project_3.src.model import get_networks
 from project_3.src.loss import Losses
 from project_3.src.DiffAugment_pytorch import DiffAugment
+from project_3.src.plot_results import make_plots
 
 
 class EngineModule(pl.LightningModule):
 
-    def __init__(self, config: DictConfig):
+    def __init__(self, config: DictConfig, test_dataset_horse, test_dataset_zebra):
         super().__init__()
         self.config = config
         self.g_h2z, self.g_z2h, self.d_h, self.d_z = get_networks()
@@ -20,6 +21,8 @@ class EngineModule(pl.LightningModule):
         device = 'cuda' if torch.cuda.is_available() else 'cpu'
         self.target_real = torch.autograd.Variable(torch.ones((batch_size, 1), device=device), requires_grad=False)
         self.target_fake = torch.autograd.Variable(torch.zeros((batch_size, 1), device=device), requires_grad=False)
+        self.test_dataset_horse = test_dataset_horse
+        self.test_dataset_zebra = test_dataset_zebra
 
         self.automatic_optimization = False
 
@@ -102,7 +105,8 @@ class EngineModule(pl.LightningModule):
         pass
 
     def validation_epoch_end(self, outputs: list):
-        pass
+        make_plots(self.test_dataset_horse, self.g_h2z, self.g_z2h, self.device, n=4, current_epoch=self.current_epoch, suffix='_h2z')
+        make_plots(self.test_dataset_zebra, self.g_z2h, self.g_h2z, self.device, n=4, current_epoch=self.current_epoch, suffix='_z2h')
 
     def configure_optimizers(self):
         optimizer_g = torch.optim.Adam(list(self.g_h2z.parameters()) + list(self.g_z2h.parameters()),

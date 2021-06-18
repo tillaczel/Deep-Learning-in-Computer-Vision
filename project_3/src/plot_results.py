@@ -4,10 +4,10 @@ import os
 import wandb
 import numpy as np
 
-def make_plots(dataset, modelA2B, modelB2A, device, n=4): # n = number of plots to show
+def make_plots(dataset, modelA2B, modelB2A, device, n=4, current_epoch=None, suffix=''): # n = number of plots to show
     images, predsA2B, predsB2A = get_data(dataset, modelA2B, modelB2A, device, n)
     for img, predA2B, predB2A in zip(images, predsA2B, predsB2A):
-        plot_images_and_predictions(img, predA2B, predB2A, current_epoch=None)
+        plot_images_and_predictions(img, predA2B, predB2A, current_epoch=current_epoch, suffix=suffix)
 
 def plot_subplot(ax, img, title, show_title=True):
     ax.imshow(img)
@@ -15,7 +15,7 @@ def plot_subplot(ax, img, title, show_title=True):
         ax.set_title(title)
     ax.axis('off')
 
-def plot_images_and_predictions(input_images, predsA2B, predsB2B, current_epoch=None, n=4):
+def plot_images_and_predictions(input_images, predsA2B, predsB2B, current_epoch=None, n=4, suffix=''):
     fig, axs = plt.subplots(n, 3, figsize=(15, n * 5))
     for i in range(n):
         show_title = True
@@ -23,7 +23,7 @@ def plot_images_and_predictions(input_images, predsA2B, predsB2B, current_epoch=
         plot_subplot(axs[i, 1], predsA2B[i], 'Predicted (A2B) image', show_title=show_title)
         plot_subplot(axs[i, 2], predsB2B[i], 'Reconstructed (B2A) image', show_title=show_title)
 
-    fname = f'convertedImages_{current_epoch}.png' if current_epoch is not None else 'convertedImages.png'
+    fname = f'converted_images{suffix}_{current_epoch}.png' if current_epoch is not None else f'converted_images{suffix}.png'
     #fname = os.path.join(wandb.run.dir, fname)
     plt.savefig(fname)
     #wandb.save(fname, base_path=wandb.run.dir)
