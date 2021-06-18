@@ -61,9 +61,9 @@ class EngineModule(pl.LightningModule):
 
     def configure_optimizers(self):
         optimizer_g = torch.optim.Adam(list(self.G_A2B.parameters())+list(self.G_B2A.parameters()),
-                                       lr=self.config.training.lr, betas=(0.5, 0.999))
+                                       lr=self.config.training.optimizer.lr, betas=(0.5, 0.999))
         optimizer_d = torch.optim.Adam(list(self.D_A.parameters())+list(self.D_B.parameters()),
-                                       lr=self.config.training.lr, betas=(0.5, 0.999))
+                                       lr=self.config.training.optimizer.lr, betas=(0.5, 0.999))
         return optimizer_g, optimizer_d
 
 
