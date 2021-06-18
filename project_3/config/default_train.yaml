@@ -20,10 +20,10 @@ training:
   loss:
     pos_weight: 1
   early_stopping:
-    monitor: 'val_loss'
+    monitor: 'loss_sum'
     stopping_patience: 10
   model_checkpoint:
-    monitor: 'val_loss'
+    monitor: 'loss_sum'
 data:
   size: 128
   url: 'https://drive.google.com/uc?id=1jPelB2jzNZJq3ZU9Uk_Mkt4MJtF3DRgg'

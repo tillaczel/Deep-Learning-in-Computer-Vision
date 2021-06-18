@@ -90,6 +90,8 @@ class EngineModule(pl.LightningModule):
 
         self.log('loss_g', loss_g, on_step=False, on_epoch=True, prog_bar=True, logger=True)
         self.log('loss_d', loss_d, on_step=False, on_epoch=True, prog_bar=True, logger=True)
+        # for tracking general progress
+        self.log('loss_sum', loss_d + loss_g, on_step=False, on_epoch=True, prog_bar=True, logger=True)
 
         return {'loss_g': loss_g, 'loss_d': loss_d}
 
