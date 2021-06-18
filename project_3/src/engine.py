@@ -33,6 +33,7 @@ class EngineModule(pl.LightningModule):
         real_h, real_z = batch['horse'], batch['zebra']
         g_opt, d_opt, = self.optimizers()
         # augment_images = DiffAugment(images, policy='color,translation,cutout')
+        print(real_h.shape)
 
         # ----------------- #
         #   Fit generator   #
@@ -41,17 +42,20 @@ class EngineModule(pl.LightningModule):
         same_h, same_z = self.g_z2h(real_h), self.g_h2z(real_z)
         loss_identity_h = self.loss.criterion_identity(same_h, real_h)
         loss_identity_z = self.loss.criterion_identity(same_z, real_z)
+        del same_h, same_z
 
         # GAN loss
         fake_h, fake_z = self.g_z2h(real_z), self.g_h2z(real_h)
         pred_fake_h, pred_fake_z = self.d_h(fake_h), self.d_z(fake_z)
         loss_gan_z2h = self.loss.criterion_GAN(pred_fake_h, self.traget_real)
         loss_gan_h2z = self.loss.criterion_GAN(pred_fake_z, self.traget_real)
+        del pred_fake_h, pred_fake_z
 
         # Cycle loss
         recovered_h, recovered_z = self.g_z2h(fake_z), self.g_h2z(fake_h)
         loss_cycle_hzh = self.loss.criterion_cycle(recovered_h, real_h)
         loss_cycle_zhz = self.loss.criterion_cycle(recovered_z, real_z)
+        del fake_h, fake_z, recovered_h, recovered_z
 
         # Total loss
         loss_g = loss_identity_h + loss_identity_z + loss_gan_z2h + loss_gan_h2z + loss_cycle_hzh + loss_cycle_zhz
