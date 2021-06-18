@@ -88,8 +88,27 @@ class EngineModule(pl.LightningModule):
         loss_g.backward()
         g_opt.step()
 
-        self.log('loss_g', loss_g, on_step=False, on_epoch=True, prog_bar=True, logger=True)
+        # Log discriminator
+        self.log('loss_d_h_real', loss_h_real, on_step=False, on_epoch=True, prog_bar=False, logger=True)
+        self.log('loss_d_z_real', loss_z_real, on_step=False, on_epoch=True, prog_bar=False, logger=True)
+        self.log('loss_d_h_fake', loss_h_fake, on_step=False, on_epoch=True, prog_bar=False, logger=True)
+        self.log('loss_d_z_fake', loss_z_fake, on_step=False, on_epoch=True, prog_bar=False, logger=True)
+        self.log('loss_d_real', loss_h_real+loss_z_real, on_step=False, on_epoch=True, prog_bar=False, logger=True)
+        self.log('loss_d_fake', loss_h_fake+loss_z_fake, on_step=False, on_epoch=True, prog_bar=False, logger=True)
         self.log('loss_d', loss_d, on_step=False, on_epoch=True, prog_bar=True, logger=True)
+
+        # Log generator
+        self.log('loss_g_identity_h', loss_identity_h, on_step=False, on_epoch=True, prog_bar=False, logger=True)
+        self.log('loss_g_identity_z', loss_identity_z, on_step=False, on_epoch=True, prog_bar=False, logger=True)
+        self.log('loss_g_gan_z2h', loss_gan_z2h, on_step=False, on_epoch=True, prog_bar=False, logger=True)
+        self.log('loss_g_gan_h2z', loss_gan_h2z, on_step=False, on_epoch=True, prog_bar=False, logger=True)
+        self.log('loss_g_cycle_hzh', loss_cycle_hzh, on_step=False, on_epoch=True, prog_bar=False, logger=True)
+        self.log('loss_g_cycle_zhz', loss_cycle_zhz, on_step=False, on_epoch=True, prog_bar=False, logger=True)
+        self.log('loss_g_identity', loss_identity_h+loss_identity_z, on_step=False, on_epoch=False, prog_bar=True, logger=True)
+        self.log('loss_g_gan', loss_gan_z2h+loss_gan_h2z, on_step=False, on_epoch=True, prog_bar=False, logger=True)
+        self.log('loss_g_cycle', loss_cycle_hzh+loss_cycle_zhz, on_step=False, on_epoch=True, prog_bar=False, logger=True)
+        self.log('loss_g', loss_g, on_step=False, on_epoch=True, prog_bar=True, logger=True)
+
         # for tracking general progress
         self.log('loss_sum', loss_d + loss_g, on_step=False, on_epoch=True, prog_bar=True, logger=True)
 
