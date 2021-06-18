@@ -92,10 +92,23 @@ class EngineModule(pl.LightningModule):
         loss_g.backward()
         g_opt.step()
 
+
         self.log('loss_g', loss_g, on_step=False, on_epoch=True, prog_bar=True, logger=True)
         self.log('loss_d', loss_d, on_step=False, on_epoch=True, prog_bar=True, logger=True)
         # for tracking general progress
         self.log('loss_sum', loss_d + loss_g, on_step=False, on_epoch=True, prog_bar=True, logger=True)
+
+        self.log('loss_identity_h', loss_identity_h, on_step=False, on_epoch=True, prog_bar=False, logger=True)
+        self.log('loss_identity_z', loss_identity_z, on_step=False, on_epoch=True, prog_bar=False, logger=True)
+        self.log('loss_gan_z2h', loss_gan_z2h, on_step=False, on_epoch=True, prog_bar=False, logger=True)
+        self.log('loss_gan_h2z', loss_gan_h2z, on_step=False, on_epoch=True, prog_bar=False, logger=True)
+        self.log('loss_cycle_hzh', loss_cycle_hzh, on_step=False, on_epoch=True, prog_bar=False, logger=True)
+        self.log('loss_cycle_zhz', loss_cycle_zhz, on_step=False, on_epoch=True, prog_bar=False, logger=True)
+
+        self.log('loss_h_real', loss_h_real, on_step=False, on_epoch=True, prog_bar=False, logger=True)
+        self.log('loss_z_real', loss_z_real, on_step=False, on_epoch=True, prog_bar=False, logger=True)
+        self.log('loss_h_fake', loss_h_fake, on_step=False, on_epoch=True, prog_bar=False, logger=True)
+        self.log('loss_z_fake', loss_z_fake, on_step=False, on_epoch=True, prog_bar=False, logger=True)
 
         return {'loss_g': loss_g, 'loss_d': loss_d}
 
@@ -161,6 +174,18 @@ class EngineModule(pl.LightningModule):
             self.log('val_loss_d', loss_d, on_step=False, on_epoch=True, prog_bar=True, logger=True)
             # for tracking general progress
             self.log('val_loss_sum', loss_d + loss_g, on_step=False, on_epoch=True, prog_bar=True, logger=True)
+
+            self.log('val_loss_identity_h', loss_identity_h, on_step=False, on_epoch=True, prog_bar=False, logger=True)
+            self.log('val_loss_identity_z', loss_identity_z, on_step=False, on_epoch=True, prog_bar=False, logger=True)
+            self.log('val_loss_gan_z2h', loss_gan_z2h, on_step=False, on_epoch=True, prog_bar=False, logger=True)
+            self.log('val_loss_gan_h2z', loss_gan_h2z, on_step=False, on_epoch=True, prog_bar=False, logger=True)
+            self.log('val_loss_cycle_hzh', loss_cycle_hzh, on_step=False, on_epoch=True, prog_bar=False, logger=True)
+            self.log('val_loss_cycle_zhz', loss_cycle_zhz, on_step=False, on_epoch=True, prog_bar=False, logger=True)
+
+            self.log('val_loss_h_real', loss_h_real, on_step=False, on_epoch=True, prog_bar=False, logger=True)
+            self.log('val_loss_z_real', loss_z_real, on_step=False, on_epoch=True, prog_bar=False, logger=True)
+            self.log('val_loss_h_fake', loss_h_fake, on_step=False, on_epoch=True, prog_bar=False, logger=True)
+            self.log('val_loss_z_fake', loss_z_fake, on_step=False, on_epoch=True, prog_bar=False, logger=True)
 
     def validation_epoch_end(self, outputs: list):
         make_plots(self.test_dataset_horse, self.g_h2z, self.g_z2h, self.device, n=4, current_epoch=self.current_epoch, suffix='_h2z')
