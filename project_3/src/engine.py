@@ -4,7 +4,6 @@ import torch
 from torch import nn
 
 from project_3.src.model import get_networks
-from project_3.src.plot_results import plot_predictions
 from project_3.src.loss import Losses
 from project_3.src.DiffAugment_pytorch import DiffAugment
 
