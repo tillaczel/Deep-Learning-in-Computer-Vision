@@ -42,12 +42,14 @@ class EngineModule(pl.LightningModule):
         pred_h_real, pred_z_real = self.d_h(real_h), self.d_z(real_z)
         loss_h_real = self.loss.criterion_GAN(pred_h_real, self.target_real)
         loss_z_real = self.loss.criterion_GAN(pred_z_real, self.target_real)
+        del pred_h_real, pred_z_real
 
         # Fake loss
         fake_h, fake_z = self.g_z2h(real_z), self.g_h2z(real_h)
         pred_h_fake, pred_z_fake = self.d_h(fake_h.detach()), self.d_z(fake_z.detach())
         loss_h_fake = self.loss.criterion_GAN(pred_h_fake, self.target_fake)
         loss_z_fake = self.loss.criterion_GAN(pred_z_fake, self.target_fake)
+        del fake_h, fake_z, pred_h_fake, pred_z_fake
 
         # Total loss
         loss_d = loss_h_real+loss_z_real+loss_h_fake+loss_z_fake
