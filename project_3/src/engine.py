@@ -42,7 +42,7 @@ class EngineModule(pl.LightningModule):
         pass
 
     def validation_step(self, batch, batch_idx):
-        print(batch)
+        print(batch['horse'].shape)
         pass
 
     def validation_epoch_end(self, outputs: list):
