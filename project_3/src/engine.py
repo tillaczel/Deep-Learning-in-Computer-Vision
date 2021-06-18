@@ -2,7 +2,6 @@ from omegaconf import DictConfig
 import pytorch_lightning as pl
 import torch
 from torch import nn
-import itertools
 
 from project_3.src.model import Model
 from project_3.src.plot_results import plot_predictions
@@ -10,7 +9,7 @@ from project_3.src.plot_results import plot_predictions
 
 class EngineModule(pl.LightningModule):
 
-    def __init__(self, config: DictConfig, main_metrics=None):
+    def __init__(self, config: DictConfig):
         super().__init__()
         self.config = config
         self.G_A2B, self.G_B2A, self.D_A, self.D_B = None, None, None, None
@@ -34,7 +33,7 @@ class EngineModule(pl.LightningModule):
                  on_epoch=True, logger=True)
 
     def training_step(self, batch, batch_idx):
-        g_opt, d_a_opt, d_b_opt = self.optimizers()
+        g_opt, d_opt, = self.optimizers()
         images, labels = batch
         seg_hat = self.model(images)
         loss = self.loss_func(seg_hat, labels.type(torch.float32))
@@ -74,10 +73,10 @@ class EngineModule(pl.LightningModule):
         pass
 
     def configure_optimizers(self):
-        optimizer_g = torch.optim.Adam(itertools.chain(self.G_A2B.parameters(), self.netG_B2A.parameters()),
+        optimizer_g = torch.optim.Adam(list(self.G_A2B.parameters())+list(self.netG_B2A.parameters()),
                                        lr=self.config.training.lr, betas=(0.5, 0.999))
-        optimizer_d_a = torch.optim.Adam(self.D_A.parameters(), lr=self.config.training.lr, betas=(0.5, 0.999))
-        optimizer_d_b = torch.optim.Adam(self.D_B.parameters(), lr=self.config.training.lr, betas=(0.5, 0.999))
-        return optimizer_g, optimizer_d_a, optimizer_d_b
+        optimizer_d = torch.optim.Adam(list(self.D_A.parameters())+list(self.D_B.parameters()),
+                                       lr=self.config.training.lr, betas=(0.5, 0.999))
+        return optimizer_g, optimizer_d
 
 
