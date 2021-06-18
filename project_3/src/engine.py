@@ -42,6 +42,7 @@ class EngineModule(pl.LightningModule):
         pass
 
     def validation_step(self, batch, batch_idx):
+        print(batch)
         pass
 
     def validation_epoch_end(self, outputs: list):
