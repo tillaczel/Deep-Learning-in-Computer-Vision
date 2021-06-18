@@ -35,11 +35,8 @@ def get_data(dataset, modelA2B, modelB2A, device, n=4):
     idxs = np.random.choice(np.arange(120), replace=False, size=n)
     for idx in idxs:
         img = dataset[idx]
-        print('\n img:', img.min(), img.max(), torch.std(img), torch.mean(img))
         predA2B = modelA2B(img.unsqueeze(0).to(device)) # Do a forward pass A2B
         predB2A = modelB2A(predA2B.to(device)) # Forward pass B2A (reconstruct image)
-        print('a2b', predA2B.min(), predA2B.max(), torch.std(predA2B), torch.mean(predA2B))
-        print('b2a', predB2A.min(), predB2A.max(), torch.std(predB2A), torch.mean(predB2A))
         images.append(img), predsA2B.append(predA2B.detach().cpu()), predsB2A.append(predB2A.detach().cpu())
 
     return images, predsA2B, predsB2A
