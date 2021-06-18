@@ -2,9 +2,9 @@ import os
 import wandb
 from omegaconf import DictConfig, OmegaConf
 
-from project_2.src.data import get_dataloaders
-from project_2.src.engine import EngineModule
-from project_2.src.trainer import get_trainer
+from project_3.src.data import get_dataloaders
+from project_3.src.engine import EngineModule
+from project_3.src.trainer import get_trainer
 
 
 def run_training(cfg: DictConfig):

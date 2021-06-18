@@ -2,9 +2,9 @@ from omegaconf import DictConfig
 import pytorch_lightning as pl
 import torch
 from torch import nn
-from project_2.src.model import Model
-from project_2.src.plot_results import plot_predictions
-from project_2.src.metrics import Metrics
+from project_3.src.model import Model
+from project_3.src.plot_results import plot_predictions
+from project_3.src.metrics import Metrics
 
 
 class EngineModule(pl.LightningModule):
