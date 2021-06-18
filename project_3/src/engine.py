@@ -24,13 +24,30 @@ class EngineModule(pl.LightningModule):
         self.test_dataset_horse = test_dataset_horse
         self.test_dataset_zebra = test_dataset_zebra
 
+        self.warmup_epochs = config.training.warmup_epochs
         self.automatic_optimization = False
 
     def forward(self, x):
         return self.model(x)
 
+    def get_loss_weights(self):
+        # warmup gan weights
+        if self.current_epoch < self.warmup_epochs:
+            d = self.current_epoch / self.warmup_epochs
+            g_gan = d
+        else:
+            d = 1
+            g_gan = 1
+
+        # keep reconstruction losses constant
+        g_identity = 1
+        g_cycle = 1
+
+        return d, g_identity, g_gan, g_cycle
 
     def training_step(self, batch, batch_idx):
+        d, g_identity, g_gan, g_cycle = self.get_loss_weights()
+
         real_h, real_z = batch['horse'], batch['zebra']
         g_opt, d_opt, = self.optimizers()
         # augment_images = DiffAugment(images, policy='color,translation,cutout')
