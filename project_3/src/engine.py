@@ -23,10 +23,6 @@ class EngineModule(pl.LightningModule):
 
         self.automatic_optimization = False
 
-    @property
-    def lr(self):
-        return self.optimizers().param_groups[0]['lr']
-
     def forward(self, x):
         return self.model(x)
 
@@ -93,7 +89,6 @@ class EngineModule(pl.LightningModule):
 
         self.log('loss_g', loss_g, on_step=False, on_epoch=True, prog_bar=False, logger=True)
         self.log('loss_d', loss_d, on_step=False, on_epoch=True, prog_bar=False, logger=True)
-        self.log('lr', self.lr, on_step=False, on_epoch=True, prog_bar=False, logger=True)
 
         return {'loss_g': loss_g, 'loss_d': loss_d}
 
