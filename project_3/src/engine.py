@@ -5,6 +5,7 @@ from torch import nn
 from project_3.src.model import Model
 from project_3.src.plot_results import plot_predictions
 from project_3.src.metrics import Metrics
+from project_3.src.loss import Losses
 
 
 class EngineModule(pl.LightningModule):
@@ -13,7 +14,7 @@ class EngineModule(pl.LightningModule):
         super().__init__()
         self.config = config
         self.model = Model(n_channels=config.model.in_dim, n_classes=config.model.out_dim, dropout_rate=config.model.dropout_rate)
-        self.loss_func = nn.BCEWithLogitsLoss(pos_weight=torch.tensor([config.training.loss.pos_weight]))
+        self.losses = Losses()
         if main_metrics is not None:
             self.metrics = Metrics(main_metrics)
         else:
