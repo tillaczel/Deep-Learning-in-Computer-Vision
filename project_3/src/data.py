@@ -78,7 +78,7 @@ class ImageDataset(Dataset):
 
 def pad_dataset(dataset, length):
     while len(dataset.fnames) < length:
-        dataset.fnames.append(torch.empty(0))
+        dataset.fnames.append(None)
 
 
 def split_dataset(dataset, valid_transform, split=0.8, seed=2312):
@@ -145,4 +145,3 @@ def get_transforms(size, train_augmentation):
     valid_transform = transforms.Compose(valid_transform)
 
     return train_transform, valid_transform
-
