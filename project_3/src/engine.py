@@ -3,9 +3,8 @@ import pytorch_lightning as pl
 import torch
 from torch import nn
 
-from project_3.src.model import Model
+from project_3.src.model import get_networks
 from project_3.src.plot_results import plot_predictions
-from project_3.src.metrics import Metrics
 from project_3.src.loss import Losses
 
 
@@ -14,7 +13,7 @@ class EngineModule(pl.LightningModule):
     def __init__(self, config: DictConfig):
         super().__init__()
         self.config = config
-        self.G_A2B, self.G_B2A, self.D_A, self.D_B = None, None, None, None
+        self.G_A2B, self.G_B2A, self.D_A, self.D_B = get_networks()
         self.losses = Losses()
 
         self.automatic_optimization = False
