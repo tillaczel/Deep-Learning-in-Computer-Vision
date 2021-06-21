@@ -22,10 +22,9 @@ def get_statistics(activations):
 
 
 class FrechetInceptionDistance(Metric):
-    def __init__(self, inception, inception_normalize, dist_sync_on_step=False):
+    def __init__(self, inception, dist_sync_on_step=False):
         super().__init__(dist_sync_on_step=dist_sync_on_step)
         self.inception = inception
-        self.inception_normalize = inception_normalize
         self.add_state("activations_org", default=[], dist_reduce_fx="cat")
         self.add_state("activations_pred", default=[], dist_reduce_fx="cat")
         self.resize = transforms.Resize((299, 299))
