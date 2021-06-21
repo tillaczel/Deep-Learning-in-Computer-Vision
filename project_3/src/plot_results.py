@@ -27,7 +27,6 @@ def plot_images_and_predictions(input_images, predsA2B, predsB2A, identity_preds
     fname = os.path.join(wandb.run.dir, fname)
     plt.savefig(fname)
     wandb.save(fname, base_path=wandb.run.dir)
-    plt.show() # show in colab
 
 
 def get_data(dataset, modelA2B, modelB2A, device, n=4):

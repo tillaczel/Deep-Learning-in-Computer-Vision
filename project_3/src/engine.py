@@ -88,7 +88,7 @@ class EngineModule(pl.LightningModule):
         # Fake loss
         fake_h, fake_z = self.g_z2h(real_z), self.g_h2z(real_h)
 
-        # Sample from 50 previous generated batches
+        # Sample from 50 previous generated images
         fake_h = self.fake_pool_H.push_and_pop(fake_h)
         fake_z = self.fake_pool_Z.push_and_pop(fake_z)
 

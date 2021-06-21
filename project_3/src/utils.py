@@ -52,7 +52,7 @@ class ImagePool:
             image = torch.unsqueeze(image, 0)
 
             if self.nb_images < self.pool_sz:
-                self.image_pool.append (image)
+                self.image_pool.append(image)
                 images_to_return.append(image)
                 self.nb_images += 1
             else:
