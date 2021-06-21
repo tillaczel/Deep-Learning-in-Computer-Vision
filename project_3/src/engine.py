@@ -19,8 +19,8 @@ class EngineModule(pl.LightningModule):
     def __init__(self, config: DictConfig, test_dataset_horse, test_dataset_zebra):
         super().__init__()
         self.config = config
-        self.g_h2z, self.g_z2h, self.d_h, self.d_z = get_networks()
-        self.loss = Losses()
+        self.g_h2z, self.g_z2h, self.d_h, self.d_z = get_networks(config.model.f, config.model.blocks)
+        self.loss = Losses(config.training.d_loss)
 
         batch_size = config.training.batch_size
         device = 'cuda' if torch.cuda.is_available() else 'cpu'

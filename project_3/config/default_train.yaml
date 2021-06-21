@@ -9,6 +9,8 @@ model:
   in_dim: 1
   ensemble: True
   dropout_rate: 0.3
+  f: 64
+  blocks: 9
 
 training:
   augment: True
@@ -21,8 +23,7 @@ training:
   optimizer:
     name: adam
     lr: 0.001
-  loss:
-    pos_weight: 1
+  d_loss: 'mse'
   early_stopping:
     monitor: 'loss_sum'
     stopping_patience: 10
