@@ -53,7 +53,7 @@ class EngineModule(pl.LightningModule):
             d = 1
             g_gan = 1
 
-        return d, self.weight_identity, 0, self.weight_cycle
+        return d, self.weight_identity, g_gan, self.weight_cycle
 
     def training_step(self, batch, batch_idx):
         loss_weight_d, loss_weight_g_identity, loss_weight_g_gan, loss_weight_g_cycle = self.get_loss_weights()
