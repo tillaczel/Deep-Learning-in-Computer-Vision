@@ -21,8 +21,8 @@ class EngineModule(pl.LightningModule):
 
         batch_size = config.training.batch_size
         device = 'cuda' if torch.cuda.is_available() else 'cpu'
-        self.target_real = torch.autograd.Variable(torch.ones((batch_size, 1), device=device), requires_grad=False)
-        self.target_fake = torch.autograd.Variable(torch.zeros((batch_size, 1), device=device), requires_grad=False)
+        self.target_real = torch.autograd.Variable(torch.ones((batch_size, 196), device=device), requires_grad=False)
+        self.target_fake = torch.autograd.Variable(torch.zeros((batch_size, 196), device=device), requires_grad=False)
         self.target_real_val = torch.ones((20, 1), device=device)
         self.target_fake_val = torch.zeros((20, 1), device=device)
 
@@ -70,7 +70,6 @@ class EngineModule(pl.LightningModule):
 
         # Real loss
         pred_h_real, pred_z_real = self.d_h(real_h), self.d_z(real_z)
-        print(pred_h_real.shape)
         loss_h_real = self.loss.criterion_GAN(pred_h_real, self.target_real)
         loss_z_real = self.loss.criterion_GAN(pred_z_real, self.target_real)
         del pred_h_real, pred_z_real
