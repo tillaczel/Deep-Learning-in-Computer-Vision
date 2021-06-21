@@ -20,8 +20,9 @@ training:
   optimizer:
     name: adam
     lr: 0.001
-  loss:
-    pos_weight: 1
+  early_stopping:
+    monitor: 'loss_sum'
+    stopping_patience: 100
   model_checkpoint:
     monitor: 'loss_sum'
 data:
