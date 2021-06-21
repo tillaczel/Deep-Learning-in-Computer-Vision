@@ -10,6 +10,8 @@ from project_3.src.loss import Losses
 from project_3.src.DiffAugment_pytorch import DiffAugment
 from project_3.src.plot_results import make_plots
 
+from pytorch_fid.inception import InceptionV3
+
 
 class EngineModule(pl.LightningModule):
 
@@ -29,9 +31,13 @@ class EngineModule(pl.LightningModule):
         self.test_dataset_horse = test_dataset_horse
         self.test_dataset_zebra = test_dataset_zebra
 
-        self.inception =  models.inception_v3(pretrained=True)
-        # TODO cut layer
-        self.inception.fc = nn.Identity() # not sure if it works
+        # self.inception =  models.inception_v3(pretrained=True)
+        # # TODO cut layer
+        # self.inception.fc = nn.Identity() # not sure if it works
+
+        block_idx = InceptionV3.BLOCK_INDEX_BY_DIM[2048]
+
+        self.inception = InceptionV3([block_idx])
         self.inception_normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
 
         self.fid_identity_h = FrechetInceptionDistance(self.inception, self.inception_normalize)
@@ -249,15 +255,31 @@ class EngineModule(pl.LightningModule):
             self.log('val_loss_z_fake', loss_z_fake, on_step=False, on_epoch=True, prog_bar=False, logger=True)
 
     def validation_epoch_end(self, outputs: list):
-        self.log('val_fid_identity_h', self.fid_identity_h.compute(), on_epoch=True, prog_bar=False)
-        self.log('val_fid_identity_z', self.fid_identity_z.compute(), on_epoch=True, prog_bar=False)
-        self.log('val_fid_cycle_h', self.fid_cycle_h.compute(), on_epoch=True, prog_bar=False)
-        self.log('val_fid_cycle_z', self.fid_cycle_z.compute(), on_epoch=True, prog_bar=False)
-        self.log('val_fid_h2z', self.fid_h2z.compute(), on_epoch=True, prog_bar=False)
-        self.log('val_fid_z2h', self.fid_z2h.compute(), on_epoch=True, prog_bar=False)
+        fid_identity_h = self.fid_identity_h.compute()
+        print('\n fid_identity_h', fid_identity_h)
+        self.log('val_fid_identity_h', fid_identity_h, on_epoch=True, prog_bar=False)
+        fid_identity_z = self.fid_identity_z.compute()
+        print('fid_identity_z', fid_identity_z)
+        self.log('val_fid_identity_z', fid_identity_z, on_epoch=True, prog_bar=False)
+        fid_cycle_h = self.fid_cycle_h.compute()
+        print('fid_cycle_h', fid_cycle_h)
+        self.log('val_fid_cycle_h', fid_cycle_h, on_epoch=True, prog_bar=False)
+        fid_cycle_z = self.fid_cycle_z.compute()
+        print('fid_cycle_z', fid_cycle_z)
+        self.log('val_fid_cycle_z', fid_cycle_z, on_epoch=True, prog_bar=False)
+        fid_h2z = self.fid_h2z.compute()
+        print('fid_h2z', fid_h2z)
+        self.log('val_fid_h2z', fid_h2z, on_epoch=True, prog_bar=False)
+        fid_z2h = self.fid_z2h.compute()
+        print('fid_z2h', fid_z2h)
+        self.log('val_fid_z2h', fid_z2h, on_epoch=True, prog_bar=False)
 
-        self.log('fid_sanity_check_z_vs_h', self.fid_sanity_check_z_vs_h.compute(), on_epoch=True, prog_bar=False)
-        self.log('fid_sanity_check_z_vs_z', self.fid_sanity_check_z_vs_z.compute(), on_epoch=True, prog_bar=False)
+        fid_sanity_check_z_vs_h = self.fid_sanity_check_z_vs_h.compute()
+        print('fid_sanity_check_z_vs_h', fid_sanity_check_z_vs_h)
+        self.log('fid_sanity_check_z_vs_h', fid_sanity_check_z_vs_h, on_epoch=True, prog_bar=False)
+        fid_sanity_check_z_vs_z = self.fid_sanity_check_z_vs_z.compute()
+        print('fid_sanity_check_z_vs_z', fid_sanity_check_z_vs_z)
+        self.log('fid_sanity_check_z_vs_z', fid_sanity_check_z_vs_z, on_epoch=True, prog_bar=False)
 
         # TODO: this should be redundant
         self.fid_identity_h.reset()

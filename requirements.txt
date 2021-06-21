@@ -3,3 +3,4 @@ pytorch-lightning
 hydra-core
 wandb
 wget
+pytorch_fid

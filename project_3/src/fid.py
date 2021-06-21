@@ -1,40 +1,16 @@
 import torch
 from scipy import linalg
 from torchmetrics import Metric
+from torchvision import transforms
 
-from torch.nn.functional import adaptive_avg_pool2d
 import numpy as np
 
 
-# def calculate_fid(act1, act2):
-#     # https://machinelearningmastery.com/how-to-implement-the-frechet-inception-distance-fid-from-scratch/
-#     # calculate mean and covariance statistics
-#     mu1, sigma1 = act1.mean(axis=0), cov(act1, rowvar=False)
-#     mu2, sigma2 = act2.mean(axis=0), cov(act2, rowvar=False)
-#     # calculate sum squared difference between means
-#     ssdiff = torch.sum((mu1 - mu2)**2.0)
-#     # calculate sqrt of product between cov
-#     covmean = sqrtm(sigma1.dot(sigma2))
-#     # check and correct imaginary numbers from sqrt
-#     if iscomplexobj(covmean):
-#         covmean = covmean.real
-#     # calculate score
-#     fid = ssdiff + trace(sigma1 + sigma2 - 2.0 * covmean)
-#     return fid
 
 def get_activations_step(model, images):
-    # todo: normalize and resize??
-
     with torch.no_grad():
-        pred = model(images)  # [0]
-
-    # If model output is not scalar, apply global spatial average pooling.
-    # This happens if you choose a dimensionality not equal 2048.
-    # if pred.size(2) != 1 or pred.size(3) != 1:
-    #     pred = adaptive_avg_pool2d(pred, output_size=(1, 1))
-    #
-    # pred = pred.squeeze(3).squeeze(2).cpu().numpy()
-    pred = pred.cpu().numpy()
+        pred = model(images)[0]
+    pred = pred.squeeze(3).squeeze(2).cpu().numpy()
     return pred
 
 
@@ -52,24 +28,12 @@ class FrechetInceptionDistance(Metric):
         self.inception_normalize = inception_normalize
         self.add_state("activations_org", default=[], dist_reduce_fx="cat")
         self.add_state("activations_pred", default=[], dist_reduce_fx="cat")
-        # self.add_state("total", default=torch.tensor(0), dist_reduce_fx="sum")
+        self.resize = transforms.Resize((299, 299))
 
     def update(self, preds: torch.Tensor, target: torch.Tensor):
 
-        # org = self.inception_normalize(target)
-        # org = self.inception(org)
-        # TODO: is the model right?
-        org = get_activations_step(self.inception, target)
-        pred = get_activations_step(self.inception, preds)
-        #
-        # pred = self.inception_normalize(preds)
-        # pred = self.inception(pred)
-
-        # print('mu_pred', torch.mean(pred))
-        # print('mu_org', torch.mean(org))
-        # TODO: covariance??
-        # self.activations_org.append(org.detach().cpu())
-        # self.activations_pred.append(pred.detach().cpu())
+        org = get_activations_step(self.inception, self.resize(target))
+        pred = get_activations_step(self.inception, self.resize(preds))
         self.activations_org.append(org)
         self.activations_pred.append(pred)
         del org, pred
