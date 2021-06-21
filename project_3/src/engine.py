@@ -99,8 +99,8 @@ class EngineModule(pl.LightningModule):
         fake_h, fake_z = self.g_z2h(real_z), self.g_h2z(real_h)
 
         # Sample from 50 previous generated images
-        fake_h = self.fake_pool_H.push_and_pop(fake_h)
-        fake_z = self.fake_pool_Z.push_and_pop(fake_z)
+        fake_h = self.fake_pool_H.push_and_pop(fake_h, self.device)
+        fake_z = self.fake_pool_Z.push_and_pop(fake_z, self.device)
 
         if self.config.training.augment:
             pred_h_fake, pred_z_fake = self.d_h(
