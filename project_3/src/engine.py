@@ -23,8 +23,8 @@ class EngineModule(pl.LightningModule):
         device = 'cuda' if torch.cuda.is_available() else 'cpu'
         self.target_real = torch.autograd.Variable(torch.ones((batch_size, 196), device=device), requires_grad=False)
         self.target_fake = torch.autograd.Variable(torch.zeros((batch_size, 196), device=device), requires_grad=False)
-        self.target_real_val = torch.ones((20, 1), device=device)
-        self.target_fake_val = torch.zeros((20, 1), device=device)
+        self.target_real_val = torch.ones((20, 196), device=device)
+        self.target_fake_val = torch.zeros((20, 196), device=device)
 
         self.test_dataset_horse = test_dataset_horse
         self.test_dataset_zebra = test_dataset_zebra
