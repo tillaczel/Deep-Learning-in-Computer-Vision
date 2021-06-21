@@ -11,9 +11,9 @@ model:
   dropout_rate: 0.3
 
 training:
-  warmup_epochs: 20
-  weight_identity: 10
-  weight_cycle: 3
+  warmup_epochs: 0
+  weight_identity: 0
+  weight_cycle: 0
   samples_per_epoch: 1536
   max_epochs: 100
   batch_size: 16
@@ -22,9 +22,6 @@ training:
     lr: 0.001
   loss:
     pos_weight: 1
-  early_stopping:
-    monitor: 'loss_sum'
-    stopping_patience: 10
   model_checkpoint:
     monitor: 'loss_sum'
 data:
