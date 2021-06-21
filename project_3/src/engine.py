@@ -29,12 +29,12 @@ class EngineModule(pl.LightningModule):
         self.test_dataset_horse = test_dataset_horse
         self.test_dataset_zebra = test_dataset_zebra
 
-        self.inception =  models.inception_v3(pretrained=True)
-        # TODO cut layer
-        self.inception.fc = nn.Identity() # not sure if it works
-        self.inception_normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-
-        self.fid_identity_h = FrechetInceptionDistance(self.inception, self.inception_normalize)
+        # self.inception =  models.inception_v3(pretrained=True)
+        # # TODO cut layer
+        # self.inception.fc = nn.Identity() # not sure if it works
+        # self.inception_normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+        #
+        # self.fid_identity_h = FrechetInceptionDistance(self.inception, self.inception_normalize)
 
         self.warmup_epochs = config.training.warmup_epochs
         self.weight_identity = config.training.weight_identity
@@ -121,15 +121,26 @@ class EngineModule(pl.LightningModule):
         loss_g.backward()
         g_opt.step()
 
-        self.log('loss_g', loss_g, on_step=False, on_epoch=True, prog_bar=True, logger=True)
-        self.log('loss_g_unweighted', loss_g_unweighted, on_step=False, on_epoch=True, prog_bar=True, logger=True)
+        # Log discriminator
+        self.log('loss_d_h_real', loss_h_real, on_step=False, on_epoch=True, prog_bar=False, logger=True)
+        self.log('loss_d_z_real', loss_z_real, on_step=False, on_epoch=True, prog_bar=False, logger=True)
+        self.log('loss_d_h_fake', loss_h_fake, on_step=False, on_epoch=True, prog_bar=False, logger=True)
+        self.log('loss_d_z_fake', loss_z_fake, on_step=False, on_epoch=True, prog_bar=False, logger=True)
+        self.log('loss_d_real', loss_h_real+loss_z_real, on_step=False, on_epoch=True, prog_bar=False, logger=True)
+        self.log('loss_d_fake', loss_h_fake+loss_z_fake, on_step=False, on_epoch=True, prog_bar=False, logger=True)
         self.log('loss_d', loss_d, on_step=False, on_epoch=True, prog_bar=True, logger=True)
         self.log('loss_d_unweighted', loss_d_unweighted, on_step=False, on_epoch=True, prog_bar=True, logger=True)
-        # for tracking general progress
-        self.log('loss_sum', loss_g_unweighted + loss_d_unweighted, on_step=False, on_epoch=True, prog_bar=True, logger=True)
+
+        # Log generator
+        self.log('loss_g_gan', loss_gan_z2h+loss_gan_h2z, on_step=False, on_epoch=True, prog_bar=False, logger=True)
+        self.log('loss_g_cycle', loss_cycle_hzh+loss_cycle_zhz, on_step=False, on_epoch=True, prog_bar=False, logger=True)
+        self.log('loss_g', loss_g, on_step=False, on_epoch=True, prog_bar=True, logger=True)
+        self.log('loss_g_unweighted', loss_g_unweighted, on_step=False, on_epoch=True, prog_bar=True, logger=True)
+
 
         self.log('loss_identity_h', loss_identity_h, on_step=False, on_epoch=True, prog_bar=False, logger=True)
         self.log('loss_identity_z', loss_identity_z, on_step=False, on_epoch=True, prog_bar=False, logger=True)
+        self.log('loss_identity', loss_identity_h+loss_identity_z, on_step=False, on_epoch=False, prog_bar=True, logger=True)
         self.log('loss_gan_z2h', loss_gan_z2h, on_step=False, on_epoch=True, prog_bar=False, logger=True)
         self.log('loss_gan_h2z', loss_gan_h2z, on_step=False, on_epoch=True, prog_bar=False, logger=True)
         self.log('loss_cycle_hzh', loss_cycle_hzh, on_step=False, on_epoch=True, prog_bar=False, logger=True)
@@ -139,6 +150,7 @@ class EngineModule(pl.LightningModule):
         self.log('loss_z_real', loss_z_real, on_step=False, on_epoch=True, prog_bar=False, logger=True)
         self.log('loss_h_fake', loss_h_fake, on_step=False, on_epoch=True, prog_bar=False, logger=True)
         self.log('loss_z_fake', loss_z_fake, on_step=False, on_epoch=True, prog_bar=False, logger=True)
+        self.log('loss_sum', loss_g_unweighted + loss_d_unweighted, on_step=False, on_epoch=True, prog_bar=True, logger=True)
 
         return {'loss_g': loss_g, 'loss_d': loss_d}
 
@@ -181,7 +193,7 @@ class EngineModule(pl.LightningModule):
             loss_identity_z = self.loss.criterion_identity(same_z, real_z)
 
             # TODO: FID ?
-            self.fid_identity_h(same_h, real_h)
+            # self.fid_identity_h(same_h, real_h)
             del same_h, same_z
 
 
