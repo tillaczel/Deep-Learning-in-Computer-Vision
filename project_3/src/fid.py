@@ -22,8 +22,9 @@ class FrechetInceptionDistance(Metric):
         super().__init__(dist_sync_on_step=dist_sync_on_step)
         self.inception = inception
         self.inception_normalize = inception_normalize
-        self.add_state("fid_sum", default=torch.tensor(0), dist_reduce_fx="sum")
-        self.add_state("total", default=torch.tensor(0), dist_reduce_fx="sum")
+        self.add_state("activations_org", default=[], dist_reduce_fx="cat")
+        self.add_state("activations_pred", default=[], dist_reduce_fx="cat")
+        # self.add_state("total", default=torch.tensor(0), dist_reduce_fx="sum")
 
     def update(self, preds: torch.Tensor, target: torch.Tensor):
         org = self.inception_normalize(target)
@@ -32,11 +33,15 @@ class FrechetInceptionDistance(Metric):
         pred = self.inception_normalize(preds)
         pred = self.inception(pred)
 
-        print('mu_pred', torch.mean(pred))
-        print('mu_org', torch.mean(org))
+        # print('mu_pred', torch.mean(pred))
+        # print('mu_org', torch.mean(org))
         # TODO: covariance??
-
-        self.total += target.shape[0]
+        self.activations_org.append(org.detach().cpu())
+        self.activations_pred.append(pred.detach().cpu())
+        del org, pred
 
     def compute(self):
-        return self.fid_sum / self.total
+        print('FID')
+        print(len(self.activations_org))
+        print(self.activations_org[0].shape)
+        return 0

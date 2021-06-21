@@ -29,12 +29,12 @@ class EngineModule(pl.LightningModule):
         self.test_dataset_horse = test_dataset_horse
         self.test_dataset_zebra = test_dataset_zebra
 
-        # self.inception =  models.inception_v3(pretrained=True)
-        # # TODO cut layer
-        # self.inception.fc = nn.Identity() # not sure if it works
-        # self.inception_normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-        #
-        # self.fid_identity_h = FrechetInceptionDistance(self.inception, self.inception_normalize)
+        self.inception =  models.inception_v3(pretrained=True)
+        # TODO cut layer
+        self.inception.fc = nn.Identity() # not sure if it works
+        self.inception_normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+
+        self.fid_identity_h = FrechetInceptionDistance(self.inception, self.inception_normalize)
 
         self.warmup_epochs = config.training.warmup_epochs
         self.weight_identity = config.training.weight_identity
@@ -193,7 +193,7 @@ class EngineModule(pl.LightningModule):
             loss_identity_z = self.loss.criterion_identity(same_z, real_z)
 
             # TODO: FID ?
-            # self.fid_identity_h(same_h, real_h)
+            self.fid_identity_h(same_h, real_h)
             del same_h, same_z
 
 
