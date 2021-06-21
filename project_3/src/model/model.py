@@ -62,6 +62,5 @@ class Discriminator(nn.Module):
 
     def forward(self, x):
         x = self.disc(x)
-        x = F.avg_pool2d(x, x.size()[2:])
         x = torch.flatten(x, 1)
         return x

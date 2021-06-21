@@ -70,6 +70,7 @@ class EngineModule(pl.LightningModule):
 
         # Real loss
         pred_h_real, pred_z_real = self.d_h(real_h), self.d_z(real_z)
+        print(pred_h_real.shape)
         loss_h_real = self.loss.criterion_GAN(pred_h_real, self.target_real)
         loss_z_real = self.loss.criterion_GAN(pred_z_real, self.target_real)
         del pred_h_real, pred_z_real
