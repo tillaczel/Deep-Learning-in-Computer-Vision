@@ -10,6 +10,8 @@ from project_3.src.loss import Losses
 from project_3.src.DiffAugment_pytorch import DiffAugment
 from project_3.src.plot_results import make_plots
 
+from pytorch_fid.inception import InceptionV3
+
 
 class EngineModule(pl.LightningModule):
 
@@ -32,9 +34,18 @@ class EngineModule(pl.LightningModule):
         # self.inception =  models.inception_v3(pretrained=True)
         # # TODO cut layer
         # self.inception.fc = nn.Identity() # not sure if it works
-        # self.inception_normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-        #
-        # self.fid_identity_h = FrechetInceptionDistance(self.inception, self.inception_normalize)
+
+        block_idx = InceptionV3.BLOCK_INDEX_BY_DIM[2048]
+
+        self.inception = InceptionV3([block_idx])
+        self.inception_normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+
+        self.fid_identity_h = FrechetInceptionDistance(self.inception, self.inception_normalize)
+        self.fid_identity_z = FrechetInceptionDistance(self.inception, self.inception_normalize)
+        self.fid_cycle_h = FrechetInceptionDistance(self.inception, self.inception_normalize)
+        self.fid_cycle_z = FrechetInceptionDistance(self.inception, self.inception_normalize)
+        self.fid_h2z = FrechetInceptionDistance(self.inception, self.inception_normalize)
+        self.fid_z2h = FrechetInceptionDistance(self.inception, self.inception_normalize)
 
         self.warmup_epochs = config.training.warmup_epochs
         self.weight_identity = config.training.weight_identity
@@ -193,7 +204,8 @@ class EngineModule(pl.LightningModule):
             loss_identity_z = self.loss.criterion_identity(same_z, real_z)
 
             # TODO: FID ?
-            # self.fid_identity_h(same_h, real_h)
+            self.fid_identity_h.update(same_h, real_h)
+            self.fid_identity_z.update(same_z, real_z)
             del same_h, same_z
 
 
@@ -202,12 +214,17 @@ class EngineModule(pl.LightningModule):
             pred_fake_h, pred_fake_z = self.d_h(fake_h), self.d_z(fake_z)
             loss_gan_z2h = self.loss.criterion_GAN(pred_fake_h, self.target_real_val)
             loss_gan_h2z = self.loss.criterion_GAN(pred_fake_z, self.target_real_val)
+            # TODO: should this be h2z vs z or h2z vs h ?
+            self.fid_h2z.update(fake_z, real_z)
+            self.fid_z2h.update(fake_h, real_h)
             del pred_fake_h, pred_fake_z
 
             # Cycle loss
             recovered_h, recovered_z = self.g_z2h(fake_z), self.g_h2z(fake_h)
             loss_cycle_hzh = self.loss.criterion_cycle(recovered_h, real_h)
             loss_cycle_zhz = self.loss.criterion_cycle(recovered_z, real_z)
+            self.fid_cycle_h.update(recovered_h, real_h)
+            self.fid_cycle_z.update(recovered_z, real_z)
             del fake_h, fake_z, recovered_h, recovered_z
 
             # Total loss
@@ -231,6 +248,21 @@ class EngineModule(pl.LightningModule):
             self.log('val_loss_z_fake', loss_z_fake, on_step=False, on_epoch=True, prog_bar=False, logger=True)
 
     def validation_epoch_end(self, outputs: list):
+        self.log('val_fid_identity_h', self.fid_identity_h.compute(), on_epoch=True, prog_bar=False)
+        self.log('val_fid_identity_z', self.fid_identity_z.compute(), on_epoch=True, prog_bar=False)
+        self.log('val_fid_cycle_h', self.fid_cycle_h.compute(), on_epoch=True, prog_bar=False)
+        self.log('val_fid_cycle_z', self.fid_cycle_z.compute(), on_epoch=True, prog_bar=False)
+        self.log('val_fid_h2z', self.fid_h2z.compute(), on_epoch=True, prog_bar=False)
+        self.log('val_fid_z2h', self.fid_z2h.compute(), on_epoch=True, prog_bar=False)
+
+        # TODO: this should be redundant
+        self.fid_identity_h.reset()
+        self.fid_identity_z.reset()
+        self.fid_cycle_h.reset()
+        self.fid_cycle_z.reset()
+        self.fid_h2z.reset()
+        self.fid_z2h.reset()
+
         make_plots(self.test_dataset_horse, self.g_h2z, self.g_z2h, self.device, n=4, current_epoch=self.current_epoch,
                    suffix='_h2z')
         make_plots(self.test_dataset_zebra, self.g_z2h, self.g_h2z, self.device, n=4, current_epoch=self.current_epoch,
