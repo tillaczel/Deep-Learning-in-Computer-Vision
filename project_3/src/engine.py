@@ -47,9 +47,6 @@ class EngineModule(pl.LightningModule):
         self.fid_h2z = FrechetInceptionDistance(self.inception, self.inception_normalize)
         self.fid_z2h = FrechetInceptionDistance(self.inception, self.inception_normalize)
 
-        self.fid_sanity_check_z_vs_h = FrechetInceptionDistance(self.inception, self.inception_normalize)
-        self.fid_sanity_check_z_vs_z = FrechetInceptionDistance(self.inception, self.inception_normalize)
-
         self.warmup_epochs = config.training.warmup_epochs
         self.weight_identity = config.training.weight_identity
         self.weight_cycle = config.training.weight_cycle
@@ -230,10 +227,6 @@ class EngineModule(pl.LightningModule):
             self.fid_cycle_z.update(recovered_z, real_z)
             del fake_h, fake_z, recovered_h, recovered_z
 
-            # FID sanity check...
-            self.fid_sanity_check_z_vs_h.update(real_z, real_h)
-            self.fid_sanity_check_z_vs_z.update(real_z, real_z)
-
             # Total loss
             loss_g = loss_identity_h + loss_identity_z + loss_gan_z2h + loss_gan_h2z + loss_cycle_hzh + loss_cycle_zhz
 
@@ -262,9 +255,6 @@ class EngineModule(pl.LightningModule):
         self.log('val_fid_h2z', self.fid_h2z.compute(), on_epoch=True, prog_bar=False)
         self.log('val_fid_z2h', self.fid_z2h.compute(), on_epoch=True, prog_bar=False)
 
-        self.log('fid_sanity_check_z_vs_h', self.fid_sanity_check_z_vs_h.compute(), on_epoch=True, prog_bar=False)
-        self.log('fid_sanity_check_z_vs_z', self.fid_sanity_check_z_vs_z.compute(), on_epoch=True, prog_bar=False)
-
         # TODO: this should be redundant
         self.fid_identity_h.reset()
         self.fid_identity_z.reset()
@@ -272,9 +262,6 @@ class EngineModule(pl.LightningModule):
         self.fid_cycle_z.reset()
         self.fid_h2z.reset()
         self.fid_z2h.reset()
-
-        self.fid_sanity_check_z_vs_h.reset()
-        self.fid_sanity_check_z_vs_z.reset()
 
         make_plots(self.test_dataset_horse, self.g_h2z, self.g_z2h, self.device, n=4, current_epoch=self.current_epoch,
                    suffix='_h2z')
