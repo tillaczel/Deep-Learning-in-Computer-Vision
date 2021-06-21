@@ -109,9 +109,13 @@ class EngineModule(pl.LightningModule):
         loss_identity_z = self.loss.criterion_identity(same_z, real_z)
         del same_h, same_z
 
+
         # GAN loss
         fake_h, fake_z = self.g_z2h(real_z), self.g_h2z(real_h)
-        pred_fake_h, pred_fake_z = self.d_h(fake_h), self.d_z(fake_z)
+        if self.config.training.augment:
+            pred_fake_h, pred_fake_z = self.d_h(DiffAugment(fake_h, policy='color,translation,cutout')), self.d_z(DiffAugment(fake_z, policy='color,translation,cutout'))
+        else:
+            pred_fake_h, pred_fake_z = self.d_h(fake_h), self.d_z(fake_z)
         loss_gan_z2h = self.loss.criterion_GAN(pred_fake_h, self.target_real)
         loss_gan_h2z = self.loss.criterion_GAN(pred_fake_z, self.target_real)
         del pred_fake_h, pred_fake_z
