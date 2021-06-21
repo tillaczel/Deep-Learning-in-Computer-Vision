@@ -12,7 +12,7 @@ model:
 
 training:
   warmup_epochs: 0
-  weight_identity: 0
+  weight_identity: 1
   weight_cycle: 0
   samples_per_epoch: 1536
   max_epochs: 100
