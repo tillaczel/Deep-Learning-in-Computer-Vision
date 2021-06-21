@@ -231,6 +231,7 @@ class EngineModule(pl.LightningModule):
             self.log('val_loss_z_fake', loss_z_fake, on_step=False, on_epoch=True, prog_bar=False, logger=True)
 
     def validation_epoch_end(self, outputs: list):
+        fid = self.
         make_plots(self.test_dataset_horse, self.g_h2z, self.g_z2h, self.device, n=4, current_epoch=self.current_epoch,
                    suffix='_h2z')
         make_plots(self.test_dataset_zebra, self.g_z2h, self.g_h2z, self.device, n=4, current_epoch=self.current_epoch,
