@@ -12,8 +12,8 @@ model:
 
 training:
   warmup_epochs: 0
-  weight_identity: 5
-  weight_cycle: 10
+  weight_identity: 10
+  weight_cycle: 3
   samples_per_epoch: 1536
   max_epochs: 100
   batch_size: 8
