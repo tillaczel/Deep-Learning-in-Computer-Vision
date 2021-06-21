@@ -102,6 +102,7 @@ def get_dataloaders(size, train_augmentation, batch_size, url, data_path, sample
     # we skip it for now
     # train_horse, val_horse = split_dataset(train_horse, valid_transform, split=0.8, seed=2312)
     # train_zebra, val_zebra = split_dataset(train_zebra, valid_transform, split=0.8, seed=2312)
+    print(len(train_horse), len(train_zebra))
     horse_sampler = torch.utils.data.RandomSampler(train_horse, replacement=True, num_samples=samples_per_epoch, generator=None)
     zebra_sampler = torch.utils.data.RandomSampler(train_zebra, replacement=True, num_samples=samples_per_epoch, generator=None)
 
