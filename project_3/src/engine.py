@@ -9,6 +9,7 @@ from project_3.src.model import get_networks
 from project_3.src.loss import Losses
 from project_3.src.DiffAugment_pytorch import DiffAugment
 from project_3.src.plot_results import make_plots
+from project_3.src.utils import ImagePool
 
 
 class EngineModule(pl.LightningModule):
@@ -28,6 +29,9 @@ class EngineModule(pl.LightningModule):
 
         self.test_dataset_horse = test_dataset_horse
         self.test_dataset_zebra = test_dataset_zebra
+
+        self.fake_pool_H = ImagePool(pool_sz=50)
+        self.fake_pool_Z = ImagePool(pool_sz=50)
 
         # self.inception =  models.inception_v3(pretrained=True)
         # # TODO cut layer
@@ -69,11 +73,13 @@ class EngineModule(pl.LightningModule):
         # --------------------- #
 
         # Real loss
+
         if self.config.training.augment:
             pred_h_real, pred_z_real = self.d_h(DiffAugment(real_h, policy='color,translation,cutout')), self.d_z(
                 DiffAugment(real_z, policy='color,translation,cutout'))
         else:
             pred_h_real, pred_z_real = self.d_h(real_h), self.d_z(real_z)
+
         loss_h_real = self.loss.criterion_GAN(pred_h_real, self.target_real)
         loss_z_real = self.loss.criterion_GAN(pred_z_real, self.target_real)
         del pred_h_real, pred_z_real
@@ -81,6 +87,11 @@ class EngineModule(pl.LightningModule):
 
         # Fake loss
         fake_h, fake_z = self.g_z2h(real_z), self.g_h2z(real_h)
+
+        # Sample from 50 previous generated batches
+        fake_h = self.fake_pool_H.push_and_pop(fake_h)
+        fake_z = self.fake_pool_Z.push_and_pop(fake_z)
+
         if self.config.training.augment:
             pred_h_fake, pred_z_fake = self.d_h(
             DiffAugment(fake_h.detach(), policy='color,translation,cutout')), self.d_z(
