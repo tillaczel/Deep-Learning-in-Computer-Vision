@@ -4,6 +4,8 @@ from torchmetrics import Metric
 
 from torch.nn.functional import adaptive_avg_pool2d
 import numpy as np
+
+
 # def calculate_fid(act1, act2):
 #     # https://machinelearningmastery.com/how-to-implement-the-frechet-inception-distance-fid-from-scratch/
 #     # calculate mean and covariance statistics
@@ -24,7 +26,7 @@ def get_activations_step(model, images):
     # todo: normalize and resize??
 
     with torch.no_grad():
-        pred = model(images) #[0]
+        pred = model(images)  # [0]
 
     # If model output is not scalar, apply global spatial average pooling.
     # This happens if you choose a dimensionality not equal 2048.
@@ -35,9 +37,9 @@ def get_activations_step(model, images):
     pred = pred.cpu().numpy()
     return pred
 
+
 def get_statistics(activations):
     act = np.concatenate(activations)
-    print('act shape: ', act.shape)
     mu = np.mean(act, axis=0)
     sigma = np.cov(act, rowvar=False)
     return mu, sigma
@@ -54,9 +56,9 @@ class FrechetInceptionDistance(Metric):
 
     def update(self, preds: torch.Tensor, target: torch.Tensor):
 
-
         # org = self.inception_normalize(target)
         # org = self.inception(org)
+        # TODO: is the model right?
         org = get_activations_step(self.inception, target)
         pred = get_activations_step(self.inception, preds)
         #
@@ -73,7 +75,9 @@ class FrechetInceptionDistance(Metric):
         del org, pred
 
     def compute(self):
-        print('\n FID compute: ', len(self.activations_org))
+        """
+        Adapted from https://github.com/mseitzer/pytorch-fid/blob/master/src/pytorch_fid/fid_score.py
+        """
         mu1, sigma1 = get_statistics(self.activations_org)
         mu2, sigma2 = get_statistics(self.activations_pred)
 
@@ -109,6 +113,7 @@ class FrechetInceptionDistance(Metric):
             covmean = covmean.real
 
         tr_covmean = np.trace(covmean)
+        fid = (diff.dot(diff) + np.trace(sigma1)
+               + np.trace(sigma2) - 2 * tr_covmean)
 
-        return (diff.dot(diff) + np.trace(sigma1)
-                + np.trace(sigma2) - 2 * tr_covmean)
+        return fid
