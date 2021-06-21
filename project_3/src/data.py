@@ -73,7 +73,7 @@ class ImageDataset(Dataset):
 
         img = Image.open(os.path.join(self.img_path, fname)).convert('RGB')
         img = self.img_transform(img)
-        return img
+        return img * 2 - 1
 
 
 def pad_dataset(dataset, length):
@@ -123,7 +123,7 @@ def get_dataloaders(size, train_augmentation, batch_size, url, data_path, sample
         'horse': test_loader_horse,
         'zebra': test_loader_zebra,
     }, "max_size_cycle")
-    return train_loaders, test_loaders
+    return train_loaders, test_loaders,  test_horse, test_zebra
 
 
 def get_transforms(size, train_augmentation):
