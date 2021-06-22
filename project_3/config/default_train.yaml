@@ -24,6 +24,7 @@ training:
     name: adam
     lr: 0.001
   d_loss: 'mse'
+  g_loss: 'l1'
   early_stopping:
     monitor: 'loss_sum'
     stopping_patience: 10
