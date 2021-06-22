@@ -19,8 +19,8 @@ class EngineModule(pl.LightningModule):
     def __init__(self, config: DictConfig, test_dataset_horse, test_dataset_zebra):
         super().__init__()
         self.config = config
-        self.g_h2z, self.g_z2h, self.d_h, self.d_z = get_networks()
-        self.loss = Losses()
+        self.g_h2z, self.g_z2h, self.d_h, self.d_z = get_networks(config.model.f, config.model.blocks)
+        self.loss = Losses(config.training.d_loss)
 
         batch_size = config.training.batch_size
         device = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -42,14 +42,13 @@ class EngineModule(pl.LightningModule):
         block_idx = InceptionV3.BLOCK_INDEX_BY_DIM[2048]
 
         self.inception = InceptionV3([block_idx])
-        self.inception_normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
 
-        self.fid_identity_h = FrechetInceptionDistance(self.inception, self.inception_normalize)
-        self.fid_identity_z = FrechetInceptionDistance(self.inception, self.inception_normalize)
-        self.fid_cycle_h = FrechetInceptionDistance(self.inception, self.inception_normalize)
-        self.fid_cycle_z = FrechetInceptionDistance(self.inception, self.inception_normalize)
-        self.fid_h2z = FrechetInceptionDistance(self.inception, self.inception_normalize)
-        self.fid_z2h = FrechetInceptionDistance(self.inception, self.inception_normalize)
+        self.fid_identity_h = FrechetInceptionDistance(self.inception)
+        self.fid_identity_z = FrechetInceptionDistance(self.inception)
+        self.fid_cycle_h = FrechetInceptionDistance(self.inception)
+        self.fid_cycle_z = FrechetInceptionDistance(self.inception)
+        self.fid_h2z = FrechetInceptionDistance(self.inception)
+        self.fid_z2h = FrechetInceptionDistance(self.inception)
 
         self.warmup_epochs = config.training.warmup_epochs
         self.weight_identity = config.training.weight_identity
@@ -100,8 +99,8 @@ class EngineModule(pl.LightningModule):
         fake_h, fake_z = self.g_z2h(real_z), self.g_h2z(real_h)
 
         # Sample from 50 previous generated images
-        fake_h = self.fake_pool_H.push_and_pop(fake_h)
-        fake_z = self.fake_pool_Z.push_and_pop(fake_z)
+        fake_h = self.fake_pool_H.push_and_pop(fake_h, self.device)
+        fake_z = self.fake_pool_Z.push_and_pop(fake_z, self.device)
 
         if self.config.training.augment:
             pred_h_fake, pred_z_fake = self.d_h(
