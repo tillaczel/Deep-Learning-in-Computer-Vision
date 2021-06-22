@@ -4,14 +4,9 @@ import wandb
 from omegaconf import DictConfig, OmegaConf
 import pprint
 
-from project_3.src.metrics import calc_all_metrics
-from project_3.src.metrics.energy import calculate_energy
-from project_3.src.metrics.get_preds import get_mc_preds, get_regular_preds, get_ensemble_preds
-from project_3.src.plot_results import plot_predictions, plot_predictions_ensemble, plot_uncertainty
-from project_3.src.utils import download_file, get_ensemble_models
+from project_3.src.utils import download_file
 from project_3.src.engine import EngineModule
 from project_3.src.data import get_dataloaders
-from project_3.src.metrics.compare import calc_inner_expert, get_metrics
 
 
 def run_eval(cfg: DictConfig):
@@ -24,45 +19,13 @@ def run_eval(cfg: DictConfig):
         fh.write(OmegaConf.to_yaml(cfg))
     wandb.save(cfg_file, base_path=wandb.run.dir)  # this will force sync it
 
-    train_loader, valid_loader, test_loader = \
-        get_dataloaders(train_cfg.data.size, train_cfg.data.train_augmentation, train_cfg.training.batch_size,
-                        train_cfg.data.url, train_cfg.data.path, seg_reduce='all')
+    train_loader, valid_loader,  test_dataset_horse, test_dataset_zebra = \
+        get_dataloaders(cfg.data.size, cfg.data.train_augmentation, cfg.training.batch_size, cfg.data.url,
+                        cfg.data.path, samples_per_epoch=cfg.training.samples_per_epoch)
 
-    print("Inner expert scores:")
-    pprint.pprint(calc_inner_expert(test_loader))
+    download_file(cfg.run_id, "model.ckpt")
 
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    engine = EngineModule.load_from_checkpoint("model.ckpt", config=train_cfg, test_dataset_horse=test_dataset_horse, test_dataset_zebra=test_dataset_zebra)
+    engine.visualize(n=12)
 
-    if train_cfg.model.ensemble:
-        models = get_ensemble_models(cfg.run_id, train_cfg)
-        plot_predictions_ensemble(test_loader.dataset, models, device, n=10)
-        plot_uncertainty(test_loader.dataset, models, n=10)
-
-        preds, segs = get_ensemble_preds(test_loader, models)
-        print(preds.shape)
-        print("Ensemble single scores:")
-        pprint.pprint(get_metrics(preds, segs, one_pred=False))
-        print("Ensemble scores:")
-        pprint.pprint(get_metrics(torch.mean(preds, dim=1, keepdim=True), segs))
-        calculate_energy(preds[:, :, 0], segs)
-
-        del preds, segs, models
-
-
-    else:
-        download_file(cfg.run_id, "model-v1.ckpt")
-        engine = EngineModule.load_from_checkpoint("model-v1.ckpt", config=train_cfg)
-        plot_predictions(test_loader.dataset, engine.model, device, n=10)
-        plot_uncertainty(test_loader.dataset, [engine.model], n=10)
-
-        preds, segs = get_mc_preds(test_loader, engine.model, n_samples=16)
-        print("MC scores:")
-        pprint.pprint(get_metrics(preds, segs))
-        calculate_energy(preds[:, :, 0], segs)
-        del preds, segs
-
-        preds, segs = get_regular_preds(test_loader, engine.model)
-        print("Regular scores:")
-        pprint.pprint(get_metrics(preds, segs))
-        del preds, segs
 

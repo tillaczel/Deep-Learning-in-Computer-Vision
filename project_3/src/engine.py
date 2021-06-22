@@ -32,8 +32,8 @@ class EngineModule(pl.LightningModule):
         self.test_dataset_horse = test_dataset_horse
         self.test_dataset_zebra = test_dataset_zebra
 
-        self.fake_pool_H = ImagePool(pool_sz=50)
-        self.fake_pool_Z = ImagePool(pool_sz=50)
+        self.fake_pool_H = ImagePool(pool_sz=300)
+        self.fake_pool_Z = ImagePool(pool_sz=300)
 
         # self.inception =  models.inception_v3(pretrained=True)
         # # TODO cut layer
@@ -287,9 +287,13 @@ class EngineModule(pl.LightningModule):
         self.fid_h2z.reset()
         self.fid_z2h.reset()
 
-        make_plots(self.test_dataset_horse, self.g_h2z, self.g_z2h, self.device, n=4, current_epoch=self.current_epoch,
+        self.visualize()
+
+
+    def visualize(self, n=10):
+        make_plots(self.test_dataset_horse, self.g_h2z, self.g_z2h, self.device, n=n, current_epoch=self.current_epoch,
                    suffix='_h2z')
-        make_plots(self.test_dataset_zebra, self.g_z2h, self.g_h2z, self.device, n=4, current_epoch=self.current_epoch,
+        make_plots(self.test_dataset_zebra, self.g_z2h, self.g_h2z, self.device, n=n, current_epoch=self.current_epoch,
                    suffix='_z2h')
 
     def configure_optimizers(self):
