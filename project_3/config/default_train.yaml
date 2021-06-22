@@ -9,20 +9,24 @@ model:
   in_dim: 1
   ensemble: True
   dropout_rate: 0.3
+  f: 64
+  blocks: 9
 
 training:
-  warmup_epochs: 0
+  augment: True
+  warmup_epochs: 20
   weight_identity: 10
   weight_cycle: 3
   samples_per_epoch: 1536
   max_epochs: 100
-  batch_size: 8
+  batch_size: 16
   optimizer:
     name: adam
     lr: 0.001
+  d_loss: 'mse'
   early_stopping:
     monitor: 'loss_sum'
-    stopping_patience: 100
+    stopping_patience: 10
   model_checkpoint:
     monitor: 'loss_sum'
 data:

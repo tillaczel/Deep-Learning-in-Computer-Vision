@@ -17,7 +17,7 @@ class ResBlock(nn.Module):
 
 
 class Generator(nn.Module):
-    def __init__(self, f=64, blocks=6):
+    def __init__(self, f=64, blocks=9):
         super(Generator, self).__init__()
         layers = [nn.ReflectionPad2d(3),
                   nn.Conv2d(3, f, 7, 1, 0), norm_layer(f), nn.ReLU(True),
